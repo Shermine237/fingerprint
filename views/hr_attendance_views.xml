@@ -34,28 +34,32 @@
         </field>
     </record>
     
-    <!-- Action pour remplacer la vue tree standard -->
-    <record id="hr_attendance.hr_attendance_action" model="ir.actions.act_window">
-        <field name="view_mode">tree,kanban,form</field>
-        <field name="view_id" ref="pointeur_hr_attendance_view_tree"/>
-    </record>
-    
-    <!-- Ajout de filtres dans la vue search des présences -->
-    <record id="hr_attendance_view_filter_inherit" model="ir.ui.view">
-        <field name="name">hr.attendance.filter.inherit</field>
+    <!-- Vue de filtrage complète pour les présences -->
+    <record id="pointeur_hr_attendance_view_filter" model="ir.ui.view">
+        <field name="name">pointeur.hr.attendance.filter</field>
         <field name="model">hr.attendance</field>
-        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_filter"/>
         <field name="arch" type="xml">
-            <filter name="groupby_employee" position="after">
-                <separator/>
+            <search string="Recherche de présences">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="location_id"/>
                 <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type', '=', 'overtime')]"/>
                 <filter name="filter_late" string="Retards" domain="[('attendance_type', '=', 'late')]"/>
                 <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type', '=', 'early_leave')]"/>
                 <separator/>
+                <filter name="group_by_employee" string="Employé" context="{'group_by': 'employee_id'}"/>
+                <filter name="group_by_department" string="Département" context="{'group_by': 'department_id'}"/>
                 <filter name="group_by_location" string="Lieu de pointage" context="{'group_by': 'location_id'}"/>
                 <filter name="group_by_type" string="Type de présence" context="{'group_by': 'attendance_type'}"/>
-            </filter>
+            </search>
         </field>
+    </record>
+    
+    <!-- Action pour remplacer la vue search standard -->
+    <record id="hr_attendance.hr_attendance_action" model="ir.actions.act_window">
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_id" ref="pointeur_hr_attendance_view_tree"/>
+        <field name="search_view_id" ref="pointeur_hr_attendance_view_filter"/>
     </record>
     
     <!-- Vue form pour les lieux de pointage -->

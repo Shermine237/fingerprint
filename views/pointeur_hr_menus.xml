@@ -7,10 +7,10 @@
               action="action_pointeur_location" 
               sequence="10"/>
     
-    <!-- Ajout du rapport de présence dans le menu des rapports RH -->
+    <!-- Ajout du rapport de présence dans le menu des présences -->
     <menuitem id="menu_pointeur_hr_attendance_report" 
               name="Rapport de présence détaillé" 
-              parent="hr.menu_hr_reporting" 
+              parent="hr_attendance.menu_hr_attendance_root" 
               action="action_employee_attendance_report" 
-              sequence="10"/>
+              sequence="20"/>
 </odoo>

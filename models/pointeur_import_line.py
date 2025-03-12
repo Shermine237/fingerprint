@@ -4,7 +4,9 @@ class PointeurImportLine(models.Model):
     _name = 'pointeur_hr.import.line'
     _description = 'Ligne d\'import des données du pointeur'
     _order = 'date desc, id desc'
-
+    payroll_id = fields.Char(string='ID Paie')
+    dept_code = fields.Char(string='Code département')
+    note = fields.Text(string='Note')
     import_id = fields.Many2one('pointeur_hr.import', string='Import', required=True, ondelete='cascade')
     display_name = fields.Char(string='Nom employé', required=True)
     display_id = fields.Char(string='ID employé')

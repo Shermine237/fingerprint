@@ -1,6 +1,6 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 
 class HrAttendance(models.Model):
@@ -107,11 +107,11 @@ class HrAttendance(models.Model):
             tolerance = timedelta(minutes=tolerance_minutes)
             
             # Vérifier si l'employé est arrivé en retard
-            if check_in_time > (datetime.combine(datetime.min, start_time) + tolerance).time():
+            if check_in_time > (datetime.combine(datetime.min.date(), start_time) + tolerance).time():
                 attendance_type = 'late'
             
             # Vérifier si l'employé est parti tôt
-            if check_out_time < (datetime.combine(datetime.min, end_time) - tolerance).time():
+            if check_out_time < (datetime.combine(datetime.min.date(), end_time) - tolerance).time():
                 # Si déjà en retard, on garde le statut 'late'
                 if attendance_type != 'late':
                     attendance_type = 'early_leave'
@@ -127,7 +127,7 @@ class HrAttendance(models.Model):
         """Convertit une heure flottante (ex: 7.5) en objet time (07:30:00)"""
         hours = int(float_hour)
         minutes = int((float_hour - hours) * 60)
-        return datetime.time(hours, minutes)
+        return time(hours, minutes)
 
 
 class PointeurLocation(models.Model):

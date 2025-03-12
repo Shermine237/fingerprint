@@ -1,3 +1,9 @@
+from . import pointeur_location  # Doit être chargé en premier
+from . import hr_employee
+from . import hr_attendance
+from . import hr_attendance_report
+from . import pointeur_import
+from . import pointeur_import_line
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 from datetime import datetime, timedelta

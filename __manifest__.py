@@ -17,10 +17,10 @@
     'data': [
         'security/ir.model.access.csv',
         'views/hr_attendance_views.xml',
+        'views/pointeur_location_views.xml',
         'views/hr_employee_views.xml',
         'views/hr_attendance_report_views.xml',
         'views/pointeur_import_views.xml',
-        'views/pointeur_location_views.xml',
         'views/pointeur_hr_menus.xml',
     ],
     'demo': [],

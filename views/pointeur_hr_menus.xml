@@ -4,20 +4,20 @@
     <menuitem id="menu_pointeur_location" 
               name="Lieux de pointage" 
               parent="hr_attendance.menu_hr_attendance_settings" 
-              action="action_pointeur_location" 
+              action="pointeur_hr.action_pointeur_location" 
               sequence="10"/>
               
     <!-- Ajout du rapport détaillé dans le menu des présences -->
     <menuitem id="menu_pointeur_hr_attendance_report" 
               name="Rapport détaillé" 
               parent="hr_attendance.menu_hr_attendance_root" 
-              action="action_employee_attendance_report" 
+              action="pointeur_hr.action_employee_attendance_report" 
               sequence="20"/>
               
     <!-- Ajout de l'import des données du pointeur dans le menu des présences -->
     <menuitem id="menu_pointeur_import" 
               name="Import du pointeur" 
               parent="hr_attendance.menu_hr_attendance_root" 
-              action="action_pointeur_import" 
+              action="pointeur_hr.action_pointeur_import" 
               sequence="30"/>
 </odoo>

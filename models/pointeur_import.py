@@ -63,19 +63,37 @@ class PointeurImport(models.Model):
 
         for row in reader:
             try:
-                # Création de la ligne d'import
+                # Conversion des dates et heures
+                date = datetime.strptime(row['Date'], '%m/%d/%y').date()
+                in_time = datetime.strptime(f"{row['Date']} {row['In Time']}", '%m/%d/%y %I:%M%p')
+                out_time = None
+                if row['Out Time'] and row['Out Day']:
+                    # Convertir l'heure de sortie
+                    out_time = datetime.strptime(f"{date.strftime('%m/%d/%y')} {row['Out Time']}", '%m/%d/%y %I:%M%p')
+                    # Si la sortie est le lendemain, ajouter un jour
+                    if row['Out Day'] != row['In Day']:
+                        out_time += timedelta(days=1)
+
                 vals = {
                     'import_id': self.id,
                     'display_name': row['Display Name'],
-                    'display_id': row.get('ID', ''),
-                    'date': datetime.strptime(row['In Time'], '%Y-%m-%d %H:%M:%S').date(),
-                    'check_in': row['In Time'],
-                    'check_out': row['Out Time'],
-                    'department': row.get('Department', ''),
-                    'reg_hours': float(row.get('Regular Hours', 0)),
-                    'ot1_hours': float(row.get('OT1 Hours', 0)),
-                    'ot2_hours': float(row.get('OT2 Hours', 0)),
-                    'total_hours': float(row.get('Total Hours', 0)),
+                    'display_id': row['Display ID'],
+                    'payroll_id': row.get('Payroll ID', ''),
+                    'date': date,
+                    'in_day': row['In Day'],
+                    'in_time': row['In Time'],
+                    'out_day': row['Out Day'],
+                    'out_time': row['Out Time'],
+                    'check_in': in_time,
+                    'check_out': out_time,
+                    'department': row['Department'],
+                    'dept_code': row['Dept. Code'],
+                    'reg_hours': float(row.get('REG', 0)),
+                    'ot1_hours': float(row.get('OT1', 0)),
+                    'ot2_hours': float(row.get('OT2', 0)),
+                    'total_hours': float(row.get('Total', 0)),
+                    'in_note': row.get('In Note', ''),
+                    'out_note': row.get('Out Note', '')
                 }
                 self.env['pointeur_hr.import.line'].create(vals)
                 success_count += 1
@@ -152,9 +170,11 @@ class PointeurImport(models.Model):
 
     def action_cancel(self):
         """Annuler l'import"""
-        self.write({'state': 'cancelled'})
+        self.ensure_one()
+        self.state = 'cancelled'
 
     def action_reset(self):
         """Réinitialiser l'import"""
-        self.write({'state': 'draft'})
+        self.ensure_one()
+        self.state = 'draft'
         self.line_ids.unlink()

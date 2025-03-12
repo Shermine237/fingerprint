@@ -1,5 +1,11 @@
 from odoo import api, fields, models, _
-
+date = datetime.strptime(row['Date'], '%m/%d/%y').date()
+in_time = datetime.strptime(f"{row['Date']} {row['In Time']}", '%m/%d/%y %I:%M%p')
+out_time = None
+if row['Out Time'] and row['Out Day']:
+    out_time = datetime.strptime(f"{date.strftime('%m/%d/%y')} {row['Out Time']}", '%m/%d/%y %I:%M%p')
+    if row['Out Day'] != row['In Day']:
+        out_time += timedelta(days=1)
 class PointeurImportLine(models.Model):
     _name = 'pointeur_hr.import.line'
     _description = 'Ligne d\'import des données du pointeur'
@@ -11,6 +17,10 @@ class PointeurImportLine(models.Model):
     display_name = fields.Char(string='Nom employé', required=True)
     display_id = fields.Char(string='ID employé')
     date = fields.Date(string='Date', required=True)
+    in_day = fields.Char(string='Jour entrée')
+    in_time = fields.Char(string='Heure entrée')
+    out_day = fields.Char(string='Jour sortie')
+    out_time = fields.Char(string='Heure sortie')
     check_in = fields.Datetime(string='Entrée', required=True)
     check_out = fields.Datetime(string='Sortie')
     department = fields.Char(string='Département')
@@ -25,6 +35,8 @@ class PointeurImportLine(models.Model):
         ('error', 'Erreur')
     ], string='État', default='draft')
     error_message = fields.Text(string='Message d\'erreur')
+    in_note = fields.Text(string='Note entrée')
+    out_note = fields.Text(string='Note sortie')
 
     def action_view_attendance(self):
         """Voir la présence associée"""

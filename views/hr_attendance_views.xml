@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Ajout de champs dans la vue form des présences -->
+    <record id="hr_attendance_view_form_inherit" model="ir.ui.view">
+        <field name="name">hr.attendance.form.inherit</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='check_out']" position="after">
+                <field name="location_id"/>
+                <field name="attendance_type" readonly="1"/>
+                <field name="working_hours" widget="float_time"/>
+                <field name="overtime_hours" widget="float_time"/>
+                <field name="notes"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Ajout de champs dans la vue tree des présences -->
+    <record id="hr_attendance_view_tree_inherit" model="ir.ui.view">
+        <field name="name">hr.attendance.tree.inherit</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='check_out']" position="after">
+                <field name="location_id"/>
+                <field name="attendance_type"/>
+                <field name="working_hours" widget="float_time" sum="Total"/>
+                <field name="overtime_hours" widget="float_time" sum="Total"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Ajout de filtres dans la vue search des présences -->
+    <record id="hr_attendance_view_filter_inherit" model="ir.ui.view">
+        <field name="name">hr.attendance.filter.inherit</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='today']" position="after">
+                <separator/>
+                <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type', '=', 'overtime')]"/>
+                <filter name="filter_late" string="Retards" domain="[('attendance_type', '=', 'late')]"/>
+                <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type', '=', 'early_leave')]"/>
+                <separator/>
+                <filter name="group_by_location" string="Lieu de pointage" context="{'group_by': 'location_id'}"/>
+                <filter name="group_by_type" string="Type de présence" context="{'group_by': 'attendance_type'}"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Vue form pour les lieux de pointage -->
+    <record id="pointeur_location_view_form" model="ir.ui.view">
+        <field name="name">pointeur.location.form</field>
+        <field name="model">pointeur.location</field>
+        <field name="arch" type="xml">
+            <form string="Lieu de pointage">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="Nom du lieu de pointage"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="address"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Vue tree pour les lieux de pointage -->
+    <record id="pointeur_location_view_tree" model="ir.ui.view">
+        <field name="name">pointeur.location.tree</field>
+        <field name="model">pointeur.location</field>
+        <field name="arch" type="xml">
+            <tree string="Lieux de pointage">
+                <field name="name"/>
+                <field name="address"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+    
+    <!-- Vue search pour les lieux de pointage -->
+    <record id="pointeur_location_view_search" model="ir.ui.view">
+        <field name="name">pointeur.location.search</field>
+        <field name="model">pointeur.location</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher un lieu de pointage">
+                <field name="name"/>
+                <field name="address"/>
+                <filter string="Archivé" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_by_company" string="Société" context="{'group_by': 'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Action pour les lieux de pointage -->
+    <record id="action_pointeur_location" model="ir.actions.act_window">
+        <field name="name">Lieux de pointage</field>
+        <field name="res_model">pointeur.location</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez votre premier lieu de pointage
+            </p>
+            <p>
+                Les lieux de pointage permettent de suivre où les employés pointent leur présence.
+            </p>
+        </field>
+    </record>
+</odoo>

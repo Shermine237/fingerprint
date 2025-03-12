@@ -49,52 +49,88 @@ class PointeurImport(models.Model):
         if not self.file:
             raise UserError(_("Veuillez sélectionner un fichier à importer."))
 
-        # Décodage du fichier CSV
+        # Lecture du fichier CSV
         csv_data = base64.b64decode(self.file)
         csv_file = io.StringIO(csv_data.decode('utf-8'))
         reader = csv.DictReader(csv_file)
-
-        # Variables pour le suivi des erreurs
-        error_lines = []
         success_count = 0
+        error_lines = []
 
         # Suppression des anciennes lignes
         self.line_ids.unlink()
 
+        # Affichage des en-têtes pour le débogage
+        headers = reader.fieldnames
+        self.message_post(body=_("En-têtes du fichier CSV:\n%s") % ', '.join(headers))
+
         for row in reader:
             try:
-                # Conversion des dates et heures
-                date = datetime.strptime(row['Date'], '%m/%d/%y').date()
-                in_time = datetime.strptime(f"{row['Date']} {row['In Time']}", '%m/%d/%y %I:%M%p')
-                out_time = None
-                if row['Out Time'] and row['Out Day']:
-                    # Convertir l'heure de sortie
-                    out_time = datetime.strptime(f"{date.strftime('%m/%d/%y')} {row['Out Time']}", '%m/%d/%y %I:%M%p')
-                    # Si la sortie est le lendemain, ajouter un jour
-                    if row['Out Day'] != row['In Day']:
-                        out_time += timedelta(days=1)
+                # Validation des données requises
+                if not row.get('Display Name', '').strip():
+                    raise ValueError("Le nom de l'employé est obligatoire")
 
+                # Affichage de la première ligne pour le débogage
+                if reader.line_num == 2:  # La première ligne est l'en-tête
+                    self.message_post(body=_("Exemple de ligne:\n%s") % str(row))
+
+                # Nettoyage et conversion des dates
+                in_time = row.get('In Time', '').strip()
+                out_time = row.get('Out Time', '').strip()
+                in_day = row.get('In Day', '').strip()
+
+                # Au moins une heure doit être présente
+                if not in_time and not out_time:
+                    raise ValueError("Au moins une heure d'entrée ou de sortie est requise")
+                
+                # Conversion du format de date
+                check_in = None
+                if in_time and in_day:
+                    try:
+                        # Convertir 'a' en 'AM' et 'p' en 'PM'
+                        in_time = in_time.replace('a', ' AM').replace('p', ' PM')
+                        check_in = datetime.strptime(f"{in_day} {in_time}", '%m/%d/%y %I:%M %p')
+                    except ValueError as e:
+                        raise ValueError(f"Erreur de format pour l'heure d'entrée. Format attendu: 'MM/DD/YY HH:MMa/p', reçu: '{in_day} {in_time}'. Erreur: {str(e)}")
+
+                check_out = None
+                if out_time:
+                    try:
+                        out_time = out_time.replace('a', ' AM').replace('p', ' PM')
+                        out_day = row.get('Out Day', in_day).strip()  # Si pas de Out Day, utiliser In Day
+                        if not out_day and not in_day:
+                            raise ValueError("Le jour de sortie est requis si aucun jour d'entrée n'est spécifié")
+                        check_out = datetime.strptime(f"{out_day} {out_time}", '%m/%d/%y %I:%M %p')
+                    except ValueError as e:
+                        raise ValueError(f"Erreur de format pour l'heure de sortie. Format attendu: 'MM/DD/YY HH:MMa/p', reçu: '{out_day} {out_time}'. Erreur: {str(e)}")
+
+                # Validation de la cohérence des heures
+                if check_in and check_out and check_out < check_in:
+                    raise ValueError("L'heure de sortie ne peut pas être antérieure à l'heure d'entrée")
+
+                # Création de la ligne d'import
                 vals = {
                     'import_id': self.id,
-                    'display_name': row['Display Name'],
-                    'display_id': row['Display ID'],
-                    'payroll_id': row.get('Payroll ID', ''),
-                    'date': date,
-                    'in_day': row['In Day'],
-                    'in_time': row['In Time'],
-                    'out_day': row['Out Day'],
-                    'out_time': row['Out Time'],
-                    'check_in': in_time,
-                    'check_out': out_time,
-                    'department': row['Department'],
-                    'dept_code': row['Dept. Code'],
+                    'display_id': row.get('Display ID', '').strip(),
+                    'display_name': row.get('Display Name', '').strip(),
+                    'department': row.get('Department', '').strip(),
+                    'dept_code': row.get('Dept. Code', '').strip(),
+                    'payroll_id': row.get('Payroll ID', '').strip(),
+                    'date': check_in.date() if check_in else (check_out.date() if check_out else None),
+                    'in_day': in_day,
+                    'in_time': in_time,
+                    'out_day': row.get('Out Day', '').strip(),
+                    'out_time': out_time,
+                    'check_in': check_in,
+                    'check_out': check_out,
+                    'in_note': row.get('In Note', '').strip(),
+                    'out_note': row.get('Out Note', '').strip(),
                     'reg_hours': float(row.get('REG', 0)),
                     'ot1_hours': float(row.get('OT1', 0)),
                     'ot2_hours': float(row.get('OT2', 0)),
-                    'total_hours': float(row.get('Total', 0)),
-                    'in_note': row.get('In Note', ''),
-                    'out_note': row.get('Out Note', '')
+                    'total_hours': float(row.get('Total', 0))
                 }
+
+                # Création de la ligne
                 self.env['pointeur_hr.import.line'].create(vals)
                 success_count += 1
 

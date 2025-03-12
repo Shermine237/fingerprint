@@ -2,8 +2,8 @@
 <odoo>
     <!-- Vue form pour l'import des données du pointeur -->
     <record id="view_pointeur_import_form" model="ir.ui.view">
-        <field name="name">pointeur.import.form</field>
-        <field name="model">pointeur.import</field>
+        <field name="name">pointeur_hr.import.form</field>
+        <field name="model">pointeur_hr.import</field>
         <field name="arch" type="xml">
             <form string="Import des données du pointeur">
                 <header>
@@ -16,8 +16,7 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_view_attendances" type="object" class="oe_stat_button" icon="fa-calendar"
-                                attrs="{'invisible': [('attendance_count', '=', 0)]}">
+                        <button name="action_view_attendances" type="object" class="oe_stat_button" icon="fa-calendar" attrs="{'invisible': [('attendance_count', '=', 0)]}">
                             <field name="attendance_count" widget="statinfo" string="Présences"/>
                         </button>
                     </div>
@@ -53,8 +52,7 @@
                                     <field name="total_hours" sum="Total"/>
                                     <field name="attendance_id"/>
                                     <field name="state"/>
-                                    <button name="action_view_attendance" type="object" icon="fa-calendar" 
-                                            attrs="{'invisible': [('attendance_id', '=', False)]}"/>
+                                    <button name="action_view_attendance" type="object" icon="fa-calendar" attrs="{'invisible': [('attendance_id', '=', False)]}"/>
                                 </tree>
                             </field>
                         </page>
@@ -70,8 +68,8 @@
 
     <!-- Vue tree pour l'import des données du pointeur -->
     <record id="view_pointeur_import_tree" model="ir.ui.view">
-        <field name="name">pointeur.import.tree</field>
-        <field name="model">pointeur.import</field>
+        <field name="name">pointeur_hr.import.tree</field>
+        <field name="model">pointeur_hr.import</field>
         <field name="arch" type="xml">
             <tree string="Imports des données du pointeur" decoration-success="state == 'done'" decoration-info="state == 'imported'" decoration-muted="state == 'cancelled'">
                 <field name="name"/>
@@ -87,8 +85,8 @@
 
     <!-- Vue search pour l'import des données du pointeur -->
     <record id="view_pointeur_import_search" model="ir.ui.view">
-        <field name="name">pointeur.import.search</field>
-        <field name="model">pointeur.import</field>
+        <field name="name">pointeur_hr.import.search</field>
+        <field name="model">pointeur_hr.import</field>
         <field name="arch" type="xml">
             <search string="Rechercher les imports">
                 <field name="name"/>
@@ -109,8 +107,8 @@
 
     <!-- Vue form pour les lignes d'import -->
     <record id="view_pointeur_import_line_form" model="ir.ui.view">
-        <field name="name">pointeur.import.line.form</field>
-        <field name="model">pointeur.import.line</field>
+        <field name="name">pointeur_hr.import.line.form</field>
+        <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
             <form string="Ligne d'import">
                 <sheet>
@@ -149,8 +147,8 @@
 
     <!-- Vue tree pour les lignes d'import -->
     <record id="view_pointeur_import_line_tree" model="ir.ui.view">
-        <field name="name">pointeur.import.line.tree</field>
-        <field name="model">pointeur.import.line</field>
+        <field name="name">pointeur_hr.import.line.tree</field>
+        <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
             <tree string="Lignes d'import" decoration-success="state == 'done'" decoration-danger="state == 'error'">
                 <field name="import_id"/>
@@ -166,16 +164,15 @@
                 <field name="total_hours" sum="Total"/>
                 <field name="attendance_id"/>
                 <field name="state"/>
-                <button name="action_view_attendance" type="object" icon="fa-calendar" 
-                        attrs="{'invisible': [('attendance_id', '=', False)]}"/>
+                <button name="action_view_attendance" type="object" icon="fa-calendar" attrs="{'invisible': [('attendance_id', '=', False)]}"/>
             </tree>
         </field>
     </record>
 
     <!-- Vue search pour les lignes d'import -->
     <record id="view_pointeur_import_line_search" model="ir.ui.view">
-        <field name="name">pointeur.import.line.search</field>
-        <field name="model">pointeur.import.line</field>
+        <field name="name">pointeur_hr.import.line.search</field>
+        <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
             <search string="Rechercher les lignes d'import">
                 <field name="display_name"/>
@@ -198,7 +195,7 @@
     <!-- Action pour l'import des données du pointeur -->
     <record id="action_pointeur_import" model="ir.actions.act_window">
         <field name="name">Import des données du pointeur</field>
-        <field name="res_model">pointeur.import</field>
+        <field name="res_model">pointeur_hr.import</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_my_imports': 1}</field>
         <field name="help" type="html">
@@ -215,7 +212,7 @@
     <!-- Action pour les lignes d'import -->
     <record id="action_pointeur_import_line" model="ir.actions.act_window">
         <field name="name">Lignes d'import</field>
-        <field name="res_model">pointeur.import.line</field>
+        <field name="res_model">pointeur_hr.import.line</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_pending': 1}</field>
     </record>

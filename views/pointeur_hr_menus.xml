@@ -6,10 +6,10 @@
               parent="hr_attendance.menu_hr_attendance_settings" 
               action="action_pointeur_location" 
               sequence="10"/>
-    
-    <!-- Ajout du rapport de présence dans le menu des présences -->
+              
+    <!-- Ajout du rapport détaillé dans le menu des présences -->
     <menuitem id="menu_pointeur_hr_attendance_report" 
-              name="Rapport de présence détaillé" 
+              name="Rapport détaillé" 
               parent="hr_attendance.menu_hr_attendance_root" 
               action="action_employee_attendance_report" 
               sequence="20"/>

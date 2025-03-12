@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_pointeur_location_user,pointeur.location.user,model_pointeur_location,hr_attendance.group_hr_attendance_user,1,0,0,0
 access_pointeur_location_manager,pointeur.location.manager,model_pointeur_location,hr_attendance.group_hr_attendance_manager,1,1,1,1
+access_hr_attendance_report_user,hr.attendance.report.user,model_hr_attendance_report,hr_attendance.group_hr_attendance_user,1,0,0,0
+access_hr_attendance_report_manager,hr.attendance.report.manager,model_hr_attendance_report,hr_attendance.group_hr_attendance_manager,1,0,0,0

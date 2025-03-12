@@ -18,6 +18,10 @@ class HrAttendanceReport(models.Model):
         ('early_leave', 'Départ anticipé'),
         ('overtime', 'Heures supplémentaires')
     ], string='Type de présence', readonly=True)
+    source = fields.Selection([
+        ('manual', 'Saisie manuelle'),
+        ('import', 'Importé du pointeur')
+    ], string='Source', readonly=True)
     check_in = fields.Datetime(string='Entrée', readonly=True)
     check_out = fields.Datetime(string='Sortie', readonly=True)
     working_hours = fields.Float(string='Heures travaillées', readonly=True)
@@ -35,6 +39,7 @@ class HrAttendanceReport(models.Model):
                     e.department_id as department_id,
                     a.location_id as location_id,
                     a.attendance_type as attendance_type,
+                    a.source as source,
                     a.check_in as check_in,
                     a.check_out as check_out,
                     a.working_hours as working_hours,

@@ -15,6 +15,10 @@ class HrAttendance(models.Model):
         ('early_leave', 'Départ anticipé')
     ], string='Type de présence', default='normal', compute='_compute_attendance_type', store=True)
     notes = fields.Text(string='Notes')
+    source = fields.Selection([
+        ('manual', 'Saisie manuelle'),
+        ('import', 'Importé du pointeur')
+    ], string='Source', default='manual', required=True, readonly=True)
     
     # Champs calculés
     working_hours = fields.Float(string='Heures travaillées', compute='_compute_working_hours', store=True)

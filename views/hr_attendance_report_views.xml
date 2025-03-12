@@ -15,6 +15,7 @@
                 <field name="working_hours" widget="float_time" sum="Total"/>
                 <field name="overtime_hours" widget="float_time" sum="Total"/>
                 <field name="attendance_type"/>
+                <field name="source"/>
             </tree>
         </field>
     </record>
@@ -34,12 +35,15 @@
                 <filter string="Retards" name="late" domain="[('attendance_type', '=', 'late')]"/>
                 <filter string="Départs anticipés" name="early_leave" domain="[('attendance_type', '=', 'early_leave')]"/>
                 <filter string="Heures supplémentaires" name="overtime" domain="[('attendance_type', '=', 'overtime')]"/>
+                <filter string="Saisie manuelle" name="manual" domain="[('source', '=', 'manual')]"/>
+                <filter string="Importé du pointeur" name="imported" domain="[('source', '=', 'import')]"/>
                 <group expand="0" string="Regrouper par">
                     <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
                     <filter string="Département" name="department" context="{'group_by': 'department_id'}"/>
                     <filter string="Lieu de pointage" name="location" context="{'group_by': 'location_id'}"/>
                     <filter string="Date" name="date" context="{'group_by': 'date'}"/>
                     <filter string="Type de présence" name="type" context="{'group_by': 'attendance_type'}"/>
+                    <filter string="Source" name="source" context="{'group_by': 'source'}"/>
                 </group>
             </search>
         </field>

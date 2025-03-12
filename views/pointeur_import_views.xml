@@ -137,7 +137,8 @@
                         <group>
                             <field name="attendance_id"/>
                             <field name="state"/>
-                            <field name="note"/>
+                            <field name="in_note"/>
+                            <field name="out_note"/>
                         </group>
                     </group>
                 </sheet>
@@ -150,20 +151,25 @@
         <field name="name">pointeur_hr.import.line.tree</field>
         <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
-            <tree string="Lignes d'import" decoration-success="state == 'done'" decoration-danger="state == 'error'">
+            <tree string="Lignes d'import" decoration-success="state == 'done'" decoration-danger="state == 'error'" decoration-info="state == 'draft'">
                 <field name="import_id"/>
                 <field name="display_name"/>
                 <field name="display_id"/>
+                <field name="payroll_id"/>
                 <field name="date"/>
-                <field name="check_in"/>
-                <field name="check_out"/>
+                <field name="in_day"/>
+                <field name="in_time"/>
+                <field name="out_day"/>
+                <field name="out_time"/>
                 <field name="department"/>
+                <field name="dept_code"/>
                 <field name="reg_hours" sum="Total"/>
                 <field name="ot1_hours" sum="Total"/>
                 <field name="ot2_hours" sum="Total"/>
                 <field name="total_hours" sum="Total"/>
                 <field name="attendance_id"/>
                 <field name="state"/>
+                <field name="error_message"/>
                 <button name="action_view_attendance" type="object" icon="fa-calendar" attrs="{'invisible': [('attendance_id', '=', False)]}"/>
             </tree>
         </field>

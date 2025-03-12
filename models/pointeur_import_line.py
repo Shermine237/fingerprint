@@ -1,18 +1,12 @@
 from odoo import api, fields, models, _
-date = datetime.strptime(row['Date'], '%m/%d/%y').date()
-in_time = datetime.strptime(f"{row['Date']} {row['In Time']}", '%m/%d/%y %I:%M%p')
-out_time = None
-if row['Out Time'] and row['Out Day']:
-    out_time = datetime.strptime(f"{date.strftime('%m/%d/%y')} {row['Out Time']}", '%m/%d/%y %I:%M%p')
-    if row['Out Day'] != row['In Day']:
-        out_time += timedelta(days=1)
+from datetime import datetime, timedelta
+
 class PointeurImportLine(models.Model):
     _name = 'pointeur_hr.import.line'
     _description = 'Ligne d\'import des données du pointeur'
     _order = 'date desc, id desc'
     payroll_id = fields.Char(string='ID Paie')
     dept_code = fields.Char(string='Code département')
-    note = fields.Text(string='Note')
     import_id = fields.Many2one('pointeur_hr.import', string='Import', required=True, ondelete='cascade')
     display_name = fields.Char(string='Nom employé', required=True)
     display_id = fields.Char(string='ID employé')

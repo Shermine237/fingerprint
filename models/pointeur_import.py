@@ -122,10 +122,16 @@ class PointeurImport(models.Model):
             if not line.attendance_id:
                 try:
                     # Recherche de l'employé
-                    employee = self.env['hr.employee'].search([('name', '=', line.display_name)], limit=1)
+                    domain = []
+                    if line.display_id:
+                        domain = [('barcode', '=', line.display_id)]
+                    else:
+                        domain = [('name', '=', line.display_name)]
+                    
+                    employee = self.env['hr.employee'].search(domain, limit=1)
                     if not employee:
                         line.state = 'error'
-                        line.error_message = f"Employé non trouvé : {line.display_name}"
+                        line.error_message = f"Employé non trouvé : {line.display_name} (ID: {line.display_id or 'Non défini'})"
                         continue
 
                     # Création de la présence
@@ -134,6 +140,7 @@ class PointeurImport(models.Model):
                         'check_in': line.check_in,
                         'check_out': line.check_out,
                         'source': 'import',
+                        'note': f"IN: {line.in_note or ''}\nOUT: {line.out_note or ''}"
                     }
                     attendance = self.env['hr.attendance'].create(attendance_vals)
                     line.write({

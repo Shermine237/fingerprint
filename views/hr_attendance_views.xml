@@ -16,19 +16,28 @@
         </field>
     </record>
     
-    <!-- Ajout de champs dans la vue tree des présences -->
-    <record id="hr_attendance_view_tree_inherit" model="ir.ui.view">
-        <field name="name">hr.attendance.tree.inherit</field>
+    <!-- Vue tree complète pour les présences -->
+    <record id="pointeur_hr_attendance_view_tree" model="ir.ui.view">
+        <field name="name">pointeur.hr.attendance.tree</field>
         <field name="model">hr.attendance</field>
-        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_tree"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='check_out']" position="after">
+            <tree string="Présences" default_order="check_in desc">
+                <field name="employee_id"/>
+                <field name="department_id" invisible="1"/>
+                <field name="check_in"/>
+                <field name="check_out"/>
                 <field name="location_id"/>
                 <field name="attendance_type"/>
                 <field name="working_hours" widget="float_time" sum="Total"/>
                 <field name="overtime_hours" widget="float_time" sum="Total"/>
-            </xpath>
+            </tree>
         </field>
+    </record>
+    
+    <!-- Action pour remplacer la vue tree standard -->
+    <record id="hr_attendance.hr_attendance_action" model="ir.actions.act_window">
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_id" ref="pointeur_hr_attendance_view_tree"/>
     </record>
     
     <!-- Ajout de filtres dans la vue search des présences -->

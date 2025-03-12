@@ -12,6 +12,7 @@ class PointeurImport(models.Model):
     _name = 'pointeur.import'
     _description = 'Import des données du pointeur physique'
     _order = 'create_date desc'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Nom', required=True, default=lambda self: _('Import du %s') % fields.Date.context_today(self).strftime('%d/%m/%Y'))
     file = fields.Binary(string='Fichier CSV', required=True)

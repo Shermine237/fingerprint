@@ -12,6 +12,7 @@
     'depends': [
         'hr_attendance',
         'hr',
+        'mail',
     ],
     'data': [
         'security/ir.model.access.csv',

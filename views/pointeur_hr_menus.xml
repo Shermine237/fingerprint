@@ -13,4 +13,11 @@
               parent="hr_attendance.menu_hr_attendance_root" 
               action="action_employee_attendance_report" 
               sequence="20"/>
+              
+    <!-- Ajout de l'import des données du pointeur dans le menu des présences -->
+    <menuitem id="menu_pointeur_import" 
+              name="Import du pointeur" 
+              parent="hr_attendance.menu_hr_attendance_root" 
+              action="action_pointeur_import" 
+              sequence="30"/>
 </odoo>

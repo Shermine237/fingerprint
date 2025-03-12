@@ -60,6 +60,7 @@
         <field name="view_mode">tree,kanban,form</field>
         <field name="view_id" ref="pointeur_hr_attendance_view_tree"/>
         <field name="search_view_id" ref="pointeur_hr_attendance_view_filter"/>
+        <field name="name">Présences</field>
     </record>
     
     <!-- Vue form pour les lieux de pointage -->

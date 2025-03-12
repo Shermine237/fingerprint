@@ -1,47 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Menu principal pour le module Pointeur HR -->
-    <menuitem id="menu_pointeur_hr_root" 
-              name="Pointeur HR" 
-              web_icon="pointeur_hr,static/description/icon.png"
-              sequence="80"/>
-    
-    <!-- Sous-menu pour les présences -->
-    <menuitem id="menu_pointeur_hr_attendance" 
-              name="Présences" 
-              parent="menu_pointeur_hr_root" 
-              sequence="10"/>
-    
-    <!-- Sous-menu pour les rapports -->
-    <menuitem id="menu_pointeur_hr_reports" 
-              name="Rapports" 
-              parent="menu_pointeur_hr_root" 
-              sequence="20"/>
-    
-    <!-- Sous-menu pour la configuration -->
-    <menuitem id="menu_pointeur_hr_config" 
-              name="Configuration" 
-              parent="menu_pointeur_hr_root" 
-              sequence="100"/>
-    
-    <!-- Lien vers les présences -->
-    <menuitem id="menu_pointeur_hr_attendance_list" 
-              name="Présences" 
-              parent="menu_pointeur_hr_attendance" 
-              action="hr_attendance.hr_attendance_action" 
-              sequence="10"/>
-    
-    <!-- Lien vers le rapport de présence -->
-    <menuitem id="menu_pointeur_hr_attendance_report" 
-              name="Rapport de présence" 
-              parent="menu_pointeur_hr_reports" 
-              action="action_employee_attendance_report" 
-              sequence="10"/>
-    
-    <!-- Lien vers les lieux de pointage -->
+    <!-- Ajout des lieux de pointage dans le menu de configuration des présences -->
     <menuitem id="menu_pointeur_location" 
               name="Lieux de pointage" 
-              parent="menu_pointeur_hr_config" 
+              parent="hr_attendance.menu_hr_attendance_settings" 
               action="action_pointeur_location" 
+              sequence="10"/>
+    
+    <!-- Ajout du rapport de présence dans le menu des rapports RH -->
+    <menuitem id="menu_pointeur_hr_attendance_report" 
+              name="Rapport de présence détaillé" 
+              parent="hr.menu_hr_reporting" 
+              action="action_employee_attendance_report" 
               sequence="10"/>
 </odoo>

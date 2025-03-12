@@ -6,7 +6,7 @@
         Ce module étend les fonctionnalités du module de présences d'Odoo 14.
         Il permet d'ajouter des fonctionnalités supplémentaires pour la gestion des présences.
     """,
-    'category': 'Human Resources/Attendances',
+    'category': 'Human Resources',
     'author': 'Shermine237',
     'website': '',
     'depends': [

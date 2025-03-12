@@ -46,7 +46,7 @@
         <field name="model">hr.attendance</field>
         <field name="inherit_id" ref="hr_attendance.hr_attendance_view_filter"/>
         <field name="arch" type="xml">
-            <xpath expr="//filter[@name='today']" position="after">
+            <filter name="groupby_employee" position="after">
                 <separator/>
                 <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type', '=', 'overtime')]"/>
                 <filter name="filter_late" string="Retards" domain="[('attendance_type', '=', 'late')]"/>
@@ -54,7 +54,7 @@
                 <separator/>
                 <filter name="group_by_location" string="Lieu de pointage" context="{'group_by': 'location_id'}"/>
                 <filter name="group_by_type" string="Type de présence" context="{'group_by': 'attendance_type'}"/>
-            </xpath>
+            </filter>
         </field>
     </record>
     

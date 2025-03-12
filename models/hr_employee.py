@@ -7,7 +7,7 @@ class HrEmployee(models.Model):
     _inherit = 'hr.employee'
     
     # Champs additionnels pour le pointage
-    default_location_id = fields.Many2one('pointeur.location', string='Lieu de pointage par défaut')
+    default_location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage par défaut')
     badge_id = fields.Char(string='ID Badge', help="Identifiant unique du badge de l'employé")
     
     # Statistiques de présence

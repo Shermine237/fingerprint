@@ -353,19 +353,13 @@ class PointeurImport(models.Model):
             self.state = 'imported'
             
             # Mise à jour de la date d'import
-            user_tz = self.env.user.tz or 'UTC'
-            local_tz = pytz.timezone(user_tz)
-            local_now = datetime.now(local_tz)
-            
-            # Conversion en UTC naïf pour Odoo
-            utc_now = local_now.astimezone(pytz.UTC).replace(tzinfo=None)
-            self.import_date = utc_now
+            self.import_date = fields.Datetime.now()
             
             # Message de confirmation avec statistiques
             message = _("""Import réussi le %s :
 - %d lignes importées
 - %d employés différents""") % (
-                local_now.strftime('%d/%m/%Y à %H:%M:%S'),
+                fields.Datetime.now().strftime('%d/%m/%Y à %H:%M:%S'),
                 success_count,
                 len(set(val['employee_name'] for val in line_vals))
             )
@@ -374,8 +368,8 @@ class PointeurImport(models.Model):
                 message += _("\n\nErreurs :\n%s") % '\n'.join(error_lines)
                 self.state = 'error'
                 
-            # Création du message avec la date locale
-            self.with_context(mail_create_date=utc_now).message_post(body=message)
+            # Création du message
+            self.message_post(body=message)
 
     def action_create_attendances(self):
         """Créer les présences à partir des lignes importées"""

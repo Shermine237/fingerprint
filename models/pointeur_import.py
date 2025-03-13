@@ -70,6 +70,61 @@ class PointeurImport(models.Model):
             _logger.warning(f"Impossible de convertir '{value}' en float: {str(e)}")
             return 0.0
 
+    def _convert_time_to_float(self, time_str):
+        """Convertit une chaîne de temps (HH:MMa/p) en nombre d'heures"""
+        if not time_str:
+            return 0.0
+        try:
+            # Suppression des espaces
+            time_str = time_str.strip()
+            
+            # Extraction de am/pm
+            is_pm = time_str[-1].lower() == 'p'
+            
+            # Conversion en heures et minutes
+            hours, minutes = map(int, time_str[:-1].split(':'))
+            
+            # Ajustement pour pm
+            if is_pm and hours < 12:
+                hours += 12
+            elif not is_pm and hours == 12:
+                hours = 0
+                
+            return hours + minutes / 60.0
+        except Exception:
+            return 0.0
+
+    def _convert_to_datetime(self, date_str, time_str):
+        """Convertit une date (mm/dd/yy) et une heure (HH:MMa/p) en datetime"""
+        if not date_str or not time_str:
+            return False
+            
+        try:
+            # Conversion de la date
+            date = datetime.strptime(date_str, '%m/%d/%y').date()
+            
+            # Suppression des espaces
+            time_str = time_str.strip()
+            
+            # Extraction de am/pm
+            is_pm = time_str[-1].lower() == 'p'
+            
+            # Conversion en heures et minutes
+            hours, minutes = map(int, time_str[:-1].split(':'))
+            
+            # Ajustement pour pm
+            if is_pm and hours < 12:
+                hours += 12
+            elif not is_pm and hours == 12:
+                hours = 0
+                
+            # Création du datetime
+            return datetime.combine(date, datetime.time(hours, minutes))
+            
+        except Exception as e:
+            _logger.error("Erreur lors de la conversion de la date/heure : %s, %s - %s", date_str, time_str, str(e))
+            return False
+
     def action_import(self):
         """Importer les données du fichier CSV"""
         self.ensure_one()
@@ -87,43 +142,41 @@ class PointeurImport(models.Model):
         # Suppression des anciennes lignes
         self.line_ids.unlink()
 
-        # Affichage des en-têtes pour le débogage
-        headers = reader.fieldnames
-        self.message_post(body=_("En-têtes du fichier CSV:\n%s") % ', '.join(headers))
-
+        # Import des nouvelles lignes
         line_vals = []
         for row in reader:
             try:
                 # Extraction des données
-                check_in_date = datetime.strptime(row['Date'], '%m/%d/%y').date()
-                check_in_time = row.get('In Time', '').strip()
-                check_out_time = row.get('Out Time', '').strip()
+                employee_name = row.get('Display Name', '').strip()
+                date = row.get('Date', '').strip()
+                in_time = row.get('In Time', '').strip()
+                out_time = row.get('Out Time', '').strip()
 
                 # Construction des dates et heures
-                check_in = self._convert_to_datetime(check_in_date, check_in_time) if check_in_time else False
-                check_out = self._convert_to_datetime(check_in_date, check_out_time) if check_out_time else False
+                check_in = self._convert_to_datetime(date, in_time) if in_time else False
+                check_out = self._convert_to_datetime(date, out_time) if out_time else False
+
+                # Si check_out est avant check_in, on ajoute un jour
+                if check_in and check_out and check_out < check_in:
+                    check_out += timedelta(days=1)
 
                 # Préparation des valeurs
                 vals = {
                     'import_id': self.id,
-                    'employee_name': row.get('Display Name', '').strip(),
+                    'employee_name': employee_name,
                     'display_id': row.get('Display ID', '').strip(),
+                    'payroll_id': row.get('Payroll ID', '').strip(),
                     'department': row.get('Department', '').strip(),
                     'dept_code': row.get('Dept. Code', '').strip(),
-                    'payroll_id': row.get('Payroll ID', '').strip(),
-                    'date': check_in_date,
-                    'check_in_date': check_in_date,
-                    'check_in_time': check_in_time,
-                    'check_out_date': check_in_date,  # Par défaut même jour
-                    'check_out_time': check_out_time,
+                    'date': datetime.strptime(date, '%m/%d/%y').date() if date else False,
                     'check_in': check_in,
                     'check_out': check_out,
                     'in_note': row.get('In Note', '').strip(),
                     'out_note': row.get('Out Note', '').strip(),
-                    'reg_hours': self._convert_to_float(row.get('Reg. Hours', '0')),
-                    'ot1_hours': self._convert_to_float(row.get('OT1 Hours', '0')),
-                    'ot2_hours': self._convert_to_float(row.get('OT2 Hours', '0')),
-                    'total_hours': self._convert_to_float(row.get('Total Hours', '0')),
+                    'reg_hours': self._convert_time_to_float(row.get('REG', '0')),
+                    'ot1_hours': self._convert_time_to_float(row.get('OT1', '0')),
+                    'ot2_hours': self._convert_time_to_float(row.get('OT2', '0')),
+                    'total_hours': self._convert_time_to_float(row.get('Total', '0')),
                     'state': 'imported'
                 }
 
@@ -137,6 +190,15 @@ class PointeurImport(models.Model):
             self.env['pointeur_hr.import.line'].create(line_vals)
             self.state = 'imported'
             self.import_date = fields.Datetime.now()
+            
+            # Message de confirmation avec statistiques
+            message = _("""Import réussi :
+- %d lignes importées
+- %d employés différents""") % (
+                len(line_vals),
+                len(set(val['employee_name'] for val in line_vals))
+            )
+            self.message_post(body=message)
 
         # Mise à jour du statut et des messages
         if error_lines:
@@ -362,16 +424,6 @@ class PointeurImport(models.Model):
 - %d correspondances partielles
 - %d employés non trouvés""") % (success_count, error_count, perfect_matches, partial_matches, no_matches)
             self.message_post(body=message)
-
-    def _convert_to_datetime(self, date, time):
-        """Convertir une date et une heure en datetime"""
-        if not date or not time:
-            return False
-        
-        try:
-            return datetime.strptime(f"{date} {time}", '%Y-%m-%d %H:%M')
-        except ValueError as e:
-            raise ValueError(f"Erreur de format pour la date et l'heure. Format attendu: 'YYYY-MM-DD HH:MM', reçu: '{date} {time}'. Erreur: {str(e)}")
 
     def action_view_attendances(self):
         """Voir les présences créées"""

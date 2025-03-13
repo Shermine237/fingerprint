@@ -14,7 +14,7 @@
                 <field name="source"/>
                 <field name="check_in"/>
                 <field name="check_out"/>
-                <field name="attendance_type_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="attendance_type_ids" widget="selection_badge"/>
                 <field name="working_hours" widget="float_time" sum="Total"/>
                 <field name="regular_hours" widget="float_time" sum="Total"/>
                 <field name="overtime_hours" widget="float_time" sum="Total"/>
@@ -36,9 +36,9 @@
                 <field name="location_id"/>
                 <field name="source"/>
                 <field name="attendance_type_ids"/>
-                <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids.code', '=', 'overtime')]"/>
-                <filter name="filter_late" string="Retards" domain="[('attendance_type_ids.code', '=', 'late')]"/>
-                <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids.code', '=', 'early_leave')]"/>
+                <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids', '=', 'overtime')]"/>
+                <filter name="filter_late" string="Retards" domain="[('attendance_type_ids', '=', 'late')]"/>
+                <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids', '=', 'early_leave')]"/>
                 <separator/>
                 <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Cette semaine" name="this_week" domain="[('date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d'))]"/>
@@ -92,11 +92,11 @@
     </record>
 
     <!-- Action pour le rapport de présence -->
-    <record id="action_employee_attendance_report" model="ir.actions.act_window">
-        <field name="name">Analyse des présences</field>
+    <record id="action_hr_attendance_report" model="ir.actions.act_window">
+        <field name="name">Rapport de présence</field>
         <field name="res_model">hr.attendance.report</field>
         <field name="view_mode">tree,pivot,graph</field>
         <field name="search_view_id" ref="view_hr_attendance_report_search"/>
-        <field name="context">{'search_default_this_month': True}</field>
+        <field name="context">{'search_default_this_month': 1}</field>
     </record>
 </odoo>

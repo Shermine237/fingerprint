@@ -8,12 +8,12 @@ class HrAttendance(models.Model):
     
     # Champs additionnels pour le pointage
     location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage')
-    attendance_type_ids = fields.Many2many(
-        'pointeur_hr.attendance.type',
-        string='Types de présence',
-        compute='_compute_attendance_types',
-        store=True
-    )
+    attendance_type_ids = fields.Selection([
+        ('normal', 'Normal'),
+        ('overtime', 'Heures supplémentaires'),
+        ('late', 'Retard'),
+        ('early_leave', 'Départ anticipé')
+    ], string='Types de présence', compute='_compute_working_hours', store=True, multiple=True)
     notes = fields.Text(string='Notes')
     source = fields.Selection([
         ('manual', 'Saisie manuelle'),
@@ -22,7 +22,7 @@ class HrAttendance(models.Model):
     
     # Champs calculés
     working_hours = fields.Float(string='Heures travaillées', compute='_compute_working_hours', store=True)
-    overtime_hours = fields.Float(string='Heures supplémentaires', compute='_compute_overtime_hours', store=True)
+    overtime_hours = fields.Float(string='Heures supplémentaires', compute='_compute_working_hours', store=True)
     regular_hours = fields.Float(string='Heures normales', compute='_compute_working_hours', store=True)
     late_hours = fields.Float(string='Heures de retard', compute='_compute_working_hours', store=True)
     early_leave_hours = fields.Float(string='Heures départ anticipé', compute='_compute_working_hours', store=True)
@@ -35,6 +35,8 @@ class HrAttendance(models.Model):
             attendance.regular_hours = 0.0
             attendance.late_hours = 0.0
             attendance.early_leave_hours = 0.0
+            attendance.overtime_hours = 0.0
+            attendance.attendance_type_ids = []
 
             if not attendance.check_in or not attendance.check_out:
                 continue
@@ -48,6 +50,8 @@ class HrAttendance(models.Model):
             if not calendar:
                 attendance.working_hours = total_hours
                 attendance.regular_hours = total_hours
+                if total_hours > 0:
+                    attendance.attendance_type_ids = ['normal']
                 continue
 
             day_of_week = attendance.check_in.weekday()
@@ -56,9 +60,28 @@ class HrAttendance(models.Model):
                 ('dayofweek', '=', str(day_of_week))
             ], order='hour_from')
 
+            # Vérifier si c'est un jour férié
+            is_holiday = self.env['resource.calendar.leaves'].search([
+                ('calendar_id', '=', calendar.id),
+                ('date_from', '<=', attendance.check_in),
+                ('date_to', '>=', attendance.check_out)
+            ], limit=1)
+
+            # Vérifier si c'est un weekend
+            is_weekend = day_of_week in (5, 6)  # 5=Samedi, 6=Dimanche
+
+            if is_holiday or is_weekend:
+                attendance.working_hours = total_hours
+                attendance.overtime_hours = total_hours
+                if total_hours > 0:
+                    attendance.attendance_type_ids = ['overtime']
+                continue
+
             if not work_hours:
                 attendance.working_hours = total_hours
                 attendance.regular_hours = total_hours
+                if total_hours > 0:
+                    attendance.attendance_type_ids = ['normal']
                 continue
 
             # Obtenir les horaires prévus
@@ -91,91 +114,26 @@ class HrAttendance(models.Model):
 
             # Les heures normales sont les heures travaillées moins les retards et départs anticipés
             attendance.regular_hours = max(0, attendance.working_hours - attendance.late_hours - attendance.early_leave_hours)
-    
-    @api.depends('working_hours', 'employee_id.resource_calendar_id')
-    def _compute_overtime_hours(self):
-        for attendance in self:
-            if attendance.check_in and attendance.check_out and attendance.employee_id.resource_calendar_id:
-                # Initialiser les heures
-                standard_hours = 8.0  # Valeur par défaut
-                
-                # Vérifier si c'est un jour férié
-                is_holiday = self.env['resource.calendar.leaves'].search([
-                    ('calendar_id', '=', attendance.employee_id.resource_calendar_id.id),
-                    ('date_from', '<=', attendance.check_in),
-                    ('date_to', '>=', attendance.check_out)
-                ], limit=1)
-                
-                if is_holiday:
-                    # Toutes les heures sont supplémentaires si c'est un jour férié
-                    attendance.overtime_hours = attendance.working_hours
-                    continue
 
-                # Vérifier si c'est un weekend
-                is_weekend = attendance.check_in.weekday() in (5, 6)  # 5=Samedi, 6=Dimanche
-                if is_weekend:
-                    # Toutes les heures sont supplémentaires le weekend
-                    attendance.overtime_hours = attendance.working_hours
-                    continue
-                
-                # Jour normal : calculer les heures standard depuis le calendrier
-                calendar = attendance.employee_id.resource_calendar_id
-                day_of_week = attendance.check_in.weekday()
-                
-                # Recherche des horaires de travail pour ce jour
-                work_hours = self.env['resource.calendar.attendance'].search([
-                    ('calendar_id', '=', calendar.id),
-                    ('dayofweek', '=', str(day_of_week))
-                ])
-                
-                if work_hours:
-                    # Calculer les heures standard en tenant compte des pauses
-                    total_hours = 0
-                    for line in work_hours:
-                        total_hours += line.hour_to - line.hour_from
-                        if total_hours > 4:  # Pause déjeuner après 4h de travail
-                            total_hours -= 1  # 1h de pause déjeuner
-                    standard_hours = total_hours
-                
-                # Calculer les heures supplémentaires
-                if attendance.working_hours > standard_hours:
-                    attendance.overtime_hours = attendance.working_hours - standard_hours
-                else:
-                    attendance.overtime_hours = 0.0
-            else:
-                attendance.overtime_hours = 0.0
-    
-    @api.depends('late_hours', 'early_leave_hours', 'overtime_hours')
-    def _compute_attendance_types(self):
-        for attendance in self:
-            attendance_type_ids = self.env['pointeur_hr.attendance.type']
-            AttendanceType = self.env['pointeur_hr.attendance.type']
+            # Calculer les heures supplémentaires
+            standard_hours = sum((line.hour_to - line.hour_from) for line in work_hours)
+            if total_hours > 4:  # Déduire la pause déjeuner
+                standard_hours -= 1
             
-            # Type normal par défaut
+            if attendance.working_hours > standard_hours:
+                attendance.overtime_hours = attendance.working_hours - standard_hours
+
+            # Attribuer les types de présence
+            types = []
             if attendance.working_hours > 0:
-                normal_type = AttendanceType.search([('code', '=', 'normal')], limit=1)
-                if normal_type:
-                    attendance_type_ids |= normal_type
-            
-            # Heures supplémentaires
+                types.append('normal')
             if attendance.overtime_hours > 0:
-                overtime_type = AttendanceType.search([('code', '=', 'overtime')], limit=1)
-                if overtime_type:
-                    attendance_type_ids |= overtime_type
-            
-            # Retard
+                types.append('overtime')
             if attendance.late_hours > 0:
-                late_type = AttendanceType.search([('code', '=', 'late')], limit=1)
-                if late_type:
-                    attendance_type_ids |= late_type
-            
-            # Départ anticipé
+                types.append('late')
             if attendance.early_leave_hours > 0:
-                early_leave_type = AttendanceType.search([('code', '=', 'early_leave')], limit=1)
-                if early_leave_type:
-                    attendance_type_ids |= early_leave_type
-            
-            attendance.attendance_type_ids = attendance_type_ids
+                types.append('early_leave')
+            attendance.attendance_type_ids = types
     
     def _float_to_time(self, float_hour):
         """Convertit une heure flottante (ex: 7.5) en objet time (07:30:00)"""

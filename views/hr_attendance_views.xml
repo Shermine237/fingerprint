@@ -8,7 +8,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='check_out']" position="after">
                 <field name="location_id"/>
-                <field name="attendance_type_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="attendance_type_ids" widget="selection_badge"/>
                 <field name="working_hours" widget="float_time"/>
                 <field name="overtime_hours" widget="float_time"/>
                 <field name="notes"/>
@@ -27,7 +27,7 @@
                 <field name="check_in"/>
                 <field name="check_out"/>
                 <field name="location_id"/>
-                <field name="attendance_type_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="attendance_type_ids" widget="selection_badge"/>
                 <field name="working_hours" widget="float_time" sum="Total"/>
                 <field name="overtime_hours" widget="float_time" sum="Total"/>
             </tree>
@@ -44,9 +44,9 @@
                 <field name="department_id"/>
                 <field name="location_id"/>
                 <field name="attendance_type_ids"/>
-                <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids.code', '=', 'overtime')]"/>
-                <filter name="filter_late" string="Retards" domain="[('attendance_type_ids.code', '=', 'late')]"/>
-                <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids.code', '=', 'early_leave')]"/>
+                <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids', '=', 'overtime')]"/>
+                <filter name="filter_late" string="Retards" domain="[('attendance_type_ids', '=', 'late')]"/>
+                <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids', '=', 'early_leave')]"/>
                 <separator/>
                 <filter name="group_by_employee" string="Employé" context="{'group_by': 'employee_id'}"/>
                 <filter name="group_by_department" string="Département" context="{'group_by': 'department_id'}"/>

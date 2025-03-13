@@ -7,12 +7,12 @@
               action="pointeur_hr.action_pointeur_location" 
               sequence="10"/>
               
-    <!-- Ajout du rapport détaillé dans le menu des présences -->
+    <!-- Ajout du rapport détaillé dans le menu Analyse des présences -->
     <menuitem id="menu_pointeur_hr_attendance_report" 
               name="Rapport détaillé" 
-              parent="hr_attendance.menu_hr_attendance_root" 
+              parent="hr_attendance.menu_hr_attendance_analysis" 
               action="pointeur_hr.action_employee_attendance_report" 
-              sequence="20"/>
+              sequence="10"/>
               
     <!-- Ajout de l'import des données du pointeur dans le menu des présences -->
     <menuitem id="menu_pointeur_import" 

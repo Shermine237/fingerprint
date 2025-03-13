@@ -48,7 +48,8 @@ class HrAttendanceReport(models.Model):
                     a.late_hours as late_hours,
                     a.early_leave_hours as early_leave_hours
                 FROM hr_attendance a
-                LEFT JOIN hr_employee e ON e.id = a.employee_id
+                JOIN hr_employee e ON e.id = a.employee_id
                 WHERE a.check_in IS NOT NULL
+                AND (a.check_out IS NULL OR a.check_in <= a.check_out)
             )
         """ % self._table)

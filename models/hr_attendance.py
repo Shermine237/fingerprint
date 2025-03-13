@@ -1,6 +1,7 @@
 from odoo import models, fields, api
 from datetime import datetime, timedelta
 from pytz import timezone, UTC
+from odoo.exceptions import ValidationError
 
 
 class HrAttendance(models.Model):
@@ -21,6 +22,15 @@ class HrAttendance(models.Model):
     late_hours = fields.Float(string='Retard', compute='_compute_working_hours', store=True)
     early_leave_hours = fields.Float(string='Départ anticipé', compute='_compute_working_hours', store=True)
     attendance_type_ids = fields.Char(string='Types de présence', compute='_compute_working_hours', store=True)
+
+    @api.constrains('check_in', 'check_out')
+    def _check_validity(self):
+        """Vérifie que l'heure de sortie est après l'heure d'entrée et qu'il y a bien une heure d'entrée"""
+        for attendance in self:
+            if attendance.check_out and not attendance.check_in:
+                raise ValidationError(_("Une présence ne peut pas avoir une heure de sortie sans heure d'entrée."))
+            if attendance.check_in and attendance.check_out and attendance.check_in > attendance.check_out:
+                raise ValidationError(_("L'heure de sortie doit être après l'heure d'entrée."))
 
     @api.depends('check_in', 'check_out')
     def _compute_working_hours(self):

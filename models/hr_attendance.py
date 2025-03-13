@@ -132,14 +132,3 @@ class HrAttendance(models.Model):
         hours = int(float_hour)
         minutes = int((float_hour - hours) * 60)
         return time(hours, minutes)
-
-
-class PointeurLocation(models.Model):
-    _name = 'pointeur_hr.location'
-    _description = 'Lieu de pointage'
-    
-    name = fields.Char(string='Nom', required=True)
-    address = fields.Text(string='Adresse')
-    active = fields.Boolean(default=True)
-    company_id = fields.Many2one('res.company', string='Société', default=lambda self: self.env.company)
-    notes = fields.Text(string='Notes')

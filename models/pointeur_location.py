@@ -6,13 +6,7 @@ class PointeurLocation(models.Model):
     _order = 'name'
 
     name = fields.Char(string='Nom', required=True)
-    code = fields.Char(string='Code', required=True)
-    active = fields.Boolean(string='Actif', default=True)
-    note = fields.Text(string='Note')
-    
-    # Relations
-    employee_ids = fields.One2many('hr.employee', 'default_location_id', string='Employés')
-    
-    _sql_constraints = [
-        ('code_uniq', 'unique(code)', 'Le code doit être unique !')
-    ]
+    address = fields.Text(string='Adresse')
+    active = fields.Boolean(default=True)
+    company_id = fields.Many2one('res.company', string='Société', default=lambda self: self.env.company)
+    notes = fields.Text(string='Notes')

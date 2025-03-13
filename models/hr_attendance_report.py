@@ -28,8 +28,26 @@ class HrAttendanceReport(models.Model):
     
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
+        # Vérifier si la colonne default_location_id existe dans hr_employee
+        self.env.cr.execute("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'hr_employee' 
+            AND column_name = 'default_location_id'
+        """)
+        has_default_location = bool(self.env.cr.fetchone())
+
+        # Construire la requête en fonction de l'existence de la colonne
+        default_location_field = "e.default_location_id" if has_default_location else "NULL"
+        
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
+                WITH valid_attendances AS (
+                    SELECT a.*
+                    FROM hr_attendance a
+                    WHERE a.check_in IS NOT NULL
+                    AND (a.check_out IS NULL OR a.check_in <= a.check_out)
+                )
                 SELECT
                     a.id as id,
                     CONCAT(e.name, ' - ', to_char(a.check_in, 'YYYY-MM-DD')) as name,
@@ -37,19 +55,17 @@ class HrAttendanceReport(models.Model):
                     a.employee_id as employee_id,
                     e.department_id as department_id,
                     a.location_id as location_id,
-                    e.default_location_id as default_location_id,
+                    %s as default_location_id,
                     a.source as source,
                     a.check_in as check_in,
                     a.check_out as check_out,
                     a.attendance_type_ids as attendance_type_ids,
-                    a.working_hours as working_hours,
-                    a.regular_hours as regular_hours,
-                    a.overtime_hours as overtime_hours,
-                    a.late_hours as late_hours,
-                    a.early_leave_hours as early_leave_hours
-                FROM hr_attendance a
+                    COALESCE(a.working_hours, 0) as working_hours,
+                    COALESCE(a.regular_hours, 0) as regular_hours,
+                    COALESCE(a.overtime_hours, 0) as overtime_hours,
+                    COALESCE(a.late_hours, 0) as late_hours,
+                    COALESCE(a.early_leave_hours, 0) as early_leave_hours
+                FROM valid_attendances a
                 JOIN hr_employee e ON e.id = a.employee_id
-                WHERE a.check_in IS NOT NULL
-                AND (a.check_out IS NULL OR a.check_in <= a.check_out)
             )
-        """ % self._table)
+        """ % (self._table, default_location_field))

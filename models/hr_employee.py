@@ -16,7 +16,8 @@ class HrEmployee(models.Model):
     import_id = fields.Many2one('pointeur_hr.import', string='Import', readonly=True)
     
     # Champs additionnels pour le pointage
-    default_location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage par défaut')
+    default_location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage par défaut',
+                                        help="Lieu de pointage par défaut de l'employé")
     badge_id = fields.Char(string='ID Badge', help="Identifiant unique du badge de l'employé")
     
     # Statistiques de présence
@@ -26,6 +27,7 @@ class HrEmployee(models.Model):
     
     @api.depends('attendance_ids.overtime_hours', 'attendance_ids.late_hours', 'attendance_ids.early_leave_hours')
     def _compute_attendance_stats(self):
+        """Calcule les statistiques de présence pour chaque employé"""
         for employee in self:
             # Récupérer uniquement les présences valides (avec heure d'entrée)
             attendances = self.env['hr.attendance'].search([
@@ -35,8 +37,8 @@ class HrEmployee(models.Model):
             employee.total_overtime = sum(attendances.mapped('overtime_hours'))
             employee.total_late = sum(attendances.mapped('late_hours'))
             employee.total_early_leave = sum(attendances.mapped('early_leave_hours'))
-    
-    def action_view_attendances(self):
+            
+    def action_view_attendance(self):
         """Ouvre une vue des présences de l'employé"""
         self.ensure_one()
         action = self.env.ref('hr_attendance.hr_attendance_action').read()[0]

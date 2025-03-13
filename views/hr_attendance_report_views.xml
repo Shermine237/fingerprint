@@ -38,21 +38,36 @@
                 <field name="location_id"/>
                 <field name="source"/>
                 <field name="attendance_type_ids"/>
+                
+                <!-- Filtres par type de présence -->
                 <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids', 'ilike', 'supplementaire')]"/>
                 <filter name="filter_late" string="Retards" domain="[('attendance_type_ids', 'ilike', 'retard')]"/>
                 <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids', 'ilike', 'depart_anticipe')]"/>
+                
+                <!-- Filtres de date -->
                 <separator/>
                 <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Cette semaine" name="this_week" domain="[('date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d'))]"/>
                 <filter string="Ce mois" name="this_month" domain="[('date', '>=', (context_today().replace(day=1)).strftime('%Y-%m-%d'))]"/>
+                
+                <!-- Filtres de comparaison de lieux -->
                 <separator/>
+                <filter string="Lieu différent" name="different_location" 
+                        domain="[('location_id', '!=', False), ('default_location_id', '!=', False), ('location_id', '!=', 'default_location_id')]"/>
+                <filter string="Même lieu" name="same_location" 
+                        domain="[('location_id', '=', 'default_location_id')]"/>
+                
+                <!-- Groupements -->
                 <group expand="0" string="Group By">
                     <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
                     <filter string="Département" name="department" context="{'group_by': 'department_id'}"/>
                     <filter string="Lieu par défaut" name="default_location" context="{'group_by': 'default_location_id'}"/>
                     <filter string="Lieu de pointage" name="location" context="{'group_by': 'location_id'}"/>
                     <filter string="Source" name="source" context="{'group_by': 'source'}"/>
-                    <filter string="Date" name="date" context="{'group_by': 'date'}"/>
+                    <separator/>
+                    <filter string="Date" name="date" context="{'group_by': 'date:day'}"/>
+                    <filter string="Semaine" name="week" context="{'group_by': 'date:week'}"/>
+                    <filter string="Mois" name="month" context="{'group_by': 'date:month'}"/>
                 </group>
             </search>
         </field>
@@ -63,8 +78,8 @@
         <field name="name">hr.attendance.report.pivot</field>
         <field name="model">hr.attendance.report</field>
         <field name="arch" type="xml">
-            <pivot string="Analyse des présences">
-                <field name="date" type="row"/>
+            <pivot string="Analyse des présences" display_quantity="true">
+                <field name="date" type="row" interval="month"/>
                 <field name="employee_id" type="row"/>
                 <field name="default_location_id" type="row"/>
                 <field name="location_id" type="row"/>
@@ -83,17 +98,10 @@
         <field name="name">hr.attendance.report.graph</field>
         <field name="model">hr.attendance.report</field>
         <field name="arch" type="xml">
-            <graph string="Analyse des présences">
-                <field name="date"/>
+            <graph string="Analyse des présences" type="bar" stacked="True">
+                <field name="date" interval="month"/>
                 <field name="employee_id"/>
-                <field name="default_location_id"/>
-                <field name="location_id"/>
-                <field name="attendance_type_ids"/>
                 <field name="working_hours" type="measure"/>
-                <field name="regular_hours" type="measure"/>
-                <field name="overtime_hours" type="measure"/>
-                <field name="late_hours" type="measure"/>
-                <field name="early_leave_hours" type="measure"/>
             </graph>
         </field>
     </record>
@@ -104,7 +112,10 @@
         <field name="res_model">hr.attendance.report</field>
         <field name="view_mode">tree,pivot,graph</field>
         <field name="search_view_id" ref="view_hr_attendance_report_search"/>
-        <field name="context">{'search_default_this_month': 1}</field>
+        <field name="context">{
+            'search_default_this_month': 1,
+            'search_default_employee': 1
+        }</field>
     </record>
 
     <!-- Menu pour accéder au rapport -->

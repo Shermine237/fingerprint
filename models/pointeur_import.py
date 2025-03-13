@@ -101,6 +101,9 @@ class PointeurImport(models.Model):
             return False
             
         try:
+            # Log pour le débogage
+            _logger.info("Conversion date/heure : %s %s", date_str, time_str)
+            
             # Conversion de la date
             date = datetime.strptime(date_str, '%m/%d/%y').date()
             
@@ -109,9 +112,14 @@ class PointeurImport(models.Model):
             
             # Extraction de am/pm
             is_pm = time_str[-1].lower() == 'p'
+            time_str = time_str[:-1]  # Supprime le a/p
             
             # Conversion en heures et minutes
-            hours, minutes = map(int, time_str[:-1].split(':'))
+            try:
+                hours, minutes = map(int, time_str.split(':'))
+            except ValueError as e:
+                _logger.error("Format d'heure invalide : %s - %s", time_str, str(e))
+                return False
             
             # Ajustement pour pm
             if is_pm and hours < 12:
@@ -120,7 +128,9 @@ class PointeurImport(models.Model):
                 hours = 0
                 
             # Création du datetime
-            return datetime.combine(date, datetime.time(hours, minutes))
+            result = datetime.combine(date, datetime.time(hours, minutes))
+            _logger.info("Résultat conversion : %s", result)
+            return result
             
         except Exception as e:
             _logger.error("Erreur lors de la conversion de la date/heure : %s, %s - %s", date_str, time_str, str(e))
@@ -153,9 +163,16 @@ class PointeurImport(models.Model):
                 in_time = row.get('In Time', '').strip()
                 out_time = row.get('Out Time', '').strip()
 
+                # Log pour le débogage
+                _logger.info("Traitement de la ligne : employé=%s, date=%s, entrée=%s, sortie=%s", 
+                           employee_name, date, in_time, out_time)
+
                 # Construction des dates et heures
                 check_in = self._convert_to_datetime(date, in_time) if in_time else False
                 check_out = self._convert_to_datetime(date, out_time) if out_time else False
+
+                # Log des résultats de conversion
+                _logger.info("Après conversion : check_in=%s, check_out=%s", check_in, check_out)
 
                 # Si check_out est avant check_in, on ajoute un jour
                 if check_in and check_out and check_out < check_in:
@@ -174,18 +191,21 @@ class PointeurImport(models.Model):
                     'check_out': check_out,
                     'in_note': row.get('In Note', '').strip(),
                     'out_note': row.get('Out Note', '').strip(),
-                    'reg_hours': self._convert_time_to_float(row.get('REG', '0')),
-                    'ot1_hours': self._convert_time_to_float(row.get('OT1', '0')),
-                    'ot2_hours': self._convert_time_to_float(row.get('OT2', '0')),
-                    'total_hours': self._convert_time_to_float(row.get('Total', '0')),
+                    'reg_hours': float(row.get('REG', '0') or '0'),
+                    'ot1_hours': float(row.get('OT1', '0') or '0'),
+                    'ot2_hours': float(row.get('OT2', '0') or '0'),
+                    'total_hours': float(row.get('Total', '0') or '0'),
                     'location_id': self.location_id.id if self.location_id else False,
                     'state': 'imported'
                 }
 
                 line_vals.append(vals)
+                success_count += 1
 
             except Exception as e:
-                error_lines.append(f"Erreur ligne {reader.line_num}: {str(e)}")
+                error_message = f"Erreur ligne {reader.line_num} ({employee_name}): {str(e)}"
+                error_lines.append(error_message)
+                _logger.error(error_message)
 
         # Création des lignes
         if line_vals:
@@ -197,17 +217,14 @@ class PointeurImport(models.Model):
             message = _("""Import réussi :
 - %d lignes importées
 - %d employés différents""") % (
-                len(line_vals),
+                success_count,
                 len(set(val['employee_name'] for val in line_vals))
             )
-            self.message_post(body=message)
-
-        # Mise à jour du statut et des messages
-        if error_lines:
-            self.message_post(body=_("Erreurs d'importation:\n%s") % '\n'.join(error_lines))
-            self.state = 'error'
-        else:
-            message = _("%d lignes ont été importées avec succès.") % len(line_vals)
+            
+            if error_lines:
+                message += _("\n\nErreurs :\n%s") % '\n'.join(error_lines)
+                self.state = 'error'
+                
             self.message_post(body=message)
 
     def _normalize_name(self, name):

@@ -15,7 +15,7 @@ class PointeurImport(models.Model):
     _order = 'create_date desc'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Nom', required=True, default=lambda self: _('Import du %s') % fields.Date.context_today(self).strftime('%d/%m/%Y'))
+    name = fields.Char(string='Nom', required=True, default=lambda self: _('Import du %s') % fields.Date.context_today(self).strftime('%d/%m/%Y à %H:%M'))
     file = fields.Binary(string='Fichier CSV', required=True)
     file_name = fields.Char(string='Nom du fichier')
     location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage')
@@ -270,6 +270,19 @@ class PointeurImport(models.Model):
         
         # On retourne le meilleur match si son score est suffisant
         return best_match if best_score >= 0.5 else False
+
+    def message_post(self, **kwargs):
+        """Surcharge pour formater les dates dans le fuseau horaire de l'utilisateur"""
+        # Conversion de la date dans le fuseau horaire de l'utilisateur
+        user_tz = self.env.user.tz or 'UTC'
+        local_tz = pytz.timezone(user_tz)
+        utc_now = fields.Datetime.now()
+        local_now = pytz.utc.localize(utc_now).astimezone(local_tz)
+
+        # Ajout de la date locale dans le message
+        kwargs['subject'] = kwargs.get('subject', '') + ' - ' + local_now.strftime('%d/%m/%Y %H:%M:%S')
+        
+        return super(PointeurImport, self).message_post(**kwargs)
 
     def action_import(self):
         """Importer les données du fichier CSV"""

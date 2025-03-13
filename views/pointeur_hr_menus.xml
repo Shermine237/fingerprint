@@ -7,17 +7,23 @@
               action="pointeur_hr.action_pointeur_location" 
               sequence="10"/>
               
-    <!-- Ajout du rapport détaillé dans le menu Analyse des présences -->
-    <menuitem id="menu_pointeur_hr_attendance_report" 
-              name="Rapport détaillé" 
-              parent="hr_attendance.menu_hr_attendance_analysis" 
-              action="pointeur_hr.action_employee_attendance_report" 
-              sequence="10"/>
-              
     <!-- Ajout de l'import des données du pointeur dans le menu des présences -->
     <menuitem id="menu_pointeur_import" 
               name="Import du pointeur" 
               parent="hr_attendance.menu_hr_attendance_root" 
               action="pointeur_hr.action_pointeur_import" 
+              sequence="20"/>
+              
+    <!-- Menu Reporting des présences -->
+    <menuitem id="menu_pointeur_hr_reporting" 
+              name="Reporting" 
+              parent="hr_attendance.menu_hr_attendance_root" 
               sequence="30"/>
+              
+    <!-- Ajout du rapport détaillé dans le menu Reporting -->
+    <menuitem id="menu_pointeur_hr_attendance_report" 
+              name="Rapport détaillé" 
+              parent="pointeur_hr.menu_pointeur_hr_reporting" 
+              action="pointeur_hr.action_employee_attendance_report" 
+              sequence="10"/>
 </odoo>

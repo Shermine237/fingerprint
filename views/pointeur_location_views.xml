@@ -19,24 +19,13 @@
                     </div>
                     <group>
                         <group>
-                            <field name="code"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="address"/>
                         </group>
                         <group>
-                            <field name="note"/>
+                            <field name="notes"/>
                         </group>
                     </group>
-                    <notebook>
-                        <page string="Employés" name="employees">
-                            <field name="employee_ids" readonly="1">
-                                <tree>
-                                    <field name="name"/>
-                                    <field name="department_id"/>
-                                    <field name="job_id"/>
-                                    <field name="badge_id"/>
-                                </tree>
-                            </field>
-                        </page>
-                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -49,7 +38,8 @@
         <field name="arch" type="xml">
             <tree string="Lieux de pointage">
                 <field name="name"/>
-                <field name="code"/>
+                <field name="address"/>
+                <field name="company_id" groups="base.group_multi_company"/>
                 <field name="active"/>
             </tree>
         </field>
@@ -62,10 +52,12 @@
         <field name="arch" type="xml">
             <search string="Rechercher un lieu de pointage">
                 <field name="name"/>
-                <field name="code"/>
+                <field name="address"/>
+                <field name="company_id" groups="base.group_multi_company"/>
                 <separator/>
                 <filter string="Archivé" name="inactive" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Regrouper par">
+                    <filter string="Société" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     <filter string="Actif" name="active" context="{'group_by': 'active'}"/>
                 </group>
             </search>
@@ -73,7 +65,7 @@
     </record>
 
     <!-- Action pour les lieux de pointage -->
-    <record id="action_pointeur_location" model="ir.actions.act_window">
+    <record id="pointeur_location_action" model="ir.actions.act_window">
         <field name="name">Lieux de pointage</field>
         <field name="res_model">pointeur_hr.location</field>
         <field name="view_mode">tree,form</field>

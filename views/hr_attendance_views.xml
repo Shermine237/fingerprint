@@ -65,8 +65,8 @@
     
     <!-- Vue form pour les lieux de pointage -->
     <record id="pointeur_location_view_form" model="ir.ui.view">
-        <field name="name">pointeur.location.form</field>
-        <field name="model">pointeur.location</field>
+        <field name="name">pointeur_hr.location.form</field>
+        <field name="model">pointeur_hr.location</field>
         <field name="arch" type="xml">
             <form string="Lieu de pointage">
                 <sheet>
@@ -95,45 +95,42 @@
     
     <!-- Vue tree pour les lieux de pointage -->
     <record id="pointeur_location_view_tree" model="ir.ui.view">
-        <field name="name">pointeur.location.tree</field>
-        <field name="model">pointeur.location</field>
+        <field name="name">pointeur_hr.location.tree</field>
+        <field name="model">pointeur_hr.location</field>
         <field name="arch" type="xml">
             <tree string="Lieux de pointage">
                 <field name="name"/>
                 <field name="address"/>
                 <field name="company_id" groups="base.group_multi_company"/>
-                <field name="active"/>
             </tree>
         </field>
     </record>
     
     <!-- Vue search pour les lieux de pointage -->
     <record id="pointeur_location_view_search" model="ir.ui.view">
-        <field name="name">pointeur.location.search</field>
-        <field name="model">pointeur.location</field>
+        <field name="name">pointeur_hr.location.search</field>
+        <field name="model">pointeur_hr.location</field>
         <field name="arch" type="xml">
             <search string="Rechercher un lieu de pointage">
                 <field name="name"/>
                 <field name="address"/>
+                <field name="company_id" groups="base.group_multi_company"/>
                 <filter string="Archivé" name="inactive" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Regrouper par">
-                    <filter name="group_by_company" string="Société" context="{'group_by': 'company_id'}"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Société" name="company" domain="[]" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                 </group>
             </search>
         </field>
     </record>
     
     <!-- Action pour les lieux de pointage -->
-    <record id="action_pointeur_location" model="ir.actions.act_window">
+    <record id="pointeur_location_action" model="ir.actions.act_window">
         <field name="name">Lieux de pointage</field>
-        <field name="res_model">pointeur.location</field>
+        <field name="res_model">pointeur_hr.location</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Créez votre premier lieu de pointage
-            </p>
-            <p>
-                Les lieux de pointage permettent de suivre où les employés pointent leur présence.
+                Créer un nouveau lieu de pointage
             </p>
         </field>
     </record>

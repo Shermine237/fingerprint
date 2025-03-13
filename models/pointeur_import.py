@@ -98,30 +98,39 @@ class PointeurImport(models.Model):
 
     def _convert_to_datetime(self, date_str, time_str):
         """Convertit une date (mm/dd/yy) et une heure (HH:MMa/p) en datetime"""
+        _logger.info("=== DÉBUT CONVERSION DATE/HEURE ===")
+        _logger.info("Entrée : date=%s, heure=%s", date_str, time_str)
+        
         if not date_str or not time_str:
+            _logger.error("Date ou heure manquante")
             return False
             
         try:
             # Conversion de la date
             date = datetime.strptime(date_str, '%m/%d/%y').date()
+            _logger.info("Date convertie : %s", date)
             
             # Conversion de l'heure au format 12h en 24h
             time_str = time_str.strip()
             if not time_str or len(time_str) < 2:
+                _logger.error("Chaîne d'heure invalide")
                 return False
                 
             # Vérification du marqueur AM/PM
             am_pm = time_str[-1].lower()
             if am_pm not in ['a', 'p']:
+                _logger.error("Marqueur AM/PM invalide : %s", time_str[-1])
                 return False
                 
             # Extraction des heures et minutes
             time_parts = time_str[:-1].split(':')
             if len(time_parts) != 2:
+                _logger.error("Format d'heure invalide : %s", time_str)
                 return False
                 
             hours = int(time_parts[0])
             minutes = int(time_parts[1])
+            _logger.info("Heure extraite : %d:%02d %s", hours, minutes, am_pm)
             
             # Conversion en format 24h
             if am_pm == 'p' and hours < 12:
@@ -129,11 +138,15 @@ class PointeurImport(models.Model):
             elif am_pm == 'a' and hours == 12:
                 hours = 0
                 
+            _logger.info("Heure 24h : %d:%02d", hours, minutes)
+            
             # Création du datetime
-            return datetime.combine(date, datetime.time(hours, minutes))
+            result = datetime.combine(date, datetime.time(hours, minutes))
+            _logger.info("Résultat final : %s", result)
+            return result
             
         except Exception as e:
-            _logger.error("Erreur de conversion date/heure: %s %s - %s", date_str, time_str, str(e))
+            _logger.error("Erreur de conversion : %s", str(e))
             return False
 
     def _normalize_name(self, name):
@@ -294,6 +307,7 @@ class PointeurImport(models.Model):
     def action_import(self):
         """Importer les données du fichier CSV"""
         self.ensure_one()
+        _logger.info("=== DÉBUT IMPORT ===")
 
         if not self.file:
             raise UserError(_("Veuillez sélectionner un fichier à importer."))
@@ -302,11 +316,10 @@ class PointeurImport(models.Model):
         csv_data = base64.b64decode(self.file)
         csv_file = io.StringIO(csv_data.decode('utf-8'))
         reader = csv.DictReader(csv_file)
+        _logger.info("Colonnes CSV : %s", reader.fieldnames)
+        
         success_count = 0
         error_lines = []
-
-        # Log des colonnes du fichier CSV
-        _logger.info("Colonnes du fichier CSV : %s", reader.fieldnames)
 
         # Suppression des anciennes lignes
         self.line_ids.unlink()
@@ -325,10 +338,10 @@ class PointeurImport(models.Model):
                            employee_name, date, in_time, out_time)
 
                 # Construction des dates et heures
-                check_in = self._convert_to_datetime(date, in_time) if in_time else False
-                check_out = self._convert_to_datetime(date, out_time) if out_time else False
+                check_in = self._convert_to_datetime(date, in_time)
+                check_out = self._convert_to_datetime(date, out_time)
 
-                _logger.info("Après conversion : check_in=%s, check_out=%s", check_in, check_out)
+                _logger.info("Résultat conversion : check_in=%s, check_out=%s", check_in, check_out)
 
                 # Si check_out est avant check_in, on ajoute un jour
                 if check_in and check_out and check_out < check_in:
@@ -355,6 +368,8 @@ class PointeurImport(models.Model):
                     'location_id': self.location_id.id if self.location_id else False,
                     'state': 'imported'
                 }
+                
+                _logger.info("Valeurs préparées : %s", vals)
 
                 line_vals.append(vals)
                 success_count += 1
@@ -366,6 +381,7 @@ class PointeurImport(models.Model):
 
         # Création des lignes
         if line_vals:
+            _logger.info("Création de %d lignes", len(line_vals))
             self.env['pointeur_hr.import.line'].create(line_vals)
             self.state = 'imported'
             self.import_date = fields.Datetime.now()

@@ -5,6 +5,7 @@ import csv
 import io
 import logging
 from datetime import datetime, timedelta
+import pytz
 
 _logger = logging.getLogger(__name__)
 
@@ -118,8 +119,12 @@ class PointeurImport(models.Model):
             elif not is_pm and hours == 12:
                 hours = 0
                 
-            # Création du datetime
-            return datetime.combine(date, datetime.time(hours, minutes))
+            # Création du datetime avec le fuseau horaire de l'utilisateur
+            user_tz = self.env.user.tz or 'UTC'
+            local = pytz.timezone(user_tz)
+            naive_dt = datetime.combine(date, datetime.time(hours, minutes))
+            local_dt = local.localize(naive_dt, is_dst=None)
+            return local_dt.astimezone(pytz.UTC)
             
         except Exception:
             return False

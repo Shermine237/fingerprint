@@ -29,7 +29,7 @@
                             <field name="file" filename="file_name" attrs="{'readonly': [('state', '!=', 'draft')]}" accept=".csv"/>
                             <field name="file_name" invisible="1"/>
                             <field name="location_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
-                            <field name="import_date" readonly="1"/>
+                            <field name="import_date" widget="datetime" readonly="1"/>
                         </group>
                         <group>
                             <field name="user_id" readonly="1"/>
@@ -42,9 +42,9 @@
                                 <tree decoration-success="state == 'done'" decoration-danger="state == 'error'" decoration-info="state == 'imported'">
                                     <field name="employee_name"/>
                                     <field name="display_id"/>
-                                    <field name="date"/>
-                                    <field name="check_in"/>
-                                    <field name="check_out"/>
+                                    <field name="date" widget="datetime"/>
+                                    <field name="check_in" widget="datetime"/>
+                                    <field name="check_out" widget="datetime"/>
                                     <field name="department"/>
                                     <field name="reg_hours" sum="Total" widget="float_time"/>
                                     <field name="ot1_hours" sum="Total" widget="float_time"/>
@@ -75,7 +75,7 @@
             <tree string="Imports des données du pointeur" decoration-success="state == 'done'" decoration-info="state == 'imported'" decoration-muted="state == 'cancelled'" decoration-danger="state == 'error'">
                 <field name="name"/>
                 <field name="create_date"/>
-                <field name="import_date"/>
+                <field name="import_date" widget="datetime"/>
                 <field name="user_id"/>
                 <field name="location_id"/>
                 <field name="line_count"/>
@@ -123,11 +123,11 @@
                             <field name="employee_name"/>
                             <field name="display_id"/>
                             <field name="payroll_id"/>
-                            <field name="date"/>
+                            <field name="date" widget="datetime"/>
                         </group>
                         <group>
-                            <field name="check_in"/>
-                            <field name="check_out"/>
+                            <field name="check_in" widget="datetime"/>
+                            <field name="check_out" widget="datetime"/>
                             <field name="department"/>
                             <field name="dept_code"/>
                         </group>
@@ -164,9 +164,9 @@
                 <field name="import_id"/>
                 <field name="employee_name"/>
                 <field name="display_id"/>
-                <field name="date"/>
-                <field name="check_in"/>
-                <field name="check_out"/>
+                <field name="date" widget="datetime"/>
+                <field name="check_in" widget="datetime"/>
+                <field name="check_out" widget="datetime"/>
                 <field name="department"/>
                 <field name="location_id"/>
                 <field name="reg_hours" sum="Total" widget="float_time"/>

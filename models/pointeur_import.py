@@ -432,20 +432,19 @@ class PointeurImport(models.Model):
                 if not employee:
                     raise ValidationError(_("Employé non trouvé : %s") % line.employee_name)
 
-                # Création de la présence
-                attendance = self.env['hr.attendance'].create({
+                # Créer la présence
+                attendance_vals = {
                     'employee_id': employee.id,
                     'check_in': line.check_in,
                     'check_out': line.check_out,
-                    'location_id': line.location_id.id if line.location_id else False,
-                    'source': 'import'
-                })
+                    'location_id': self.location_id.id,
+                    'source': 'import',
+                    'notes': line.notes or False,
+                }
 
-                # Mise à jour de la ligne
-                line.write({
-                    'attendance_id': attendance.id,
-                    'state': 'done'
-                })
+                # Créer la présence
+                attendance = self.env['hr.attendance'].create(attendance_vals)
+                line.attendance_id = attendance.id
 
             except Exception as e:
                 line.write({

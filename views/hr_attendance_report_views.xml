@@ -6,16 +6,19 @@
         <field name="model">hr.attendance.report</field>
         <field name="arch" type="xml">
             <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false">
+                <field name="name"/>
                 <field name="date"/>
                 <field name="employee_id"/>
                 <field name="department_id"/>
                 <field name="location_id"/>
+                <field name="source"/>
                 <field name="check_in"/>
                 <field name="check_out"/>
                 <field name="working_hours" widget="float_time" sum="Total"/>
+                <field name="regular_hours" widget="float_time" sum="Total"/>
                 <field name="overtime_hours" widget="float_time" sum="Total"/>
-                <field name="attendance_type"/>
-                <field name="source"/>
+                <field name="late_hours" widget="float_time" sum="Total"/>
+                <field name="early_leave_hours" widget="float_time" sum="Total"/>
             </tree>
         </field>
     </record>
@@ -26,24 +29,25 @@
         <field name="model">hr.attendance.report</field>
         <field name="arch" type="xml">
             <search string="Recherche de présence">
+                <field name="name"/>
                 <field name="employee_id"/>
                 <field name="department_id"/>
                 <field name="location_id"/>
-                <field name="date"/>
+                <field name="source"/>
+                <filter string="Heures sup." name="has_overtime" domain="[('overtime_hours', '>', 0)]"/>
+                <filter string="Retards" name="has_late" domain="[('late_hours', '>', 0)]"/>
+                <filter string="Départs anticipés" name="has_early_leave" domain="[('early_leave_hours', '>', 0)]"/>
+                <separator/>
                 <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter string="Ce mois" name="month" domain="[('date', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')), ('date', '&lt;=', (context_today() + relativedelta(months=1, day=1, days=-1)).strftime('%Y-%m-%d'))]"/>
-                <filter string="Retards" name="late" domain="[('attendance_type', '=', 'late')]"/>
-                <filter string="Départs anticipés" name="early_leave" domain="[('attendance_type', '=', 'early_leave')]"/>
-                <filter string="Heures supplémentaires" name="overtime" domain="[('attendance_type', '=', 'overtime')]"/>
-                <filter string="Saisie manuelle" name="manual" domain="[('source', '=', 'manual')]"/>
-                <filter string="Importé du pointeur" name="imported" domain="[('source', '=', 'import')]"/>
-                <group expand="0" string="Regrouper par">
+                <filter string="Cette semaine" name="this_week" domain="[('date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce mois" name="this_month" domain="[('date', '>=', (context_today().replace(day=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <group expand="0" string="Group By">
                     <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
                     <filter string="Département" name="department" context="{'group_by': 'department_id'}"/>
-                    <filter string="Lieu de pointage" name="location" context="{'group_by': 'location_id'}"/>
-                    <filter string="Date" name="date" context="{'group_by': 'date'}"/>
-                    <filter string="Type de présence" name="type" context="{'group_by': 'attendance_type'}"/>
+                    <filter string="Lieu" name="location" context="{'group_by': 'location_id'}"/>
                     <filter string="Source" name="source" context="{'group_by': 'source'}"/>
+                    <filter string="Date" name="date" context="{'group_by': 'date'}"/>
                 </group>
             </search>
         </field>
@@ -54,11 +58,14 @@
         <field name="name">hr.attendance.report.pivot</field>
         <field name="model">hr.attendance.report</field>
         <field name="arch" type="xml">
-            <pivot string="Analyse des présences" display_quantity="true">
+            <pivot string="Analyse des présences">
+                <field name="date" type="row"/>
                 <field name="employee_id" type="row"/>
-                <field name="date" type="col"/>
-                <field name="working_hours" type="measure" widget="float_time"/>
-                <field name="overtime_hours" type="measure" widget="float_time"/>
+                <field name="working_hours" type="measure"/>
+                <field name="regular_hours" type="measure"/>
+                <field name="overtime_hours" type="measure"/>
+                <field name="late_hours" type="measure"/>
+                <field name="early_leave_hours" type="measure"/>
             </pivot>
         </field>
     </record>
@@ -68,29 +75,23 @@
         <field name="name">hr.attendance.report.graph</field>
         <field name="model">hr.attendance.report</field>
         <field name="arch" type="xml">
-            <graph string="Analyse des présences" type="bar">
-                <field name="employee_id"/>
+            <graph string="Analyse des présences">
+                <field name="date"/>
                 <field name="working_hours" type="measure"/>
+                <field name="regular_hours" type="measure"/>
                 <field name="overtime_hours" type="measure"/>
+                <field name="late_hours" type="measure"/>
+                <field name="early_leave_hours" type="measure"/>
             </graph>
         </field>
     </record>
 
     <!-- Action pour le rapport de présence -->
     <record id="action_employee_attendance_report" model="ir.actions.act_window">
-        <field name="name">Rapport de présence détaillé</field>
+        <field name="name">Analyse des présences</field>
         <field name="res_model">hr.attendance.report</field>
         <field name="view_mode">tree,pivot,graph</field>
         <field name="search_view_id" ref="view_hr_attendance_report_search"/>
-        <field name="context">{'search_default_month': 1, 'search_default_employee': 1}</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Aucune donnée à afficher
-            </p>
-            <p>
-                Ce rapport vous permet d'analyser en détail les présences des employés.
-                Vous pouvez filtrer par date, employé, département et type de présence.
-            </p>
-        </field>
+        <field name="context">{'search_default_this_month': True}</field>
     </record>
 </odoo>

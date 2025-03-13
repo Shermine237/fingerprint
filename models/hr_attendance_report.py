@@ -11,13 +11,7 @@ class HrAttendanceReport(models.Model):
     date = fields.Date(string='Date', readonly=True)
     employee_id = fields.Many2one('hr.employee', string='Employé', readonly=True)
     department_id = fields.Many2one('hr.department', string='Département', readonly=True)
-    location_id = fields.Many2one('pointeur.location', string='Lieu de pointage', readonly=True)
-    attendance_type = fields.Selection([
-        ('normal', 'Normal'),
-        ('late', 'Retard'),
-        ('early_leave', 'Départ anticipé'),
-        ('overtime', 'Heures supplémentaires')
-    ], string='Type de présence', readonly=True)
+    location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage', readonly=True)
     source = fields.Selection([
         ('manual', 'Saisie manuelle'),
         ('import', 'Importé du pointeur')
@@ -25,7 +19,10 @@ class HrAttendanceReport(models.Model):
     check_in = fields.Datetime(string='Entrée', readonly=True)
     check_out = fields.Datetime(string='Sortie', readonly=True)
     working_hours = fields.Float(string='Heures travaillées', readonly=True)
+    regular_hours = fields.Float(string='Heures normales', readonly=True)
     overtime_hours = fields.Float(string='Heures supplémentaires', readonly=True)
+    late_hours = fields.Float(string='Heures de retard', readonly=True)
+    early_leave_hours = fields.Float(string='Heures départ anticipé', readonly=True)
     
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
@@ -38,12 +35,14 @@ class HrAttendanceReport(models.Model):
                     a.employee_id as employee_id,
                     e.department_id as department_id,
                     a.location_id as location_id,
-                    a.attendance_type as attendance_type,
                     a.source as source,
                     a.check_in as check_in,
                     a.check_out as check_out,
                     a.working_hours as working_hours,
-                    a.overtime_hours as overtime_hours
+                    a.regular_hours as regular_hours,
+                    a.overtime_hours as overtime_hours,
+                    a.late_hours as late_hours,
+                    a.early_leave_hours as early_leave_hours
                 FROM hr_attendance a
                 JOIN hr_employee e ON a.employee_id = e.id
                 WHERE a.check_out IS NOT NULL

@@ -314,11 +314,6 @@ class PointeurImport(models.Model):
 
         # Lecture du fichier CSV
         csv_data = base64.b64decode(self.file)
-        
-        # Aperçu du contenu du fichier
-        preview = self._preview_csv_content(csv_data)
-        _logger.info("Aperçu du fichier CSV :\n%s", preview)
-        
         csv_file = io.StringIO(csv_data.decode('utf-8'))
         reader = csv.DictReader(csv_file)
         success_count = 0
@@ -375,6 +370,10 @@ class PointeurImport(models.Model):
                     'state': 'imported'
                 }
 
+                # Log des valeurs finales
+                _logger.info("Valeurs finales ligne %d : check_in=%s, check_out=%s", 
+                           reader.line_num, vals['check_in'], vals['check_out'])
+
                 line_vals.append(vals)
                 success_count += 1
 
@@ -385,6 +384,12 @@ class PointeurImport(models.Model):
 
         # Création des lignes
         if line_vals:
+            # Log avant création
+            _logger.info("Création de %d lignes...", len(line_vals))
+            for i, vals in enumerate(line_vals):
+                _logger.info("Ligne %d : check_in=%s, check_out=%s", 
+                           i+1, vals['check_in'], vals['check_out'])
+
             self.env['pointeur_hr.import.line'].create(line_vals)
             self.state = 'imported'
             self.import_date = fields.Datetime.now()

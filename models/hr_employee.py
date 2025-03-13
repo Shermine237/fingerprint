@@ -12,6 +12,9 @@ from datetime import datetime, timedelta
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
     
+    # Champs pour l'importation
+    import_id = fields.Many2one('pointeur_hr.import', string='Import', readonly=True)
+    
     # Champs additionnels pour le pointage
     default_location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage par défaut')
     badge_id = fields.Char(string='ID Badge', help="Identifiant unique du badge de l'employé")

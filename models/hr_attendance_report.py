@@ -11,7 +11,8 @@ class HrAttendanceReport(models.Model):
     date = fields.Date(string='Date', readonly=True)
     employee_id = fields.Many2one('hr.employee', string='Employé', readonly=True)
     department_id = fields.Many2one('hr.department', string='Département', readonly=True)
-    location_id = fields.Many2one('pointeur_hr.location', string='Lieu', readonly=True)
+    location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage', readonly=True)
+    default_location_id = fields.Many2one('pointeur_hr.location', string='Lieu par défaut', readonly=True)
     source = fields.Selection([
         ('manual', 'Manuel'),
         ('import', 'Import')
@@ -35,7 +36,8 @@ class HrAttendanceReport(models.Model):
                     a.check_in::date as date,
                     a.employee_id as employee_id,
                     e.department_id as department_id,
-                    e.location_id as location_id,
+                    a.location_id as location_id,
+                    e.default_location_id as default_location_id,
                     a.source as source,
                     a.check_in as check_in,
                     a.check_out as check_out,

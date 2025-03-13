@@ -10,6 +10,7 @@
                 <field name="date"/>
                 <field name="employee_id"/>
                 <field name="department_id"/>
+                <field name="default_location_id"/>
                 <field name="location_id"/>
                 <field name="source"/>
                 <field name="check_in"/>
@@ -33,6 +34,7 @@
                 <field name="name"/>
                 <field name="employee_id"/>
                 <field name="department_id"/>
+                <field name="default_location_id"/>
                 <field name="location_id"/>
                 <field name="source"/>
                 <field name="attendance_type_ids"/>
@@ -47,7 +49,8 @@
                 <group expand="0" string="Group By">
                     <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
                     <filter string="Département" name="department" context="{'group_by': 'department_id'}"/>
-                    <filter string="Lieu" name="location" context="{'group_by': 'location_id'}"/>
+                    <filter string="Lieu par défaut" name="default_location" context="{'group_by': 'default_location_id'}"/>
+                    <filter string="Lieu de pointage" name="location" context="{'group_by': 'location_id'}"/>
                     <filter string="Source" name="source" context="{'group_by': 'source'}"/>
                     <filter string="Date" name="date" context="{'group_by': 'date'}"/>
                 </group>
@@ -63,6 +66,8 @@
             <pivot string="Analyse des présences">
                 <field name="date" type="row"/>
                 <field name="employee_id" type="row"/>
+                <field name="default_location_id" type="row"/>
+                <field name="location_id" type="row"/>
                 <field name="attendance_type_ids" type="col"/>
                 <field name="working_hours" type="measure"/>
                 <field name="regular_hours" type="measure"/>
@@ -80,6 +85,9 @@
         <field name="arch" type="xml">
             <graph string="Analyse des présences">
                 <field name="date"/>
+                <field name="employee_id"/>
+                <field name="default_location_id"/>
+                <field name="location_id"/>
                 <field name="attendance_type_ids"/>
                 <field name="working_hours" type="measure"/>
                 <field name="regular_hours" type="measure"/>

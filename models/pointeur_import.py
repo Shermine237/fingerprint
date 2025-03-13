@@ -351,12 +351,19 @@ class PointeurImport(models.Model):
         if line_vals:
             self.env['pointeur_hr.import.line'].create(line_vals)
             self.state = 'imported'
-            self.import_date = fields.Datetime.now()
+            
+            # Mise à jour de la date d'import dans le fuseau horaire local
+            user_tz = self.env.user.tz or 'UTC'
+            local_tz = pytz.timezone(user_tz)
+            local_now = datetime.now(local_tz)
+            utc_now = local_now.astimezone(pytz.UTC)
+            self.import_date = utc_now
             
             # Message de confirmation avec statistiques
-            message = _("""Import réussi :
+            message = _("""Import réussi le %s :
 - %d lignes importées
 - %d employés différents""") % (
+                local_now.strftime('%d/%m/%Y à %H:%M:%S'),
                 success_count,
                 len(set(val['employee_name'] for val in line_vals))
             )
@@ -365,7 +372,8 @@ class PointeurImport(models.Model):
                 message += _("\n\nErreurs :\n%s") % '\n'.join(error_lines)
                 self.state = 'error'
                 
-            self.message_post(body=message)
+            # Création du message avec la date locale
+            self.with_context(mail_create_date=utc_now).message_post(body=message)
 
     def action_create_attendances(self):
         """Créer les présences à partir des lignes importées"""

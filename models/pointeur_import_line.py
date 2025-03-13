@@ -1,5 +1,6 @@
 from odoo import api, fields, models, _
 from datetime import datetime, timedelta
+from odoo.exceptions import ValidationError
 
 class PointeurImportLine(models.Model):
     _name = 'pointeur_hr.import.line'
@@ -13,7 +14,7 @@ class PointeurImportLine(models.Model):
     department = fields.Char(string='Département')
     dept_code = fields.Char(string='Code département')
     date = fields.Date(string='Date', required=True)
-    check_in = fields.Datetime(string='Entrée')
+    check_in = fields.Datetime(string='Entrée')  # Non requis car peut être vide
     check_out = fields.Datetime(string='Sortie')
     in_note = fields.Char(string='Note d\'entrée')
     out_note = fields.Char(string='Note de sortie')
@@ -43,3 +44,10 @@ class PointeurImportLine(models.Model):
                 'res_id': self.attendance_id.id,
             }
         return True
+
+    @api.constrains('check_in', 'check_out')
+    def _check_validity(self):
+        """ Vérifie la validité des heures d'entrée et de sortie """
+        for record in self:
+            if record.check_in and record.check_out and record.check_out < record.check_in:
+                raise ValidationError(_('La date/heure de sortie ne peut pas être antérieure à la date/heure d\'entrée.'))

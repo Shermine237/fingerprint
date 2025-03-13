@@ -149,22 +149,31 @@ class HrAttendance(models.Model):
     def _compute_attendance_types(self):
         for attendance in self:
             attendance_type_ids = self.env['pointeur_hr.attendance.type']
+            AttendanceType = self.env['pointeur_hr.attendance.type']
             
             # Type normal par défaut
             if attendance.working_hours > 0:
-                attendance_type_ids |= self.env.ref('pointeur_hr.pointeur_hr_attendance_type_normal')
+                normal_type = AttendanceType.search([('code', '=', 'normal')], limit=1)
+                if normal_type:
+                    attendance_type_ids |= normal_type
             
             # Heures supplémentaires
             if attendance.overtime_hours > 0:
-                attendance_type_ids |= self.env.ref('pointeur_hr.pointeur_hr_attendance_type_overtime')
+                overtime_type = AttendanceType.search([('code', '=', 'overtime')], limit=1)
+                if overtime_type:
+                    attendance_type_ids |= overtime_type
             
             # Retard
             if attendance.late_hours > 0:
-                attendance_type_ids |= self.env.ref('pointeur_hr.pointeur_hr_attendance_type_late')
+                late_type = AttendanceType.search([('code', '=', 'late')], limit=1)
+                if late_type:
+                    attendance_type_ids |= late_type
             
             # Départ anticipé
             if attendance.early_leave_hours > 0:
-                attendance_type_ids |= self.env.ref('pointeur_hr.pointeur_hr_attendance_type_early_leave')
+                early_leave_type = AttendanceType.search([('code', '=', 'early_leave')], limit=1)
+                if early_leave_type:
+                    attendance_type_ids |= early_leave_type
             
             attendance.attendance_type_ids = attendance_type_ids
     

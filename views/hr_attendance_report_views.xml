@@ -36,9 +36,9 @@
                 <field name="location_id"/>
                 <field name="source"/>
                 <field name="attendance_type_ids"/>
-                <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids', 'in', [ref('pointeur_hr.pointeur_hr_attendance_type_overtime')])]"/>
-                <filter name="filter_late" string="Retards" domain="[('attendance_type_ids', 'in', [ref('pointeur_hr.pointeur_hr_attendance_type_late')])]"/>
-                <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids', 'in', [ref('pointeur_hr.pointeur_hr_attendance_type_early_leave')])]"/>
+                <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids.code', '=', 'overtime')]"/>
+                <filter name="filter_late" string="Retards" domain="[('attendance_type_ids.code', '=', 'late')]"/>
+                <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids.code', '=', 'early_leave')]"/>
                 <separator/>
                 <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Cette semaine" name="this_week" domain="[('date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d'))]"/>

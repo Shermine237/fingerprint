@@ -6,7 +6,8 @@ from . import pointeur_import
 from . import pointeur_import_line
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
+from dateutil.relativedelta import relativedelta
 
 
 class HrEmployee(models.Model):
@@ -21,39 +22,71 @@ class HrEmployee(models.Model):
     badge_id = fields.Char(string='ID Badge', help="Identifiant unique du badge de l'employé")
     
     # Statistiques de présence
-    total_overtime = fields.Float(string='Total heures supplémentaires', compute='_compute_attendance_stats', store=True)
-    total_late = fields.Float(string='Total retards', compute='_compute_attendance_stats', store=True)
-    total_early_leave = fields.Float(string='Total départs anticipés', compute='_compute_attendance_stats', store=True)
+    attendance_rate = fields.Float(string='Taux de présence', compute='_compute_attendance_stats', store=True)
+    total_overtime_hours = fields.Float(string='Total heures supplémentaires', compute='_compute_attendance_stats', store=True)
+    total_late_count = fields.Integer(string='Nombre de retards', compute='_compute_attendance_stats', store=True)
+    total_early_leave_count = fields.Integer(string='Nombre de départs anticipés', compute='_compute_attendance_stats', store=True)
     
-    @api.depends('attendance_ids.overtime_hours', 'attendance_ids.late_hours', 'attendance_ids.early_leave_hours')
+    @api.depends('attendance_ids')
     def _compute_attendance_stats(self):
-        """Calcule les statistiques de présence pour chaque employé"""
         for employee in self:
-            # Récupérer uniquement les présences valides (avec heure d'entrée)
+            # Calculer le premier jour du mois en cours
+            today = date.today()
+            start_date = today.replace(day=1)
+            
+            # Récupérer les présences valides du mois en cours
             attendances = self.env['hr.attendance'].search([
                 ('employee_id', '=', employee.id),
-                ('check_in', '!=', False)
+                ('check_in', '>=', start_date.strftime('%Y-%m-%d')),
+                ('check_in', '<=', today.strftime('%Y-%m-%d 23:59:59')),
+                ('check_in', '!=', False)  # Ignorer les lignes sans check_in
             ])
-            employee.total_overtime = sum(attendances.mapped('overtime_hours'))
-            employee.total_late = sum(attendances.mapped('late_hours'))
-            employee.total_early_leave = sum(attendances.mapped('early_leave_hours'))
-            
-    def action_view_attendance(self):
-        """Ouvre une vue des présences de l'employé"""
+
+            # Initialiser les compteurs
+            total_days = 0
+            overtime_hours = 0
+            late_count = 0
+            early_leave_count = 0
+
+            # Calculer les statistiques
+            for attendance in attendances:
+                if attendance.attendance_type_ids:
+                    types = attendance.attendance_type_ids.split(',')
+                    if 'supplementaire' in types:
+                        overtime_hours += attendance.working_hours
+                    if 'retard' in types:
+                        late_count += 1
+                    if 'depart_anticipe' in types:
+                        early_leave_count += 1
+                total_days += 1
+
+            # Calculer le taux de présence (jours de présence / jours ouvrés)
+            working_days = self._get_working_days(start_date, today)
+            employee.attendance_rate = (total_days / working_days) * 100 if working_days > 0 else 0
+            employee.total_overtime_hours = overtime_hours
+            employee.total_late_count = late_count
+            employee.total_early_leave_count = early_leave_count
+
+    def _get_working_days(self, start_date, end_date):
+        """Calculer le nombre de jours ouvrés entre deux dates"""
+        # Pour simplifier, on considère 22 jours ouvrés par mois
+        return 22
+
+    def action_view_attendances(self):
+        """Voir les présences de l'employé"""
         self.ensure_one()
-        action = self.env.ref('hr_attendance.hr_attendance_action').read()[0]
+        action = self.env["ir.actions.actions"]._for_xml_id("hr_attendance.hr_attendance_action")
         action['domain'] = [('employee_id', '=', self.id)]
-        action['context'] = {'default_employee_id': self.id}
+        action['context'] = {'search_default_today': 1}
         return action
-    
+
     def action_view_overtime(self):
-        """Ouvre une vue des heures supplémentaires de l'employé"""
+        """Voir les heures supplémentaires de l'employé"""
         self.ensure_one()
-        action = self.env.ref('hr_attendance.hr_attendance_action').read()[0]
+        action = self.env["ir.actions.actions"]._for_xml_id("hr_attendance.hr_attendance_action")
         action['domain'] = [
             ('employee_id', '=', self.id),
-            ('attendance_type_ids.code', '=', 'overtime')
+            ('attendance_type_ids', 'ilike', 'supplementaire')
         ]
-        action['context'] = {'default_employee_id': self.id}
-        action['name'] = _('Heures supplémentaires de %s') % self.name
+        action['context'] = {'search_default_today': 1}
         return action

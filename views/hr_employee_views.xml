@@ -45,6 +45,36 @@
         </field>
     </record>
     
+    <!-- Ajout de champs dans la vue liste des employés -->
+    <record id="hr_employee_view_tree_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.tree.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_tree"/>
+        <field name="arch" type="xml">
+            <field name="work_phone" position="after">
+                <field name="default_location_id"/>
+                <field name="badge_id"/>
+                <field name="attendance_rate" widget="percentage"/>
+            </field>
+        </field>
+    </record>
+    
+    <!-- Ajout de champs dans la vue recherche des employés -->
+    <record id="hr_employee_view_search_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.search.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_filter"/>
+        <field name="arch" type="xml">
+            <field name="job_id" position="after">
+                <field name="default_location_id"/>
+                <field name="badge_id"/>
+            </field>
+            <filter name="group_department" position="after">
+                <filter string="Lieu de pointage" name="group_location" context="{'group_by': 'default_location_id'}"/>
+            </filter>
+        </field>
+    </record>
+    
     <!-- Rapport de présence par employé -->
     <record id="action_employee_attendance_report" model="ir.actions.act_window">
         <field name="name">Rapport de présence</field>

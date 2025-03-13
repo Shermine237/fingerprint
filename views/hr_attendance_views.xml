@@ -8,10 +8,13 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='check_out']" position="after">
                 <field name="location_id"/>
+                <field name="source"/>
                 <field name="attendance_type_ids" widget="badge"/>
                 <field name="working_hours" widget="float_time"/>
+                <field name="regular_hours" widget="float_time"/>
                 <field name="overtime_hours" widget="float_time"/>
-                <field name="notes"/>
+                <field name="late_hours" widget="float_time"/>
+                <field name="early_leave_hours" widget="float_time"/>
             </xpath>
         </field>
     </record>
@@ -27,9 +30,13 @@
                 <field name="check_in"/>
                 <field name="check_out"/>
                 <field name="location_id"/>
+                <field name="source"/>
                 <field name="attendance_type_ids" widget="badge"/>
                 <field name="working_hours" widget="float_time" sum="Total"/>
+                <field name="regular_hours" widget="float_time" sum="Total"/>
                 <field name="overtime_hours" widget="float_time" sum="Total"/>
+                <field name="late_hours" widget="float_time" sum="Total"/>
+                <field name="early_leave_hours" widget="float_time" sum="Total"/>
             </tree>
         </field>
     </record>
@@ -43,6 +50,7 @@
                 <field name="employee_id"/>
                 <field name="department_id"/>
                 <field name="location_id"/>
+                <field name="source"/>
                 <field name="attendance_type_ids"/>
                 <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids', 'ilike', 'supplementaire')]"/>
                 <filter name="filter_late" string="Retards" domain="[('attendance_type_ids', 'ilike', 'retard')]"/>
@@ -51,6 +59,7 @@
                 <filter name="group_by_employee" string="Employé" context="{'group_by': 'employee_id'}"/>
                 <filter name="group_by_department" string="Département" context="{'group_by': 'department_id'}"/>
                 <filter name="group_by_location" string="Lieu de pointage" context="{'group_by': 'location_id'}"/>
+                <filter string="Source" name="groupby_source" context="{'group_by': 'source'}"/>
             </search>
         </field>
     </record>

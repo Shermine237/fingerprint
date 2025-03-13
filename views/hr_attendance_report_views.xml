@@ -98,4 +98,11 @@
         <field name="search_view_id" ref="view_hr_attendance_report_search"/>
         <field name="context">{'search_default_this_month': 1}</field>
     </record>
+
+    <!-- Menu pour accéder au rapport -->
+    <menuitem id="pointeur_hr_menu_hr_attendance_report"
+              name="Rapport de présence"
+              parent="hr_attendance.menu_hr_attendance_root"
+              action="pointeur_hr_action_hr_attendance_report"
+              sequence="30"/>
 </odoo>

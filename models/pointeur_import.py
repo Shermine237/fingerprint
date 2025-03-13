@@ -338,15 +338,26 @@ class PointeurImport(models.Model):
                            employee_name, date, in_time, out_time)
 
                 # Construction des dates et heures
-                check_in = self._convert_to_datetime(date, in_time)
-                check_out = self._convert_to_datetime(date, out_time)
+                check_in = self._convert_to_datetime(date, in_time) if date and in_time else False
+                check_out = self._convert_to_datetime(date, out_time) if date and out_time else False
 
                 _logger.info("Résultat conversion : check_in=%s, check_out=%s", check_in, check_out)
+
+                # Si pas de check-in, on ignore la ligne
+                if not check_in:
+                    _logger.info("Ligne ignorée : pas de check-in")
+                    continue
 
                 # Si check_out est avant check_in, on ajoute un jour
                 if check_in and check_out and check_out < check_in:
                     check_out += timedelta(days=1)
                     _logger.info("Ajustement check_out : %s", check_out)
+
+                # Validation des données obligatoires
+                if not employee_name:
+                    raise ValidationError(_("Le nom de l'employé est obligatoire."))
+                if not date:
+                    raise ValidationError(_("La date est obligatoire."))
 
                 # Préparation des valeurs
                 vals = {

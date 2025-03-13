@@ -98,69 +98,30 @@ class PointeurImport(models.Model):
     def _convert_to_datetime(self, date_str, time_str):
         """Convertit une date (mm/dd/yy) et une heure (HH:MMa/p) en datetime"""
         if not date_str or not time_str:
-            _logger.warning("Date ou heure manquante : date=%s, heure=%s", date_str, time_str)
             return False
             
         try:
-            # Log pour le débogage
-            _logger.info("Conversion date/heure : date='%s' heure='%s'", date_str, time_str)
-            
             # Conversion de la date
-            try:
-                date = datetime.strptime(date_str, '%m/%d/%y').date()
-                _logger.info("Date convertie : %s", date)
-            except ValueError as e:
-                _logger.error("Erreur conversion date '%s': %s", date_str, str(e))
-                return False
+            date = datetime.strptime(date_str, '%m/%d/%y').date()
             
-            # Suppression des espaces et vérification du format
+            # Nettoyage et extraction de l'heure
             time_str = time_str.strip()
-            if not time_str[-1].lower() in ['a', 'p']:
-                _logger.error("Format d'heure invalide (pas de a/p) : %s", time_str)
-                return False
-            
-            # Extraction de am/pm
             is_pm = time_str[-1].lower() == 'p'
             time_str = time_str[:-1].strip()  # Supprime le a/p
             
-            # Conversion en heures et minutes
-            try:
-                if ':' in time_str:
-                    hours, minutes = map(int, time_str.split(':'))
-                else:
-                    _logger.error("Format d'heure invalide (pas de :) : %s", time_str)
-                    return False
-                    
-                _logger.info("Heures extraites : %d:%02d %s", hours, minutes, 'PM' if is_pm else 'AM')
-                
-                # Validation des heures et minutes
-                if not (0 <= hours <= 12 and 0 <= minutes <= 59):
-                    _logger.error("Heures ou minutes invalides : %d:%02d", hours, minutes)
-                    return False
-                
-                # Ajustement pour pm
-                if is_pm and hours < 12:
-                    hours += 12
-                elif not is_pm and hours == 12:
-                    hours = 0
-                    
-                _logger.info("Heures après ajustement AM/PM : %d:%02d", hours, minutes)
-                
-            except ValueError as e:
-                _logger.error("Erreur conversion heure '%s': %s", time_str, str(e))
-                return False
+            # Conversion de l'heure
+            hours, minutes = map(int, time_str.split(':'))
+            
+            # Ajustement AM/PM
+            if is_pm and hours < 12:
+                hours += 12
+            elif not is_pm and hours == 12:
+                hours = 0
                 
             # Création du datetime
-            try:
-                result = datetime.combine(date, datetime.time(hours, minutes))
-                _logger.info("Datetime final : %s", result)
-                return result
-            except ValueError as e:
-                _logger.error("Erreur création datetime : %s", str(e))
-                return False
+            return datetime.combine(date, datetime.time(hours, minutes))
             
-        except Exception as e:
-            _logger.error("Erreur lors de la conversion de la date/heure : %s, %s - %s", date_str, time_str, str(e))
+        except Exception:
             return False
 
     def _normalize_name(self, name):
@@ -332,22 +293,13 @@ class PointeurImport(models.Model):
                 in_time = row.get('In Time', '').strip()
                 out_time = row.get('Out Time', '').strip()
 
-                # Log pour le débogage
-                _logger.info("Traitement ligne %d : employé='%s', date='%s', entrée='%s', sortie='%s'", 
-                           reader.line_num, employee_name, date, in_time, out_time)
-
                 # Construction des dates et heures
                 check_in = self._convert_to_datetime(date, in_time) if in_time else False
                 check_out = self._convert_to_datetime(date, out_time) if out_time else False
 
-                # Log des résultats de conversion
-                _logger.info("Après conversion ligne %d : check_in=%s, check_out=%s", 
-                           reader.line_num, check_in, check_out)
-
                 # Si check_out est avant check_in, on ajoute un jour
                 if check_in and check_out and check_out < check_in:
                     check_out += timedelta(days=1)
-                    _logger.info("Ajustement check_out après minuit : %s", check_out)
 
                 # Préparation des valeurs
                 vals = {
@@ -370,26 +322,15 @@ class PointeurImport(models.Model):
                     'state': 'imported'
                 }
 
-                # Log des valeurs finales
-                _logger.info("Valeurs finales ligne %d : check_in=%s, check_out=%s", 
-                           reader.line_num, vals['check_in'], vals['check_out'])
-
                 line_vals.append(vals)
                 success_count += 1
 
             except Exception as e:
                 error_message = f"Erreur ligne {reader.line_num} ({employee_name}): {str(e)}"
                 error_lines.append(error_message)
-                _logger.error(error_message)
 
         # Création des lignes
         if line_vals:
-            # Log avant création
-            _logger.info("Création de %d lignes...", len(line_vals))
-            for i, vals in enumerate(line_vals):
-                _logger.info("Ligne %d : check_in=%s, check_out=%s", 
-                           i+1, vals['check_in'], vals['check_out'])
-
             self.env['pointeur_hr.import.line'].create(line_vals)
             self.state = 'imported'
             self.import_date = fields.Datetime.now()

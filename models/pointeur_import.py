@@ -91,166 +91,287 @@ class PointeurImport(models.Model):
         headers = reader.fieldnames
         self.message_post(body=_("En-têtes du fichier CSV:\n%s") % ', '.join(headers))
 
+        line_vals = []
         for row in reader:
             try:
-                # Validation des données requises
-                if not row.get('Display Name', '').strip():
-                    continue  # Ignorer les lignes vides
+                # Extraction des données
+                check_in_date = datetime.strptime(row['Date'], '%m/%d/%y').date()
+                check_in_time = row.get('In Time', '').strip()
+                check_out_time = row.get('Out Time', '').strip()
 
-                # Affichage de la première ligne pour le débogage
-                if reader.line_num == 2:  # La première ligne est l'en-tête
-                    self.message_post(body=_("Exemple de ligne:\n%s") % str(row))
+                # Construction des dates et heures
+                check_in = self._convert_to_datetime(check_in_date, check_in_time) if check_in_time else False
+                check_out = self._convert_to_datetime(check_in_date, check_out_time) if check_out_time else False
 
-                # Nettoyage et conversion des dates
-                in_time = row.get('In Time', '').strip()
-                out_time = row.get('Out Time', '').strip()
-                in_day = row.get('In Day', '').strip()
-                out_day = row.get('Out Day', '').strip()
-
-                # Au moins une heure doit être présente
-                if not in_time and not out_time:
-                    continue  # Ignorer les lignes sans heures
-                
-                # Conversion du format de date
-                check_in = None
-                if in_time and in_day:
-                    try:
-                        # Convertir 'a' en 'AM' et 'p' en 'PM'
-                        in_time = in_time.replace('a', ' AM').replace('p', ' PM')
-                        check_in = datetime.strptime(f"{row['Date']} {in_time}", '%m/%d/%y %I:%M %p')
-                    except ValueError as e:
-                        raise ValueError(f"Erreur de format pour l'heure d'entrée. Format attendu: 'MM/DD/YY HH:MMa/p', reçu: '{row['Date']} {in_time}'. Erreur: {str(e)}")
-
-                check_out = None
-                if out_time:
-                    try:
-                        out_time = out_time.replace('a', ' AM').replace('p', ' PM')
-                        check_out = datetime.strptime(f"{row['Date']} {out_time}", '%m/%d/%y %I:%M %p')
-                        # Si la sortie est le lendemain
-                        if out_day and in_day and out_day != in_day:
-                            check_out += timedelta(days=1)
-                    except ValueError as e:
-                        raise ValueError(f"Erreur de format pour l'heure de sortie. Format attendu: 'MM/DD/YY HH:MMa/p', reçu: '{row['Date']} {out_time}'. Erreur: {str(e)}")
-
-                # Validation de la cohérence des heures
-                if check_in and check_out and check_out < check_in:
-                    raise ValueError("L'heure de sortie ne peut pas être antérieure à l'heure d'entrée")
-
-                # Création de la ligne d'import
+                # Préparation des valeurs
                 vals = {
                     'import_id': self.id,
+                    'employee_name': row.get('Display Name', '').strip(),
                     'display_id': row.get('Display ID', '').strip(),
-                    'display_name': row.get('Display Name', '').strip(),
                     'department': row.get('Department', '').strip(),
                     'dept_code': row.get('Dept. Code', '').strip(),
                     'payroll_id': row.get('Payroll ID', '').strip(),
-                    'date': datetime.strptime(row['Date'], '%m/%d/%y').date(),
-                    'in_day': in_day,
-                    'in_time': in_time,
-                    'out_day': out_day,
-                    'out_time': out_time,
+                    'date': check_in_date,
+                    'check_in_date': check_in_date,
+                    'check_in_time': check_in_time,
+                    'check_out_date': check_in_date,  # Par défaut même jour
+                    'check_out_time': check_out_time,
                     'check_in': check_in,
                     'check_out': check_out,
                     'in_note': row.get('In Note', '').strip(),
-                    'out_note': row.get('Out Note', '').strip()
+                    'out_note': row.get('Out Note', '').strip(),
+                    'reg_hours': self._convert_to_float(row.get('Reg. Hours', '0')),
+                    'ot1_hours': self._convert_to_float(row.get('OT1 Hours', '0')),
+                    'ot2_hours': self._convert_to_float(row.get('OT2 Hours', '0')),
+                    'total_hours': self._convert_to_float(row.get('Total Hours', '0')),
+                    'state': 'imported'
                 }
 
-                # Conversion des heures avec gestion des erreurs
-                for field in ['REG', 'OT1', 'OT2', 'Total']:
-                    try:
-                        value = row.get(field, '')
-                        float_value = self._convert_to_float(value)
-                        vals[f'{field.lower()}_hours'] = float_value
-                    except Exception as e:
-                        raise ValueError(f"Erreur de conversion pour le champ {field}: '{value}'. Erreur: {str(e)}")
-
-                # Création de la ligne
-                self.env['pointeur_hr.import.line'].create(vals)
-                success_count += 1
+                line_vals.append(vals)
 
             except Exception as e:
                 error_lines.append(f"Erreur ligne {reader.line_num}: {str(e)}")
+
+        # Création des lignes
+        if line_vals:
+            self.env['pointeur_hr.import.line'].create(line_vals)
+            self.state = 'imported'
+            self.import_date = fields.Datetime.now()
 
         # Mise à jour du statut et des messages
         if error_lines:
             self.message_post(body=_("Erreurs d'importation:\n%s") % '\n'.join(error_lines))
             self.state = 'error'
         else:
-            message = _("%d lignes ont été importées avec succès.") % success_count
+            message = _("%d lignes ont été importées avec succès.") % len(line_vals)
             self.message_post(body=message)
-            self.state = 'imported'
-            self.import_date = fields.Datetime.now()
+
+    def _normalize_name(self, name):
+        """Normalise un nom pour la comparaison
+        - Convertit en minuscules
+        - Supprime les espaces en début/fin
+        - Supprime les espaces multiples
+        - Gère les initiales"""
+        if not name:
+            return ''
+            
+        # Conversion en minuscules et suppression des espaces
+        name = name.lower().strip()
+        
+        # Suppression des espaces multiples
+        name = ' '.join(name.split())
+        
+        return name
+
+    def _get_initials(self, name):
+        """Extrait les initiales d'un nom"""
+        if not name:
+            return ''
+        
+        # Découpage en mots
+        words = name.split()
+        
+        # Extraction des initiales
+        initials = ''.join(word[0] for word in words if word)
+        
+        return initials.lower()
+
+    def _name_similarity_score(self, name1, name2):
+        """Calcule un score de similarité entre deux noms
+        - Score de 0 à 1, 1 étant une correspondance parfaite
+        - Prend en compte :
+          * Les mots exacts
+          * Les mots partiels (min 3 caractères)
+          * Les initiales
+          * Les noms composés"""
+        if not name1 or not name2:
+            return 0
+            
+        # Normalisation des noms
+        name1 = self._normalize_name(name1)
+        name2 = self._normalize_name(name2)
+        
+        # Si les noms sont identiques après normalisation
+        if name1 == name2:
+            return 1
+            
+        # Découpage en mots
+        words1 = name1.split()
+        words2 = name2.split()
+        
+        # Score basé sur les mots communs
+        common_words = set(words1).intersection(set(words2))
+        if not common_words:
+            # Si aucun mot commun, on vérifie les initiales
+            initials1 = self._get_initials(name1)
+            initials2 = self._get_initials(name2)
+            if initials1 and initials2 and initials1 == initials2:
+                return 0.6
+            return 0
+            
+        # Score de base sur les mots exacts
+        exact_score = len(common_words) / max(len(words1), len(words2))
+        
+        # Score pour les mots partiels et composés
+        partial_matches = 0
+        for w1 in words1:
+            for w2 in words2:
+                # Si un mot est contenu dans l'autre (minimum 3 caractères)
+                if w1 != w2 and (w1 in w2 or w2 in w1) and len(min(w1, w2, key=len)) >= 3:
+                    partial_matches += 0.5
+                # Si les 3 premiers caractères sont identiques
+                elif len(w1) >= 3 and len(w2) >= 3 and w1[:3] == w2[:3]:
+                    partial_matches += 0.3
+                # Si c'est un nom composé (avec tiret ou espace)
+                elif ('-' in w1 or '-' in w2) and any(part in w2 for part in w1.split('-')) or any(part in w1 for part in w2.split('-')):
+                    partial_matches += 0.4
+                    
+        partial_score = partial_matches / max(len(words1), len(words2))
+        
+        # Score final combiné
+        return min(1.0, exact_score + partial_score)
+
+    def _find_employee_by_name(self, name):
+        """Trouve un employé par son nom de manière intelligente.
+        Gère les variations dans l'écriture des noms :
+        - Majuscules/minuscules
+        - Espaces
+        - Initiales
+        - Noms composés
+        - Ordres des mots"""
+        if not name:
+            return False
+            
+        # Recherche de tous les employés
+        employees = self.env['hr.employee'].search([])
+        best_match = False
+        best_score = 0
+        matches = []
+        
+        # Log pour le débogage
+        _logger.info("Recherche de correspondance pour le nom : %s", name)
+        
+        for employee in employees:
+            # Calcul du score de similarité
+            score = self._name_similarity_score(name, employee.name)
+            
+            # Log des scores pour le débogage
+            if score > 0:
+                _logger.info("Score de correspondance : %.2f entre '%s' et '%s'", score, name, employee.name)
+                matches.append((employee, score))
+            
+            # Si le score est meilleur que le précédent
+            if score > best_score:
+                best_score = score
+                best_match = employee
+                _logger.info("Nouveau meilleur score : %.2f avec l'employé '%s'", score, employee.name)
+                
+            # Si correspondance parfaite, on arrête là
+            if score == 1:
+                _logger.info("Correspondance parfaite trouvée avec l'employé '%s'", employee.name)
+                return employee
+                
+        # Log du résultat final
+        if best_match and best_score >= 0.5:
+            _logger.info("Meilleure correspondance trouvée : '%s' (score : %.2f)", best_match.name, best_score)
+        else:
+            _logger.warning("Aucune correspondance trouvée pour le nom : '%s' (meilleur score : %.2f)", name, best_score)
+            
+        # Affichage des correspondances dans l'interface
+        if matches:
+            matches.sort(key=lambda x: x[1], reverse=True)
+            message = _("Correspondances trouvées pour '%s' :\n") % name
+            for employee, score in matches[:5]:  # On affiche les 5 meilleures correspondances
+                message += _("- %s (score : %.2f)\n") % (employee.name, score)
+            self.message_post(body=message)
+        
+        # On retourne le meilleur match si son score est suffisant
+        return best_match if best_score >= 0.5 else False
 
     def action_create_attendances(self):
-        """Créer les présences à partir des lignes importées"""
+        """Création des présences à partir des lignes importées"""
         self.ensure_one()
-
-        if self.state != 'imported':
-            raise UserError(_("Les présences ne peuvent être créées qu'à partir d'un import validé."))
-
-        has_error = False
+        
+        # On vérifie que toutes les lignes sont en état 'imported'
+        if any(line.state != 'imported' for line in self.line_ids):
+            raise UserError(_("Toutes les lignes doivent être en état 'Importé' avant de créer les présences"))
+            
+        attendances = self.env['hr.attendance']
+        success_count = 0
+        error_count = 0
+        
+        # Statistiques des correspondances
+        perfect_matches = 0
+        partial_matches = 0
+        no_matches = 0
+        
         for line in self.line_ids:
-            if not line.attendance_id:
-                try:
-                    # Recherche de l'employé
-                    domain = []
-                    if line.display_id:
-                        domain = [('barcode', '=', line.display_id)]
-                    else:
-                        domain = [('name', '=', line.display_name)]
+            try:
+                # Recherche de l'employé par son nom
+                employee = self._find_employee_by_name(line.employee_name)
+                if not employee:
+                    no_matches += 1
+                    raise ValidationError(_("Impossible de trouver l'employé avec le nom : %s") % line.employee_name)
+                elif self._name_similarity_score(line.employee_name, employee.name) == 1:
+                    perfect_matches += 1
+                else:
+                    partial_matches += 1
                     
-                    employee = self.env['hr.employee'].search(domain, limit=1)
-                    if not employee:
-                        line.write({
-                            'state': 'error',
-                            'error_message': f"Employé non trouvé : {line.display_name} (ID: {line.display_id or 'Non défini'})"
-                        })
-                        has_error = True
-                        continue
-
-                    # Validation des heures
-                    if not line.check_in:
-                        line.write({
-                            'state': 'error',
-                            'error_message': "L'heure d'entrée est obligatoire"
-                        })
-                        has_error = True
-                        continue
-
-                    # Création de la présence
-                    attendance_vals = {
-                        'employee_id': employee.id,
-                        'check_in': line.check_in,
-                        'check_out': line.check_out,
-                        'source': 'import',
-                        'note': '\n'.join(filter(None, [
-                            f"IN: {line.in_note}" if line.in_note else '',
-                            f"OUT: {line.out_note}" if line.out_note else ''
-                        ]))
-                    }
-
-                    # Création de la présence
-                    attendance = self.env['hr.attendance'].create(attendance_vals)
-                    line.write({
-                        'attendance_id': attendance.id,
-                        'state': 'done'
-                    })
-
-                except Exception as e:
-                    line.write({
-                        'state': 'error',
-                        'error_message': str(e)
-                    })
-                    has_error = True
-
-        # Mise à jour du statut global
-        if has_error:
-            if all(line.state == 'error' for line in self.line_ids):
-                self.state = 'error'
-            else:
-                self.message_post(body=_("Certaines lignes n'ont pas pu être importées. Vérifiez les messages d'erreur."))
-        else:
+                # Création de la présence
+                attendance = attendances.create({
+                    'employee_id': employee.id,
+                    'check_in': line.check_in,
+                    'check_out': line.check_out,
+                    'location_id': line.location_id.id if line.location_id else False,
+                })
+                
+                # Mise à jour de la ligne
+                line.write({
+                    'state': 'done',
+                    'attendance_id': attendance.id,
+                })
+                success_count += 1
+                
+            except Exception as e:
+                error_count += 1
+                # En cas d'erreur, on met à jour la ligne avec l'erreur
+                line.write({
+                    'state': 'error',
+                    'error_message': str(e),
+                })
+                
+        # Log des statistiques
+        _logger.info("Import des présences terminé : %d succès, %d erreurs", success_count, error_count)
+        _logger.info("Statistiques des correspondances : %d parfaites, %d partielles, %d non trouvées", 
+                    perfect_matches, partial_matches, no_matches)
+                
+        # Mise à jour du statut de l'import avec statistiques détaillées
+        if all(line.state == 'done' for line in self.line_ids):
             self.state = 'done'
+            message = _("""Import terminé avec succès :
+- %d présences créées
+- %d correspondances parfaites
+- %d correspondances partielles""") % (success_count, perfect_matches, partial_matches)
+            self.message_post(body=message)
+        elif any(line.state == 'error' for line in self.line_ids):
+            self.state = 'error'
+            message = _("""Import terminé avec des erreurs :
+- %d présences créées
+- %d erreurs
+- %d correspondances parfaites
+- %d correspondances partielles
+- %d employés non trouvés""") % (success_count, error_count, perfect_matches, partial_matches, no_matches)
+            self.message_post(body=message)
+
+    def _convert_to_datetime(self, date, time):
+        """Convertir une date et une heure en datetime"""
+        if not date or not time:
+            return False
+        
+        try:
+            return datetime.strptime(f"{date} {time}", '%Y-%m-%d %H:%M')
+        except ValueError as e:
+            raise ValueError(f"Erreur de format pour la date et l'heure. Format attendu: 'YYYY-MM-DD HH:MM', reçu: '{date} {time}'. Erreur: {str(e)}")
 
     def action_view_attendances(self):
         """Voir les présences créées"""

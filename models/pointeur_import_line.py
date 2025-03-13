@@ -9,13 +9,13 @@ class PointeurImportLine(models.Model):
     payroll_id = fields.Char(string='ID Paie')
     dept_code = fields.Char(string='Code département')
     import_id = fields.Many2one('pointeur_hr.import', string='Import', required=True, ondelete='cascade')
-    display_name = fields.Char(string='Nom employé', required=True)
+    employee_name = fields.Char(string='Nom employé', required=True)
     display_id = fields.Char(string='ID employé')
     date = fields.Date(string='Date')
-    in_day = fields.Char(string='Jour entrée')
-    in_time = fields.Char(string='Heure entrée')
-    out_day = fields.Char(string='Jour sortie')
-    out_time = fields.Char(string='Heure sortie')
+    check_in_date = fields.Date(string='Date entrée')
+    check_in_time = fields.Char(string='Heure entrée')
+    check_out_date = fields.Date(string='Date sortie')
+    check_out_time = fields.Char(string='Heure sortie')
     check_in = fields.Datetime(string='Entrée')
     check_out = fields.Datetime(string='Sortie')
     department = fields.Char(string='Département')
@@ -24,8 +24,10 @@ class PointeurImportLine(models.Model):
     ot2_hours = fields.Float(string='Heures sup. 2')
     total_hours = fields.Float(string='Total heures')
     attendance_id = fields.Many2one('hr.attendance', string='Présence')
+    location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage')
     state = fields.Selection([
         ('draft', 'En attente'),
+        ('imported', 'Importé'),
         ('done', 'Terminé'),
         ('error', 'Erreur')
     ], string='État', default='draft', required=True, tracking=True)

@@ -28,6 +28,7 @@
                         <group>
                             <field name="file" filename="file_name" attrs="{'readonly': [('state', '!=', 'draft')]}" accept=".csv"/>
                             <field name="file_name" invisible="1"/>
+                            <field name="location_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                             <field name="import_date" readonly="1"/>
                         </group>
                         <group>
@@ -76,6 +77,7 @@
                 <field name="create_date"/>
                 <field name="import_date"/>
                 <field name="user_id"/>
+                <field name="location_id"/>
                 <field name="line_count"/>
                 <field name="attendance_count"/>
                 <field name="state"/>
@@ -91,6 +93,7 @@
             <search string="Rechercher les imports">
                 <field name="name"/>
                 <field name="user_id"/>
+                <field name="location_id"/>
                 <filter string="Mes imports" name="my_imports" domain="[('user_id', '=', uid)]"/>
                 <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
                 <filter string="Importé" name="imported" domain="[('state', '=', 'imported')]"/>
@@ -99,6 +102,7 @@
                 <filter string="Erreur" name="error" domain="[('state', '=', 'error')]"/>
                 <group expand="0" string="Regrouper par">
                     <filter string="Utilisateur" name="user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Lieu de pointage" name="location" context="{'group_by': 'location_id'}"/>
                     <filter string="État" name="state" context="{'group_by': 'state'}"/>
                     <filter string="Mois" name="month" context="{'group_by': 'create_date:month'}"/>
                 </group>
@@ -164,6 +168,7 @@
                 <field name="check_in"/>
                 <field name="check_out"/>
                 <field name="department"/>
+                <field name="location_id"/>
                 <field name="reg_hours" sum="Total" widget="float_time"/>
                 <field name="ot1_hours" sum="Total" widget="float_time"/>
                 <field name="ot2_hours" sum="Total" widget="float_time"/>
@@ -186,6 +191,7 @@
                 <field name="display_id"/>
                 <field name="payroll_id"/>
                 <field name="department"/>
+                <field name="location_id"/>
                 <filter string="En attente" name="draft" domain="[('state', '=', 'draft')]"/>
                 <filter string="Importé" name="imported" domain="[('state', '=', 'imported')]"/>
                 <filter string="Terminé" name="done" domain="[('state', '=', 'done')]"/>
@@ -194,6 +200,7 @@
                     <filter string="Import" name="import" context="{'group_by': 'import_id'}"/>
                     <filter string="Employé" name="employee" context="{'group_by': 'employee_name'}"/>
                     <filter string="Département" name="department" context="{'group_by': 'department'}"/>
+                    <filter string="Lieu de pointage" name="location" context="{'group_by': 'location_id'}"/>
                     <filter string="État" name="state" context="{'group_by': 'state'}"/>
                     <filter string="Date" name="date" context="{'group_by': 'date'}"/>
                 </group>

@@ -7,7 +7,7 @@ class HrAttendance(models.Model):
     _inherit = 'hr.attendance'
     
     # Champs additionnels pour le pointage
-    location_id = fields.Many2one('pointeur.location', string='Lieu de pointage')
+    location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage')
     attendance_type = fields.Selection([
         ('normal', 'Normal'),
         ('overtime', 'Heures supplémentaires'),
@@ -135,7 +135,7 @@ class HrAttendance(models.Model):
 
 
 class PointeurLocation(models.Model):
-    _name = 'pointeur.location'
+    _name = 'pointeur_hr.location'
     _description = 'Lieu de pointage'
     
     name = fields.Char(string='Nom', required=True)

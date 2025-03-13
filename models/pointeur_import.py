@@ -17,6 +17,7 @@ class PointeurImport(models.Model):
     name = fields.Char(string='Nom', required=True, default=lambda self: _('Import du %s') % fields.Date.context_today(self).strftime('%d/%m/%Y'))
     file = fields.Binary(string='Fichier CSV', required=True)
     file_name = fields.Char(string='Nom du fichier')
+    location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage')
     import_date = fields.Datetime(string='Date d\'import', readonly=True)
     user_id = fields.Many2one('res.users', string='Utilisateur', default=lambda self: self.env.user, readonly=True)
     line_count = fields.Integer(string='Nombre de lignes', compute='_compute_line_count')
@@ -177,6 +178,7 @@ class PointeurImport(models.Model):
                     'ot1_hours': self._convert_time_to_float(row.get('OT1', '0')),
                     'ot2_hours': self._convert_time_to_float(row.get('OT2', '0')),
                     'total_hours': self._convert_time_to_float(row.get('Total', '0')),
+                    'location_id': self.location_id.id if self.location_id else False,
                     'state': 'imported'
                 }
 
@@ -351,79 +353,60 @@ class PointeurImport(models.Model):
         return best_match if best_score >= 0.5 else False
 
     def action_create_attendances(self):
-        """Création des présences à partir des lignes importées"""
+        """Créer les présences à partir des lignes importées"""
         self.ensure_one()
-        
-        # On vérifie que toutes les lignes sont en état 'imported'
-        if any(line.state != 'imported' for line in self.line_ids):
-            raise UserError(_("Toutes les lignes doivent être en état 'Importé' avant de créer les présences"))
-            
-        attendances = self.env['hr.attendance']
-        success_count = 0
-        error_count = 0
-        
-        # Statistiques des correspondances
-        perfect_matches = 0
-        partial_matches = 0
-        no_matches = 0
-        
-        for line in self.line_ids:
+
+        if self.state != 'imported':
+            raise UserError(_("Vous devez d'abord importer les données du fichier CSV."))
+
+        # Création des présences
+        for line in self.line_ids.filtered(lambda l: l.state == 'imported'):
             try:
-                # Recherche de l'employé par son nom
-                employee = self._find_employee_by_name(line.employee_name)
+                # Recherche de l'employé
+                employee = self.env['hr.employee'].search([
+                    '|',
+                    ('name', '=', line.employee_name),
+                    ('badge_id', '=', line.display_id)
+                ], limit=1)
+
                 if not employee:
-                    no_matches += 1
-                    raise ValidationError(_("Impossible de trouver l'employé avec le nom : %s") % line.employee_name)
-                elif self._name_similarity_score(line.employee_name, employee.name) == 1:
-                    perfect_matches += 1
-                else:
-                    partial_matches += 1
-                    
+                    raise ValidationError(_("Employé non trouvé : %s") % line.employee_name)
+
                 # Création de la présence
-                attendance = attendances.create({
+                attendance = self.env['hr.attendance'].create({
                     'employee_id': employee.id,
                     'check_in': line.check_in,
                     'check_out': line.check_out,
                     'location_id': line.location_id.id if line.location_id else False,
+                    'source': 'import'
                 })
-                
+
                 # Mise à jour de la ligne
                 line.write({
-                    'state': 'done',
                     'attendance_id': attendance.id,
+                    'state': 'done'
                 })
-                success_count += 1
-                
+
             except Exception as e:
-                error_count += 1
-                # En cas d'erreur, on met à jour la ligne avec l'erreur
                 line.write({
                     'state': 'error',
-                    'error_message': str(e),
+                    'error_message': str(e)
                 })
-                
-        # Log des statistiques
-        _logger.info("Import des présences terminé : %d succès, %d erreurs", success_count, error_count)
-        _logger.info("Statistiques des correspondances : %d parfaites, %d partielles, %d non trouvées", 
-                    perfect_matches, partial_matches, no_matches)
-                
-        # Mise à jour du statut de l'import avec statistiques détaillées
+
+        # Mise à jour de l'état de l'import
         if all(line.state == 'done' for line in self.line_ids):
             self.state = 'done'
-            message = _("""Import terminé avec succès :
-- %d présences créées
-- %d correspondances parfaites
-- %d correspondances partielles""") % (success_count, perfect_matches, partial_matches)
-            self.message_post(body=message)
         elif any(line.state == 'error' for line in self.line_ids):
             self.state = 'error'
-            message = _("""Import terminé avec des erreurs :
+
+        # Message de confirmation
+        message = _("""Création des présences terminée :
 - %d présences créées
-- %d erreurs
-- %d correspondances parfaites
-- %d correspondances partielles
-- %d employés non trouvés""") % (success_count, error_count, perfect_matches, partial_matches, no_matches)
-            self.message_post(body=message)
+- %d erreurs""") % (
+            len(self.line_ids.filtered(lambda l: l.state == 'done')),
+            len(self.line_ids.filtered(lambda l: l.state == 'error'))
+        )
+        self.message_post(body=message)
 
     def action_view_attendances(self):
         """Voir les présences créées"""

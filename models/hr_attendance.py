@@ -23,39 +23,119 @@ class HrAttendance(models.Model):
     # Champs calculés
     working_hours = fields.Float(string='Heures travaillées', compute='_compute_working_hours', store=True)
     overtime_hours = fields.Float(string='Heures supplémentaires', compute='_compute_overtime_hours', store=True)
+    regular_hours = fields.Float(string='Heures normales', compute='_compute_working_hours', store=True)
+    late_hours = fields.Float(string='Heures de retard', compute='_compute_working_hours', store=True)
+    early_leave_hours = fields.Float(string='Heures départ anticipé', compute='_compute_working_hours', store=True)
     
     @api.depends('check_in', 'check_out')
     def _compute_working_hours(self):
         for attendance in self:
-            if attendance.check_in and attendance.check_out:
-                delta = attendance.check_out - attendance.check_in
-                attendance.working_hours = delta.total_seconds() / 3600.0
-            else:
-                attendance.working_hours = 0.0
+            # Initialiser les valeurs
+            attendance.working_hours = 0.0
+            attendance.regular_hours = 0.0
+            attendance.late_hours = 0.0
+            attendance.early_leave_hours = 0.0
+
+            if not attendance.check_in or not attendance.check_out:
+                continue
+
+            # Calculer la durée totale
+            delta = attendance.check_out - attendance.check_in
+            total_hours = delta.total_seconds() / 3600.0
+
+            # Obtenir les horaires standards
+            calendar = attendance.employee_id.resource_calendar_id
+            if not calendar:
+                attendance.working_hours = total_hours
+                attendance.regular_hours = total_hours
+                continue
+
+            day_of_week = attendance.check_in.weekday()
+            work_hours = self.env['resource.calendar.attendance'].search([
+                ('calendar_id', '=', calendar.id),
+                ('dayofweek', '=', str(day_of_week))
+            ], order='hour_from')
+
+            if not work_hours:
+                attendance.working_hours = total_hours
+                attendance.regular_hours = total_hours
+                continue
+
+            # Obtenir les horaires prévus
+            start_hour = min(work_hours.mapped('hour_from'))
+            end_hour = max(work_hours.mapped('hour_to'))
+            
+            # Convertir en datetime
+            planned_start = attendance.check_in.replace(
+                hour=int(start_hour),
+                minute=int((start_hour % 1) * 60),
+                second=0
+            )
+            planned_end = attendance.check_in.replace(
+                hour=int(end_hour),
+                minute=int((end_hour % 1) * 60),
+                second=0
+            )
+
+            # Calculer les retards et départs anticipés
+            if attendance.check_in > planned_start:
+                attendance.late_hours = (attendance.check_in - planned_start).total_seconds() / 3600.0
+            
+            if attendance.check_out < planned_end:
+                attendance.early_leave_hours = (planned_end - attendance.check_out).total_seconds() / 3600.0
+
+            # Calculer les heures normales (sans la pause déjeuner)
+            attendance.working_hours = total_hours
+            if total_hours > 4:  # Déduire la pause déjeuner après 4h
+                attendance.working_hours -= 1
+
+            # Les heures normales sont les heures travaillées moins les retards et départs anticipés
+            attendance.regular_hours = max(0, attendance.working_hours - attendance.late_hours - attendance.early_leave_hours)
     
     @api.depends('working_hours', 'employee_id.resource_calendar_id')
     def _compute_overtime_hours(self):
         for attendance in self:
             if attendance.check_in and attendance.check_out and attendance.employee_id.resource_calendar_id:
-                # Récupérer les heures standard de travail pour l'employé
+                # Initialiser les heures
                 standard_hours = 8.0  # Valeur par défaut
                 
-                # Vérifier si l'employé a un calendrier de travail défini
-                if attendance.employee_id.resource_calendar_id:
-                    # Logique pour calculer les heures standard basées sur le calendrier
-                    # Cette logique peut être plus complexe selon les besoins
-                    day_of_week = attendance.check_in.weekday()
-                    calendar = attendance.employee_id.resource_calendar_id
-                    
-                    # Recherche des horaires de travail pour ce jour
-                    work_hours = self.env['resource.calendar.attendance'].search([
-                        ('calendar_id', '=', calendar.id),
-                        ('dayofweek', '=', str(day_of_week))
-                    ])
-                    
-                    if work_hours:
-                        # Calculer les heures standard pour ce jour
-                        standard_hours = sum((line.hour_to - line.hour_from) for line in work_hours)
+                # Vérifier si c'est un jour férié
+                is_holiday = self.env['resource.calendar.leaves'].search([
+                    ('calendar_id', '=', attendance.employee_id.resource_calendar_id.id),
+                    ('date_from', '<=', attendance.check_in),
+                    ('date_to', '>=', attendance.check_out)
+                ], limit=1)
+                
+                if is_holiday:
+                    # Toutes les heures sont supplémentaires si c'est un jour férié
+                    attendance.overtime_hours = attendance.working_hours
+                    continue
+
+                # Vérifier si c'est un weekend
+                is_weekend = attendance.check_in.weekday() in (5, 6)  # 5=Samedi, 6=Dimanche
+                if is_weekend:
+                    # Toutes les heures sont supplémentaires le weekend
+                    attendance.overtime_hours = attendance.working_hours
+                    continue
+                
+                # Jour normal : calculer les heures standard depuis le calendrier
+                calendar = attendance.employee_id.resource_calendar_id
+                day_of_week = attendance.check_in.weekday()
+                
+                # Recherche des horaires de travail pour ce jour
+                work_hours = self.env['resource.calendar.attendance'].search([
+                    ('calendar_id', '=', calendar.id),
+                    ('dayofweek', '=', str(day_of_week))
+                ])
+                
+                if work_hours:
+                    # Calculer les heures standard en tenant compte des pauses
+                    total_hours = 0
+                    for line in work_hours:
+                        total_hours += line.hour_to - line.hour_from
+                        if total_hours > 4:  # Pause déjeuner après 4h de travail
+                            total_hours -= 1  # 1h de pause déjeuner
+                    standard_hours = total_hours
                 
                 # Calculer les heures supplémentaires
                 if attendance.working_hours > standard_hours:

@@ -352,11 +352,13 @@ class PointeurImport(models.Model):
             self.env['pointeur_hr.import.line'].create(line_vals)
             self.state = 'imported'
             
-            # Mise à jour de la date d'import dans le fuseau horaire local
+            # Mise à jour de la date d'import
             user_tz = self.env.user.tz or 'UTC'
             local_tz = pytz.timezone(user_tz)
             local_now = datetime.now(local_tz)
-            utc_now = local_now.astimezone(pytz.UTC)
+            
+            # Conversion en UTC naïf pour Odoo
+            utc_now = local_now.astimezone(pytz.UTC).replace(tzinfo=None)
             self.import_date = utc_now
             
             # Message de confirmation avec statistiques

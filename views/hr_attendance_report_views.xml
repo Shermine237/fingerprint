@@ -14,6 +14,7 @@
                 <field name="source"/>
                 <field name="check_in"/>
                 <field name="check_out"/>
+                <field name="attendance_type_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                 <field name="working_hours" widget="float_time" sum="Total"/>
                 <field name="regular_hours" widget="float_time" sum="Total"/>
                 <field name="overtime_hours" widget="float_time" sum="Total"/>
@@ -34,9 +35,10 @@
                 <field name="department_id"/>
                 <field name="location_id"/>
                 <field name="source"/>
-                <filter string="Heures sup." name="has_overtime" domain="[('overtime_hours', '>', 0)]"/>
-                <filter string="Retards" name="has_late" domain="[('late_hours', '>', 0)]"/>
-                <filter string="Départs anticipés" name="has_early_leave" domain="[('early_leave_hours', '>', 0)]"/>
+                <field name="attendance_type_ids"/>
+                <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids', 'in', [ref('pointeur_hr.pointeur_hr_attendance_type_overtime')])]"/>
+                <filter name="filter_late" string="Retards" domain="[('attendance_type_ids', 'in', [ref('pointeur_hr.pointeur_hr_attendance_type_late')])]"/>
+                <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids', 'in', [ref('pointeur_hr.pointeur_hr_attendance_type_early_leave')])]"/>
                 <separator/>
                 <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Cette semaine" name="this_week" domain="[('date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d'))]"/>
@@ -48,6 +50,7 @@
                     <filter string="Lieu" name="location" context="{'group_by': 'location_id'}"/>
                     <filter string="Source" name="source" context="{'group_by': 'source'}"/>
                     <filter string="Date" name="date" context="{'group_by': 'date'}"/>
+                    <filter string="Type de présence" name="attendance_type" context="{'group_by': 'attendance_type_ids'}"/>
                 </group>
             </search>
         </field>
@@ -61,6 +64,7 @@
             <pivot string="Analyse des présences">
                 <field name="date" type="row"/>
                 <field name="employee_id" type="row"/>
+                <field name="attendance_type_ids" type="col"/>
                 <field name="working_hours" type="measure"/>
                 <field name="regular_hours" type="measure"/>
                 <field name="overtime_hours" type="measure"/>
@@ -77,6 +81,7 @@
         <field name="arch" type="xml">
             <graph string="Analyse des présences">
                 <field name="date"/>
+                <field name="attendance_type_ids"/>
                 <field name="working_hours" type="measure"/>
                 <field name="regular_hours" type="measure"/>
                 <field name="overtime_hours" type="measure"/>

@@ -145,63 +145,26 @@ class HrAttendance(models.Model):
             else:
                 attendance.overtime_hours = 0.0
     
-    @api.depends('check_in', 'check_out', 'employee_id.resource_calendar_id')
+    @api.depends('late_hours', 'early_leave_hours', 'overtime_hours')
     def _compute_attendance_types(self):
         for attendance in self:
             attendance_type_ids = self.env['pointeur_hr.attendance.type']
             
-            if not attendance.check_in or not attendance.check_out:
-                attendance.attendance_type_ids = attendance_type_ids
-                continue
-                
-            # Obtenir le calendrier de travail de l'employé
-            calendar = attendance.employee_id.resource_calendar_id
-            if not calendar:
-                attendance.attendance_type_ids = attendance_type_ids
-                continue
-                
-            # Déterminer le jour de la semaine
-            day_of_week = attendance.check_in.weekday()
+            # Type normal par défaut
+            if attendance.working_hours > 0:
+                attendance_type_ids |= self.env.ref('pointeur_hr.pointeur_hr_attendance_type_normal')
             
-            # Rechercher les horaires de travail pour ce jour
-            work_hours = self.env['resource.calendar.attendance'].search([
-                ('calendar_id', '=', calendar.id),
-                ('dayofweek', '=', str(day_of_week))
-            ], order='hour_from')
-            
-            if not work_hours:
-                # Jour non travaillé selon le calendrier
-                attendance_type_ids |= self.env['pointeur_hr.attendance.type'].search([('code', '=', 'overtime')])
-                attendance.attendance_type_ids = attendance_type_ids
-                continue
-                
-            # Obtenir l'heure de début et de fin prévue
-            start_hour = min(work_hours.mapped('hour_from'))
-            end_hour = max(work_hours.mapped('hour_to'))
-            
-            # Convertir les heures flottantes en heures et minutes
-            start_time = self._float_to_time(start_hour)
-            end_time = self._float_to_time(end_hour)
-            
-            # Obtenir l'heure d'arrivée et de départ
-            check_in_time = attendance.check_in.time()
-            check_out_time = attendance.check_out.time()
-            
-            # Marge de tolérance (en minutes)
-            tolerance_minutes = 15
-            tolerance = timedelta(minutes=tolerance_minutes)
-            
-            # Vérifier si l'employé est arrivé en retard
-            if check_in_time > (datetime.combine(datetime.min.date(), start_time) + tolerance).time():
-                attendance_type_ids |= self.env['pointeur_hr.attendance.type'].search([('code', '=', 'late')])
-            
-            # Vérifier si l'employé est parti tôt
-            if check_out_time < (datetime.combine(datetime.min.date(), end_time) - tolerance).time():
-                attendance_type_ids |= self.env['pointeur_hr.attendance.type'].search([('code', '=', 'early_leave')])
-            
-            # Vérifier les heures supplémentaires
+            # Heures supplémentaires
             if attendance.overtime_hours > 0:
-                attendance_type_ids |= self.env['pointeur_hr.attendance.type'].search([('code', '=', 'overtime')])
+                attendance_type_ids |= self.env.ref('pointeur_hr.pointeur_hr_attendance_type_overtime')
+            
+            # Retard
+            if attendance.late_hours > 0:
+                attendance_type_ids |= self.env.ref('pointeur_hr.pointeur_hr_attendance_type_late')
+            
+            # Départ anticipé
+            if attendance.early_leave_hours > 0:
+                attendance_type_ids |= self.env.ref('pointeur_hr.pointeur_hr_attendance_type_early_leave')
             
             attendance.attendance_type_ids = attendance_type_ids
     

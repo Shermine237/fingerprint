@@ -105,28 +105,35 @@ class PointeurImport(models.Model):
             # Conversion de la date
             date = datetime.strptime(date_str, '%m/%d/%y').date()
             
-            # Nettoyage et extraction de l'heure
+            # Conversion de l'heure au format 12h en 24h
             time_str = time_str.strip()
-            is_pm = time_str[-1].lower() == 'p'
-            time_str = time_str[:-1].strip()  # Supprime le a/p
+            if not time_str or len(time_str) < 2:
+                return False
+                
+            # Vérification du marqueur AM/PM
+            am_pm = time_str[-1].lower()
+            if am_pm not in ['a', 'p']:
+                return False
+                
+            # Extraction des heures et minutes
+            time_parts = time_str[:-1].split(':')
+            if len(time_parts) != 2:
+                return False
+                
+            hours = int(time_parts[0])
+            minutes = int(time_parts[1])
             
-            # Conversion de l'heure
-            hours, minutes = map(int, time_str.split(':'))
-            
-            # Ajustement AM/PM
-            if is_pm and hours < 12:
+            # Conversion en format 24h
+            if am_pm == 'p' and hours < 12:
                 hours += 12
-            elif not is_pm and hours == 12:
+            elif am_pm == 'a' and hours == 12:
                 hours = 0
                 
-            # Création du datetime avec le fuseau horaire de l'utilisateur
-            user_tz = self.env.user.tz or 'UTC'
-            local = pytz.timezone(user_tz)
-            naive_dt = datetime.combine(date, datetime.time(hours, minutes))
-            local_dt = local.localize(naive_dt, is_dst=None)
-            return local_dt.astimezone(pytz.UTC)
+            # Création du datetime
+            return datetime.combine(date, datetime.time(hours, minutes))
             
-        except Exception:
+        except Exception as e:
+            _logger.error("Erreur de conversion date/heure: %s %s - %s", date_str, time_str, str(e))
             return False
 
     def _normalize_name(self, name):
@@ -298,6 +305,9 @@ class PointeurImport(models.Model):
         success_count = 0
         error_lines = []
 
+        # Log des colonnes du fichier CSV
+        _logger.info("Colonnes du fichier CSV : %s", reader.fieldnames)
+
         # Suppression des anciennes lignes
         self.line_ids.unlink()
 
@@ -311,13 +321,19 @@ class PointeurImport(models.Model):
                 in_time = row.get('In Time', '').strip()
                 out_time = row.get('Out Time', '').strip()
 
+                _logger.info("Traitement ligne : name=%s, date=%s, in=%s, out=%s", 
+                           employee_name, date, in_time, out_time)
+
                 # Construction des dates et heures
                 check_in = self._convert_to_datetime(date, in_time) if in_time else False
                 check_out = self._convert_to_datetime(date, out_time) if out_time else False
 
+                _logger.info("Après conversion : check_in=%s, check_out=%s", check_in, check_out)
+
                 # Si check_out est avant check_in, on ajoute un jour
                 if check_in and check_out and check_out < check_in:
                     check_out += timedelta(days=1)
+                    _logger.info("Ajustement check_out : %s", check_out)
 
                 # Préparation des valeurs
                 vals = {
@@ -346,13 +362,12 @@ class PointeurImport(models.Model):
             except Exception as e:
                 error_message = f"Erreur ligne {reader.line_num} ({employee_name}): {str(e)}"
                 error_lines.append(error_message)
+                _logger.error(error_message)
 
         # Création des lignes
         if line_vals:
             self.env['pointeur_hr.import.line'].create(line_vals)
             self.state = 'imported'
-            
-            # Mise à jour de la date d'import
             self.import_date = fields.Datetime.now()
             
             # Message de confirmation avec statistiques
@@ -368,7 +383,6 @@ class PointeurImport(models.Model):
                 message += _("\n\nErreurs :\n%s") % '\n'.join(error_lines)
                 self.state = 'error'
                 
-            # Création du message
             self.message_post(body=message)
 
     def action_create_attendances(self):

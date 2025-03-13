@@ -19,8 +19,8 @@ class HrAttendance(models.Model):
     working_hours = fields.Float(string='Heures travaillées', compute='_compute_working_hours', store=True)
     overtime_hours = fields.Float(string='Heures supplémentaires', compute='_compute_working_hours', store=True)
     regular_hours = fields.Float(string='Heures normales', compute='_compute_working_hours', store=True)
-    late_hours = fields.Float(string='Heures de retard', compute='_compute_working_hours', store=True)
-    early_leave_hours = fields.Float(string='Heures départ anticipé', compute='_compute_working_hours', store=True)
+    late_hours = fields.Float(string='Retard', compute='_compute_working_hours', store=True)
+    early_leave_hours = fields.Float(string='Départ anticipé', compute='_compute_working_hours', store=True)
     
     @api.depends('check_in', 'check_out')
     def _compute_working_hours(self):
@@ -45,8 +45,6 @@ class HrAttendance(models.Model):
             if not calendar:
                 attendance.working_hours = total_hours
                 attendance.regular_hours = total_hours
-                if total_hours > 0:
-                    attendance.attendance_type_ids = 'normal'
                 continue
 
             day_of_week = attendance.check_in.weekday()
@@ -69,14 +67,12 @@ class HrAttendance(models.Model):
                 attendance.working_hours = total_hours
                 attendance.overtime_hours = total_hours
                 if total_hours > 0:
-                    attendance.attendance_type_ids = 'overtime'
+                    attendance.attendance_type_ids = 'supplementaire'
                 continue
 
             if not work_hours:
                 attendance.working_hours = total_hours
                 attendance.regular_hours = total_hours
-                if total_hours > 0:
-                    attendance.attendance_type_ids = 'normal'
                 continue
 
             # Obtenir les horaires prévus
@@ -120,14 +116,12 @@ class HrAttendance(models.Model):
 
             # Attribuer les types de présence
             types = []
-            if attendance.working_hours > 0:
-                types.append('normal')
             if attendance.overtime_hours > 0:
-                types.append('overtime')
+                types.append('supplementaire')
             if attendance.late_hours > 0:
-                types.append('late')
+                types.append('retard')
             if attendance.early_leave_hours > 0:
-                types.append('early_leave')
+                types.append('depart_anticipe')
             attendance.attendance_type_ids = ','.join(types)
     
     def _float_to_time(self, float_hour):

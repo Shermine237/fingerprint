@@ -44,9 +44,9 @@
                 <field name="department_id"/>
                 <field name="location_id"/>
                 <field name="attendance_type_ids"/>
-                <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids', 'ilike', 'overtime')]"/>
-                <filter name="filter_late" string="Retards" domain="[('attendance_type_ids', 'ilike', 'late')]"/>
-                <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids', 'ilike', 'early_leave')]"/>
+                <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids', 'ilike', 'supplementaire')]"/>
+                <filter name="filter_late" string="Retards" domain="[('attendance_type_ids', 'ilike', 'retard')]"/>
+                <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids', 'ilike', 'depart_anticipe')]"/>
                 <separator/>
                 <filter name="group_by_employee" string="Employé" context="{'group_by': 'employee_id'}"/>
                 <filter name="group_by_department" string="Département" context="{'group_by': 'department_id'}"/>

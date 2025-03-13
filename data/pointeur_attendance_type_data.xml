@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Types de présence par défaut -->
+        <record id="attendance_type_normal" model="pointeur_hr.attendance.type">
+            <field name="name">Normal</field>
+            <field name="code">normal</field>
+            <field name="sequence">10</field>
+            <field name="color">0</field>
+        </record>
+
+        <record id="attendance_type_overtime" model="pointeur_hr.attendance.type">
+            <field name="name">Heures supplémentaires</field>
+            <field name="code">overtime</field>
+            <field name="sequence">20</field>
+            <field name="color">2</field>
+        </record>
+
+        <record id="attendance_type_late" model="pointeur_hr.attendance.type">
+            <field name="name">Retard</field>
+            <field name="code">late</field>
+            <field name="sequence">30</field>
+            <field name="color">1</field>
+        </record>
+
+        <record id="attendance_type_early_leave" model="pointeur_hr.attendance.type">
+            <field name="name">Départ anticipé</field>
+            <field name="code">early_leave</field>
+            <field name="sequence">40</field>
+            <field name="color">3</field>
+        </record>
+    </data>
+</odoo>

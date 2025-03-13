@@ -8,12 +8,12 @@ class HrAttendance(models.Model):
     
     # Champs additionnels pour le pointage
     location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage')
-    attendance_type = fields.Selection([
-        ('normal', 'Normal'),
-        ('overtime', 'Heures supplémentaires'),
-        ('late', 'Retard'),
-        ('early_leave', 'Départ anticipé')
-    ], string='Type de présence', default='normal', compute='_compute_attendance_type', store=True)
+    attendance_type_ids = fields.Many2many(
+        'pointeur_hr.attendance.type',
+        string='Types de présence',
+        compute='_compute_attendance_types',
+        store=True
+    )
     notes = fields.Text(string='Notes')
     source = fields.Selection([
         ('manual', 'Saisie manuelle'),
@@ -146,18 +146,18 @@ class HrAttendance(models.Model):
                 attendance.overtime_hours = 0.0
     
     @api.depends('check_in', 'check_out', 'employee_id.resource_calendar_id')
-    def _compute_attendance_type(self):
+    def _compute_attendance_types(self):
         for attendance in self:
-            attendance_type = 'normal'
+            attendance_type_ids = self.env['pointeur_hr.attendance.type']
             
             if not attendance.check_in or not attendance.check_out:
-                attendance.attendance_type = 'normal'
+                attendance.attendance_type_ids = attendance_type_ids
                 continue
                 
             # Obtenir le calendrier de travail de l'employé
             calendar = attendance.employee_id.resource_calendar_id
             if not calendar:
-                attendance.attendance_type = 'normal'
+                attendance.attendance_type_ids = attendance_type_ids
                 continue
                 
             # Déterminer le jour de la semaine
@@ -171,7 +171,8 @@ class HrAttendance(models.Model):
             
             if not work_hours:
                 # Jour non travaillé selon le calendrier
-                attendance.attendance_type = 'overtime'
+                attendance_type_ids |= self.env['pointeur_hr.attendance.type'].search([('code', '=', 'overtime')])
+                attendance.attendance_type_ids = attendance_type_ids
                 continue
                 
             # Obtenir l'heure de début et de fin prévue
@@ -192,20 +193,17 @@ class HrAttendance(models.Model):
             
             # Vérifier si l'employé est arrivé en retard
             if check_in_time > (datetime.combine(datetime.min.date(), start_time) + tolerance).time():
-                attendance_type = 'late'
+                attendance_type_ids |= self.env['pointeur_hr.attendance.type'].search([('code', '=', 'late')])
             
             # Vérifier si l'employé est parti tôt
             if check_out_time < (datetime.combine(datetime.min.date(), end_time) - tolerance).time():
-                # Si déjà en retard, on garde le statut 'late'
-                if attendance_type != 'late':
-                    attendance_type = 'early_leave'
+                attendance_type_ids |= self.env['pointeur_hr.attendance.type'].search([('code', '=', 'early_leave')])
             
             # Vérifier les heures supplémentaires
             if attendance.overtime_hours > 0:
-                # Priorité aux heures supplémentaires si l'employé a fait plus que ses heures standard
-                attendance_type = 'overtime'
+                attendance_type_ids |= self.env['pointeur_hr.attendance.type'].search([('code', '=', 'overtime')])
             
-            attendance.attendance_type = attendance_type
+            attendance.attendance_type_ids = attendance_type_ids
     
     def _float_to_time(self, float_hour):
         """Convertit une heure flottante (ex: 7.5) en objet time (07:30:00)"""

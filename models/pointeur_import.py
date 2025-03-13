@@ -49,6 +49,27 @@ class PointeurImport(models.Model):
             if record.file_name and not record.file_name.lower().endswith('.csv'):
                 raise ValidationError(_("Seuls les fichiers CSV sont acceptés."))
 
+    def _convert_to_float(self, value):
+        """Convertir une valeur en float avec gestion des cas particuliers"""
+        if not value or not isinstance(value, str):
+            return 0.0
+        
+        # Supprimer les espaces et remplacer la virgule par un point
+        value = value.strip().replace(',', '.')
+        
+        # Gérer les valeurs négatives
+        is_negative = value.startswith('-')
+        if is_negative:
+            value = value[1:]
+        
+        try:
+            result = float(value)
+            return -result if is_negative else result
+        except ValueError as e:
+            # Log l'erreur pour le débogage
+            _logger.warning(f"Impossible de convertir '{value}' en float: {str(e)}")
+            return 0.0
+
     def action_import(self):
         """Importer les données du fichier CSV"""
         self.ensure_one()
@@ -131,19 +152,24 @@ class PointeurImport(models.Model):
                     'check_in': check_in,
                     'check_out': check_out,
                     'in_note': row.get('In Note', '').strip(),
-                    'out_note': row.get('Out Note', '').strip(),
-                    'reg_hours': float(row.get('REG', 0)),
-                    'ot1_hours': float(row.get('OT1', 0)),
-                    'ot2_hours': float(row.get('OT2', 0)),
-                    'total_hours': float(row.get('Total', 0))
+                    'out_note': row.get('Out Note', '').strip()
                 }
+
+                # Conversion des heures avec gestion des erreurs
+                for field in ['REG', 'OT1', 'OT2', 'Total']:
+                    try:
+                        value = row.get(field, '')
+                        float_value = self._convert_to_float(value)
+                        vals[f'{field.lower()}_hours'] = float_value
+                    except Exception as e:
+                        raise ValueError(f"Erreur de conversion pour le champ {field}: '{value}'. Erreur: {str(e)}")
 
                 # Création de la ligne
                 self.env['pointeur_hr.import.line'].create(vals)
                 success_count += 1
 
             except Exception as e:
-                error_lines.append(f"Erreur lors du traitement de la ligne {reader.line_num}: {str(e)}")
+                error_lines.append(f"Erreur ligne {reader.line_num}: {str(e)}")
 
         # Mise à jour du statut et des messages
         if error_lines:

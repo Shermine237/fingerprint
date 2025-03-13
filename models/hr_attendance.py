@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 from datetime import datetime, timedelta
+from pytz import timezone, UTC
 
 
 class HrAttendance(models.Model):
@@ -43,12 +44,17 @@ class HrAttendance(models.Model):
             if not calendar:
                 calendar = self.env.company.resource_calendar_id
 
+            # Convertir les dates en UTC avec fuseau horaire
+            tz = timezone(calendar.tz or self.env.user.tz or 'UTC')
+            start_dt = attendance.check_in.replace(hour=0, minute=0, second=0).astimezone(tz)
+            end_dt = attendance.check_in.replace(hour=23, minute=59, second=59).astimezone(tz)
+
             # Obtenir les horaires prévus pour ce jour
-            check_in_date = attendance.check_in.date()
             intervals = calendar._work_intervals_batch(
-                attendance.check_in.replace(hour=0, minute=0, second=0),
-                attendance.check_in.replace(hour=23, minute=59, second=59),
-                resources=employee.resource_id
+                start_dt,
+                end_dt,
+                resources=employee.resource_id,
+                tz=tz
             )[employee.resource_id.id]
 
             if not intervals:
@@ -76,15 +82,17 @@ class HrAttendance(models.Model):
             attendance.overtime_hours = max(0.0, attendance.working_hours - work_hours)
 
             # Calcul du retard
-            if attendance.check_in > work_start:
-                delta = attendance.check_in - work_start
+            check_in_tz = attendance.check_in.astimezone(tz)
+            if check_in_tz > work_start:
+                delta = check_in_tz - work_start
                 attendance.late_hours = delta.total_seconds() / 3600.0
             else:
                 attendance.late_hours = 0.0
 
             # Calcul du départ anticipé
-            if attendance.check_out < work_end:
-                delta = work_end - attendance.check_out
+            check_out_tz = attendance.check_out.astimezone(tz)
+            if check_out_tz < work_end:
+                delta = work_end - check_out_tz
                 attendance.early_leave_hours = delta.total_seconds() / 3600.0
             else:
                 attendance.early_leave_hours = 0.0

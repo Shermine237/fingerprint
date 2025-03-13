@@ -10,8 +10,8 @@
         Fonctionnalités :
         - Import des pointages depuis un fichier CSV
         - Gestion des lieux de pointage
-        - Suivi des types de présence (normal, retard, départ anticipé, heures supplémentaires)
-        - Calcul automatique des heures (normales, supplémentaires, retard, départ anticipé)
+        - Suivi des types de présence (heures supplémentaires, retard, départ anticipé)
+        - Calcul automatique des heures basé sur le calendrier de l'employé
         - Rapport d'analyse des présences
     """,
     'author': 'Shermine237',

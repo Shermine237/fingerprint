@@ -108,7 +108,7 @@
 
     <!-- Action pour le rapport de présence -->
     <record id="pointeur_hr_action_hr_attendance_report" model="ir.actions.act_window">
-        <field name="name">Rapport de présence</field>
+        <field name="name">Rapport de présence détaillé</field>
         <field name="res_model">hr.attendance.report</field>
         <field name="view_mode">tree,pivot,graph</field>
         <field name="search_view_id" ref="view_hr_attendance_report_search"/>
@@ -120,7 +120,7 @@
 
     <!-- Menu pour accéder au rapport -->
     <menuitem id="pointeur_hr_menu_hr_attendance_report"
-              name="Rapport de présence"
+              name="Rapport de présence détaillé"
               parent="hr_attendance.menu_hr_attendance_root"
               action="pointeur_hr_action_hr_attendance_report"
               sequence="30"/>

@@ -51,6 +51,7 @@
                                     <field name="total_hours" sum="Total" widget="float_time"/>
                                     <field name="state"/>
                                     <field name="error_message"/>
+                                    <field name="attendance_id" invisible="1"/>
                                     <button name="action_view_attendance" type="object" icon="fa-calendar" attrs="{'invisible': [('attendance_id', '=', False)]}"/>
                                 </tree>
                             </field>
@@ -169,6 +170,7 @@
                 <field name="total_hours" sum="Total" widget="float_time"/>
                 <field name="state"/>
                 <field name="error_message"/>
+                <field name="attendance_id" invisible="1"/>
                 <button name="action_view_attendance" type="object" icon="fa-calendar" attrs="{'invisible': [('attendance_id', '=', False)]}"/>
             </tree>
         </field>
@@ -205,6 +207,15 @@
         <field name="res_model">pointeur_hr.import</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_my_imports': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun import pour le moment
+            </p>
+            <p>
+                Importez les données du pointeur physique pour créer les présences dans Odoo.<br/>
+                <i>Note : Seuls les fichiers CSV sont acceptés.</i>
+            </p>
+        </field>
     </record>
 
     <!-- Action pour les lignes d'import -->
@@ -213,5 +224,13 @@
         <field name="res_model">pointeur_hr.import.line</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_imported': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune ligne d'import
+            </p>
+            <p>
+                Les lignes d'import apparaîtront ici après l'importation des données du pointeur.
+            </p>
+        </field>
     </record>
 </odoo>

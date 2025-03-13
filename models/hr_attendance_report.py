@@ -23,12 +23,7 @@ class HrAttendanceReport(models.Model):
     overtime_hours = fields.Float(string='Heures supplémentaires', readonly=True)
     late_hours = fields.Float(string='Heures de retard', readonly=True)
     early_leave_hours = fields.Float(string='Heures départ anticipé', readonly=True)
-    attendance_type_ids = fields.Selection([
-        ('normal', 'Normal'),
-        ('overtime', 'Heures supplémentaires'),
-        ('late', 'Retard'),
-        ('early_leave', 'Départ anticipé')
-    ], string='Types de présence', readonly=True, multiple=True)
+    attendance_type_ids = fields.Char(string='Types de présence', readonly=True)
     
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)

@@ -8,12 +8,7 @@ class HrAttendance(models.Model):
     
     # Champs additionnels pour le pointage
     location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage')
-    attendance_type_ids = fields.Selection([
-        ('normal', 'Normal'),
-        ('overtime', 'Heures supplémentaires'),
-        ('late', 'Retard'),
-        ('early_leave', 'Départ anticipé')
-    ], string='Types de présence', compute='_compute_working_hours', store=True, multiple=True)
+    attendance_type_ids = fields.Char(string='Types de présence', compute='_compute_working_hours', store=True)
     notes = fields.Text(string='Notes')
     source = fields.Selection([
         ('manual', 'Saisie manuelle'),
@@ -36,7 +31,7 @@ class HrAttendance(models.Model):
             attendance.late_hours = 0.0
             attendance.early_leave_hours = 0.0
             attendance.overtime_hours = 0.0
-            attendance.attendance_type_ids = []
+            attendance.attendance_type_ids = ''
 
             if not attendance.check_in or not attendance.check_out:
                 continue
@@ -51,7 +46,7 @@ class HrAttendance(models.Model):
                 attendance.working_hours = total_hours
                 attendance.regular_hours = total_hours
                 if total_hours > 0:
-                    attendance.attendance_type_ids = ['normal']
+                    attendance.attendance_type_ids = 'normal'
                 continue
 
             day_of_week = attendance.check_in.weekday()
@@ -74,14 +69,14 @@ class HrAttendance(models.Model):
                 attendance.working_hours = total_hours
                 attendance.overtime_hours = total_hours
                 if total_hours > 0:
-                    attendance.attendance_type_ids = ['overtime']
+                    attendance.attendance_type_ids = 'overtime'
                 continue
 
             if not work_hours:
                 attendance.working_hours = total_hours
                 attendance.regular_hours = total_hours
                 if total_hours > 0:
-                    attendance.attendance_type_ids = ['normal']
+                    attendance.attendance_type_ids = 'normal'
                 continue
 
             # Obtenir les horaires prévus
@@ -133,7 +128,7 @@ class HrAttendance(models.Model):
                 types.append('late')
             if attendance.early_leave_hours > 0:
                 types.append('early_leave')
-            attendance.attendance_type_ids = types
+            attendance.attendance_type_ids = ','.join(types)
     
     def _float_to_time(self, float_hour):
         """Convertit une heure flottante (ex: 7.5) en objet time (07:30:00)"""

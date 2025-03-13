@@ -29,6 +29,10 @@ class HrEmployee(models.Model):
         first_day = today.replace(day=1)
         last_day = (first_day + timedelta(days=32)).replace(day=1) - timedelta(days=1)
         
+        AttendanceType = self.env['pointeur_hr.attendance.type']
+        late_type = AttendanceType.search([('code', '=', 'late')], limit=1)
+        early_leave_type = AttendanceType.search([('code', '=', 'early_leave')], limit=1)
+        
         for employee in self:
             # Récupérer toutes les présences du mois en cours
             attendances = self.env['hr.attendance'].search([
@@ -40,8 +44,8 @@ class HrEmployee(models.Model):
             
             # Calculer les statistiques
             employee.total_overtime_hours = sum(attendances.mapped('overtime_hours'))
-            employee.total_late_count = len(attendances.filtered(lambda a: a.attendance_type == 'late'))
-            employee.total_early_leave_count = len(attendances.filtered(lambda a: a.attendance_type == 'early_leave'))
+            employee.total_late_count = len(attendances.filtered(lambda a: late_type in a.attendance_type_ids))
+            employee.total_early_leave_count = len(attendances.filtered(lambda a: early_leave_type in a.attendance_type_ids))
             
             # Calculer le taux de présence
             # Nombre de jours ouvrés dans le mois
@@ -97,7 +101,7 @@ class HrEmployee(models.Model):
         action = self.env.ref('hr_attendance.hr_attendance_action').read()[0]
         action['domain'] = [
             ('employee_id', '=', self.id),
-            ('attendance_type', '=', 'overtime')
+            ('attendance_type_ids.code', '=', 'overtime')
         ]
         action['context'] = {'default_employee_id': self.id}
         action['name'] = _('Heures supplémentaires de %s') % self.name

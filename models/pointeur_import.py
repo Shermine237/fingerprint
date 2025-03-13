@@ -4,7 +4,7 @@ import base64
 import csv
 import io
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import pytz
 
 _logger = logging.getLogger(__name__)
@@ -141,7 +141,7 @@ class PointeurImport(models.Model):
             _logger.info("Heure 24h : %d:%02d", hours, minutes)
             
             # Création du datetime
-            result = datetime.combine(date, datetime.time(hours, minutes))
+            result = datetime.combine(date, time(hours, minutes))
             _logger.info("Résultat final : %s", result)
             return result
             

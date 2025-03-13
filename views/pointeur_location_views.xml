@@ -65,7 +65,7 @@
     </record>
 
     <!-- Action pour les lieux de pointage -->
-    <record id="pointeur_location_action" model="ir.actions.act_window">
+    <record id="pointeur_hr_pointeur_location_action" model="ir.actions.act_window">
         <field name="name">Lieux de pointage</field>
         <field name="res_model">pointeur_hr.location</field>
         <field name="view_mode">tree,form</field>

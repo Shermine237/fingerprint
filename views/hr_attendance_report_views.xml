@@ -91,7 +91,7 @@
     </record>
 
     <!-- Action pour le rapport de présence -->
-    <record id="action_hr_attendance_report" model="ir.actions.act_window">
+    <record id="pointeur_hr_action_hr_attendance_report" model="ir.actions.act_window">
         <field name="name">Rapport de présence</field>
         <field name="res_model">hr.attendance.report</field>
         <field name="view_mode">tree,pivot,graph</field>

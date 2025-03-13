@@ -9,10 +9,9 @@
                 <header>
                     <button name="action_import" string="Importer" type="object" class="oe_highlight" states="draft"/>
                     <button name="action_create_attendances" string="Créer les présences" type="object" class="oe_highlight" states="imported"/>
-                    <button name="action_view_attendances" string="Voir les présences" type="object" states="done"/>
                     <button name="action_cancel" string="Annuler" type="object" states="draft,imported"/>
-                    <button name="action_reset" string="Réinitialiser" type="object" states="cancelled,done"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,imported,done"/>
+                    <button name="action_reset" string="Réinitialiser" type="object" states="cancelled,error"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,imported,done,error"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -27,8 +26,8 @@
                     </div>
                     <group>
                         <group>
-                            <field name="file" filename="filename" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
-                            <field name="filename" invisible="1"/>
+                            <field name="file" filename="file_name" attrs="{'readonly': [('state', '!=', 'draft')]}" accept=".csv"/>
+                            <field name="file_name" invisible="1"/>
                             <field name="import_date" readonly="1"/>
                         </group>
                         <group>
@@ -71,7 +70,7 @@
         <field name="name">pointeur_hr.import.tree</field>
         <field name="model">pointeur_hr.import</field>
         <field name="arch" type="xml">
-            <tree string="Imports des données du pointeur" decoration-success="state == 'done'" decoration-info="state == 'imported'" decoration-muted="state == 'cancelled'">
+            <tree string="Imports des données du pointeur" decoration-success="state == 'done'" decoration-info="state == 'imported'" decoration-muted="state == 'cancelled'" decoration-danger="state == 'error'">
                 <field name="name"/>
                 <field name="create_date"/>
                 <field name="import_date"/>
@@ -96,6 +95,7 @@
                 <filter string="Importé" name="imported" domain="[('state', '=', 'imported')]"/>
                 <filter string="Terminé" name="done" domain="[('state', '=', 'done')]"/>
                 <filter string="Annulé" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <filter string="Erreur" name="error" domain="[('state', '=', 'error')]"/>
                 <group expand="0" string="Regrouper par">
                     <filter string="Utilisateur" name="user" context="{'group_by': 'user_id'}"/>
                     <filter string="État" name="state" context="{'group_by': 'state'}"/>
@@ -206,11 +206,11 @@
         <field name="context">{'search_default_my_imports': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Créer un nouvel import de données du pointeur
+                Aucun import pour le moment
             </p>
             <p>
-                Cette fonctionnalité vous permet d'importer les données de présence
-                à partir d'un fichier CSV exporté depuis le pointeur physique.
+                Importez les données du pointeur physique pour créer les présences dans Odoo.<br/>
+                <i>Note : Seuls les fichiers CSV sont acceptés.</i>
             </p>
         </field>
     </record>

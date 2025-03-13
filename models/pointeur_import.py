@@ -1,5 +1,5 @@
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 import base64
 import csv
 import io
@@ -16,7 +16,7 @@ class PointeurImport(models.Model):
 
     name = fields.Char(string='Nom', required=True, default=lambda self: _('Import du %s') % fields.Date.context_today(self).strftime('%d/%m/%Y'))
     file = fields.Binary(string='Fichier CSV', required=True)
-    filename = fields.Char(string='Nom du fichier')
+    file_name = fields.Char(string='Nom du fichier')
     import_date = fields.Datetime(string='Date d\'import', readonly=True)
     user_id = fields.Many2one('res.users', string='Utilisateur', default=lambda self: self.env.user, readonly=True)
     line_count = fields.Integer(string='Nombre de lignes', compute='_compute_line_count')
@@ -24,11 +24,11 @@ class PointeurImport(models.Model):
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
-        ('imported', 'Importé'),
-        ('done', 'Terminé'),
+        ('imported', 'Données importées'),
+        ('done', 'Présences créées'),
         ('cancelled', 'Annulé'),
         ('error', 'Erreur')
-    ], string='État', default='draft', tracking=True)
+    ], string='État', default='draft', required=True, tracking=True)
 
     line_ids = fields.One2many('pointeur_hr.import.line', 'import_id', string='Lignes importées')
 
@@ -41,6 +41,13 @@ class PointeurImport(models.Model):
     def _compute_attendance_count(self):
         for record in self:
             record.attendance_count = len(record.line_ids.filtered(lambda l: l.attendance_id))
+
+    @api.constrains('file_name')
+    def _check_file_extension(self):
+        """Vérifier que le fichier est un CSV"""
+        for record in self:
+            if record.file_name and not record.file_name.lower().endswith('.csv'):
+                raise ValidationError(_("Seuls les fichiers CSV sont acceptés."))
 
     def action_import(self):
         """Importer les données du fichier CSV"""
@@ -67,7 +74,7 @@ class PointeurImport(models.Model):
             try:
                 # Validation des données requises
                 if not row.get('Display Name', '').strip():
-                    raise ValueError("Le nom de l'employé est obligatoire")
+                    continue  # Ignorer les lignes vides
 
                 # Affichage de la première ligne pour le débogage
                 if reader.line_num == 2:  # La première ligne est l'en-tête
@@ -77,10 +84,11 @@ class PointeurImport(models.Model):
                 in_time = row.get('In Time', '').strip()
                 out_time = row.get('Out Time', '').strip()
                 in_day = row.get('In Day', '').strip()
+                out_day = row.get('Out Day', '').strip()
 
                 # Au moins une heure doit être présente
                 if not in_time and not out_time:
-                    raise ValueError("Au moins une heure d'entrée ou de sortie est requise")
+                    continue  # Ignorer les lignes sans heures
                 
                 # Conversion du format de date
                 check_in = None
@@ -88,20 +96,20 @@ class PointeurImport(models.Model):
                     try:
                         # Convertir 'a' en 'AM' et 'p' en 'PM'
                         in_time = in_time.replace('a', ' AM').replace('p', ' PM')
-                        check_in = datetime.strptime(f"{in_day} {in_time}", '%m/%d/%y %I:%M %p')
+                        check_in = datetime.strptime(f"{row['Date']} {in_time}", '%m/%d/%y %I:%M %p')
                     except ValueError as e:
-                        raise ValueError(f"Erreur de format pour l'heure d'entrée. Format attendu: 'MM/DD/YY HH:MMa/p', reçu: '{in_day} {in_time}'. Erreur: {str(e)}")
+                        raise ValueError(f"Erreur de format pour l'heure d'entrée. Format attendu: 'MM/DD/YY HH:MMa/p', reçu: '{row['Date']} {in_time}'. Erreur: {str(e)}")
 
                 check_out = None
                 if out_time:
                     try:
                         out_time = out_time.replace('a', ' AM').replace('p', ' PM')
-                        out_day = row.get('Out Day', in_day).strip()  # Si pas de Out Day, utiliser In Day
-                        if not out_day and not in_day:
-                            raise ValueError("Le jour de sortie est requis si aucun jour d'entrée n'est spécifié")
-                        check_out = datetime.strptime(f"{out_day} {out_time}", '%m/%d/%y %I:%M %p')
+                        check_out = datetime.strptime(f"{row['Date']} {out_time}", '%m/%d/%y %I:%M %p')
+                        # Si la sortie est le lendemain
+                        if out_day and in_day and out_day != in_day:
+                            check_out += timedelta(days=1)
                     except ValueError as e:
-                        raise ValueError(f"Erreur de format pour l'heure de sortie. Format attendu: 'MM/DD/YY HH:MMa/p', reçu: '{out_day} {out_time}'. Erreur: {str(e)}")
+                        raise ValueError(f"Erreur de format pour l'heure de sortie. Format attendu: 'MM/DD/YY HH:MMa/p', reçu: '{row['Date']} {out_time}'. Erreur: {str(e)}")
 
                 # Validation de la cohérence des heures
                 if check_in and check_out and check_out < check_in:
@@ -115,10 +123,10 @@ class PointeurImport(models.Model):
                     'department': row.get('Department', '').strip(),
                     'dept_code': row.get('Dept. Code', '').strip(),
                     'payroll_id': row.get('Payroll ID', '').strip(),
-                    'date': check_in.date() if check_in else (check_out.date() if check_out else None),
+                    'date': datetime.strptime(row['Date'], '%m/%d/%y').date(),
                     'in_day': in_day,
                     'in_time': in_time,
-                    'out_day': row.get('Out Day', '').strip(),
+                    'out_day': out_day,
                     'out_time': out_time,
                     'check_in': check_in,
                     'check_out': check_out,

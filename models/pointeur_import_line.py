@@ -5,6 +5,7 @@ class PointeurImportLine(models.Model):
     _name = 'pointeur_hr.import.line'
     _description = 'Ligne d\'import des données du pointeur'
     _order = 'date desc, id desc'
+
     payroll_id = fields.Char(string='ID Paie')
     dept_code = fields.Char(string='Code département')
     import_id = fields.Many2one('pointeur_hr.import', string='Import', required=True, ondelete='cascade')
@@ -27,7 +28,7 @@ class PointeurImportLine(models.Model):
         ('draft', 'En attente'),
         ('done', 'Terminé'),
         ('error', 'Erreur')
-    ], string='État', default='draft')
+    ], string='État', default='draft', required=True, tracking=True)
     error_message = fields.Text(string='Message d\'erreur')
     in_note = fields.Text(string='Note entrée')
     out_note = fields.Text(string='Note sortie')

@@ -57,7 +57,9 @@ class HrAttendance(models.Model):
                 tz=tz
             )[employee.resource_id.id]
 
-            if not intervals:
+            # Convertir les intervalles en liste
+            interval_list = list(intervals)
+            if not interval_list:
                 # Jour non travaillé
                 attendance.overtime_hours = attendance.working_hours
                 attendance.regular_hours = 0.0
@@ -70,11 +72,11 @@ class HrAttendance(models.Model):
                 continue
 
             # Récupérer le premier intervalle de travail de la journée
-            work_start = intervals[0][0]
-            work_end = intervals[-1][1]
+            work_start = interval_list[0][0]
+            work_end = interval_list[-1][1]
             work_hours = sum(
                 (stop - start).total_seconds() / 3600
-                for start, stop, meta in intervals
+                for start, stop, meta in interval_list
             )
 
             # Calcul des heures normales et supplémentaires

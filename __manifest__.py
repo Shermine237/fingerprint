@@ -1,18 +1,25 @@
 {
     'name': 'Pointeur HR',
-    'version': '14.0.1.0.0',
-    'summary': 'Extension du module de présences',
-    'description': """
-        Ce module étend les fonctionnalités du module de présences d'Odoo 14.
-        Il permet d'ajouter des fonctionnalités supplémentaires pour la gestion des présences.
-    """,
+    'version': '1.0',
     'category': 'Human Resources',
+    'sequence': 80,
+    'summary': 'Gestion des pointages des employés',
+    'description': """
+        Module de gestion des pointages des employés avec importation depuis un pointeur.
+        
+        Fonctionnalités :
+        - Import des pointages depuis un fichier CSV
+        - Gestion des lieux de pointage
+        - Suivi des types de présence (normal, retard, départ anticipé, heures supplémentaires)
+        - Calcul automatique des heures (normales, supplémentaires, retard, départ anticipé)
+        - Rapport d'analyse des présences
+    """,
     'author': 'Shermine237',
-    'website': '',
+    'website': 'https://github.com/Shermine237',
     'depends': [
         'hr_attendance',
         'hr',
-        'mail',
+        'resource',
     ],
     'data': [
         'security/ir.model.access.csv',

@@ -86,11 +86,4 @@
             </p>
         </field>
     </record>
-
-    <!-- Menu pour les lieux de pointage -->
-    <menuitem id="menu_pointeur_location"
-        name="Lieux de pointage"
-        parent="hr_attendance.menu_hr_attendance_root"
-        action="action_pointeur_location"
-        sequence="90"/>
 </odoo>

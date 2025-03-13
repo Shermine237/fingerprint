@@ -188,6 +188,7 @@ class PointeurImport(models.Model):
         if self.state != 'imported':
             raise UserError(_("Les présences ne peuvent être créées qu'à partir d'un import validé."))
 
+        has_error = False
         for line in self.line_ids:
             if not line.attendance_id:
                 try:
@@ -200,8 +201,20 @@ class PointeurImport(models.Model):
                     
                     employee = self.env['hr.employee'].search(domain, limit=1)
                     if not employee:
-                        line.state = 'error'
-                        line.error_message = f"Employé non trouvé : {line.display_name} (ID: {line.display_id or 'Non défini'})"
+                        line.write({
+                            'state': 'error',
+                            'error_message': f"Employé non trouvé : {line.display_name} (ID: {line.display_id or 'Non défini'})"
+                        })
+                        has_error = True
+                        continue
+
+                    # Validation des heures
+                    if not line.check_in:
+                        line.write({
+                            'state': 'error',
+                            'error_message': "L'heure d'entrée est obligatoire"
+                        })
+                        has_error = True
                         continue
 
                     # Création de la présence
@@ -210,8 +223,13 @@ class PointeurImport(models.Model):
                         'check_in': line.check_in,
                         'check_out': line.check_out,
                         'source': 'import',
-                        'note': f"IN: {line.in_note or ''}\nOUT: {line.out_note or ''}"
+                        'note': '\n'.join(filter(None, [
+                            f"IN: {line.in_note}" if line.in_note else '',
+                            f"OUT: {line.out_note}" if line.out_note else ''
+                        ]))
                     }
+
+                    # Création de la présence
                     attendance = self.env['hr.attendance'].create(attendance_vals)
                     line.write({
                         'attendance_id': attendance.id,
@@ -223,14 +241,16 @@ class PointeurImport(models.Model):
                         'state': 'error',
                         'error_message': str(e)
                     })
+                    has_error = True
 
-        # Mise à jour du statut
-        if all(line.state == 'done' for line in self.line_ids):
-            self.state = 'done'
-            self.message_post(body=_("Toutes les présences ont été créées avec succès."))
+        # Mise à jour du statut global
+        if has_error:
+            if all(line.state == 'error' for line in self.line_ids):
+                self.state = 'error'
+            else:
+                self.message_post(body=_("Certaines lignes n'ont pas pu être importées. Vérifiez les messages d'erreur."))
         else:
-            error_count = len(self.line_ids.filtered(lambda l: l.state == 'error'))
-            self.message_post(body=_("%d erreurs ont été rencontrées lors de la création des présences.") % error_count)
+            self.state = 'done'
 
     def action_view_attendances(self):
         """Voir les présences créées"""

@@ -51,6 +51,7 @@
                                     <field name="total_hours" sum="Total"/>
                                     <field name="attendance_id"/>
                                     <field name="state"/>
+                                    <field name="error_message"/>
                                     <button name="action_view_attendance" type="object" icon="fa-calendar" attrs="{'invisible': [('attendance_id', '=', False)]}"/>
                                 </tree>
                             </field>

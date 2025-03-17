@@ -4,7 +4,7 @@ from pytz import timezone, UTC
 from odoo.exceptions import ValidationError
 
 
-class HrAttendance(models.Model):
+class PointeurHrAttendance(models.Model):
     _inherit = 'hr.attendance'
 
     # Champs de base

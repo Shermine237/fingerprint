@@ -1,6 +1,6 @@
 from odoo import models, fields, api, _
 
-class PointeurLocation(models.Model):
+class PointeurHrLocation(models.Model):
     _name = 'pointeur_hr.location'
     _description = 'Lieu de pointage'
     _order = 'name'

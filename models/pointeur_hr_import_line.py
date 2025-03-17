@@ -2,7 +2,7 @@ from odoo import api, fields, models, _
 from datetime import datetime, timedelta
 from odoo.exceptions import ValidationError
 
-class PointeurImportLine(models.Model):
+class PointeurHrImportLine(models.Model):
     _name = 'pointeur_hr.import.line'
     _description = 'Ligne d\'import des données du pointeur'
     _order = 'date, employee_name'
@@ -46,7 +46,7 @@ class PointeurImportLine(models.Model):
         # Si on met à jour l'attendance_id, on met à jour l'état
         if 'attendance_id' in vals and vals['attendance_id']:
             vals['state'] = 'done'
-        return super(PointeurImportLine, self).write(vals)
+        return super(PointeurHrImportLine, self).write(vals)
 
     def action_view_attendance(self):
         """Voir la présence associée"""

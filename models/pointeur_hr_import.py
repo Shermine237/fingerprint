@@ -9,7 +9,7 @@ import pytz
 
 _logger = logging.getLogger(__name__)
 
-class PointeurImport(models.Model):
+class PointeurHrImport(models.Model):
     _name = 'pointeur_hr.import'
     _description = 'Import des données du pointeur physique'
     _order = 'create_date desc'
@@ -302,7 +302,7 @@ class PointeurImport(models.Model):
         # Ajout de la date locale dans le message
         kwargs['subject'] = kwargs.get('subject', '') + ' - ' + local_now.strftime('%d/%m/%Y %H:%M:%S')
         
-        return super(PointeurImport, self).message_post(**kwargs)
+        return super(PointeurHrImport, self).message_post(**kwargs)
 
     def action_import(self):
         """Importer les données du fichier CSV"""

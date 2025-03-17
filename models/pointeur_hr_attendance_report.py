@@ -5,7 +5,7 @@ import base64
 import xlsxwriter
 import io
 
-class HrAttendanceReport(models.Model):
+class PointeurHrAttendanceReport(models.Model):
     _name = 'pointeur_hr.attendance.report'
     _description = 'Rapport de présence'
     _auto = False

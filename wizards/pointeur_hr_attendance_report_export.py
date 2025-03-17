@@ -11,7 +11,7 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
 
     export_scope = fields.Selection([
         ('selected', 'Lignes sélectionnées'),
-        ('all', 'Tout exporter (filtrace actuelle)')
+        ('all', 'Tout exporter (filtrage actuel)')
     ], string='Portée de l\'export', required=True, default='selected',
         help='Choisissez d\'exporter uniquement les lignes sélectionnées ou toutes les lignes en utilisant les filtres de recherche actuels')
 
@@ -24,7 +24,13 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
             records = Report.browse(self._context.get('active_ids', []))
         else:
             # Tout exporter en utilisant les filtres de recherche actuels
-            records = Report.search([])  # Les filtres sont automatiquement appliqués
+            # On crée un nouveau contexte sans les active_ids pour éviter de filtrer sur la sélection
+            ctx = dict(self._context)
+            if 'active_ids' in ctx:
+                del ctx['active_ids']
+            if 'active_id' in ctx:
+                del ctx['active_id']
+            records = Report.with_context(**ctx).search([])
 
         if self.export_type == 'excel':
             return records.action_export_xlsx()

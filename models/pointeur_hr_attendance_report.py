@@ -68,8 +68,19 @@ class PointeurHrAttendanceReport(models.Model):
             )
         """ % (self._table, default_location_field))
 
+    def _get_records_to_export(self):
+        """Retourne les enregistrements à exporter en fonction du contexte"""
+        active_ids = self._context.get('active_ids')
+        if active_ids:
+            # Si des lignes sont sélectionnées, exporter uniquement ces lignes
+            return self.browse(active_ids)
+        # Sinon, exporter toutes les lignes avec les filtres actuels
+        return self.search(self._context.get('search_domain', []))
+
     def action_export_xlsx(self):
         """Export des rapports de présence au format Excel"""
+        records = self._get_records_to_export()
+
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output)
         worksheet = workbook.add_worksheet('Rapport de présence')
@@ -106,7 +117,7 @@ class PointeurHrAttendanceReport(models.Model):
 
         # Données
         row = 1
-        for record in self:
+        for record in records:
             worksheet.write(row, 0, record.date.strftime('%d/%m/%Y'), cell_style)
             worksheet.write(row, 1, record.employee_id.name, cell_style)
             worksheet.write(row, 2, record.department_id.name or '', cell_style)
@@ -141,5 +152,6 @@ class PointeurHrAttendanceReport(models.Model):
 
     def action_export_pdf(self):
         """Export des rapports de présence au format PDF"""
+        records = self._get_records_to_export()
         # Retourne l'action pour générer le PDF
-        return self.env.ref('pointeur_hr.pointeur_hr_action_report_attendance').report_action(self)
+        return self.env.ref('pointeur_hr.pointeur_hr_action_report_attendance').report_action(records)

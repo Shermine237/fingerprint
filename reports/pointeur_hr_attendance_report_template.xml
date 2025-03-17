@@ -35,7 +35,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <t t-foreach="docs.filtered(lambda r: r.check_in)" t-as="o">
+                        <t t-foreach="docs" t-as="o">
                             <tr>
                                 <td><span t-field="o.date" t-options='{"format": "dd/MM/yyyy"}'/></td>
                                 <td><span t-field="o.employee_id.name"/></td>
@@ -66,23 +66,14 @@
                     <tfoot>
                         <tr>
                             <td colspan="9" class="text-right"><strong>Total</strong></td>
-                            <td><strong t-esc="sum(docs.filtered(lambda r: r.check_in).mapped('working_hours'))" t-options='{"widget": "float_time"}'/></td>
-                            <td><strong t-esc="sum(docs.filtered(lambda r: r.check_in).mapped('regular_hours'))" t-options='{"widget": "float_time"}'/></td>
-                            <td><strong t-esc="sum(docs.filtered(lambda r: r.check_in).mapped('overtime_hours'))" t-options='{"widget": "float_time"}'/></td>
-                            <td><strong t-esc="sum(docs.filtered(lambda r: r.check_in).mapped('late_hours'))" t-options='{"widget": "float_time"}'/></td>
-                            <td><strong t-esc="sum(docs.filtered(lambda r: r.check_in).mapped('early_leave_hours'))" t-options='{"widget": "float_time"}'/></td>
+                            <td><strong t-esc="sum(docs.mapped('working_hours'))" t-options='{"widget": "float_time"}'/></td>
+                            <td><strong t-esc="sum(docs.mapped('regular_hours'))" t-options='{"widget": "float_time"}'/></td>
+                            <td><strong t-esc="sum(docs.mapped('overtime_hours'))" t-options='{"widget": "float_time"}'/></td>
+                            <td><strong t-esc="sum(docs.mapped('late_hours'))" t-options='{"widget": "float_time"}'/></td>
+                            <td><strong t-esc="sum(docs.mapped('early_leave_hours'))" t-options='{"widget": "float_time"}'/></td>
                         </tr>
                     </tfoot>
                 </table>
-
-                <!-- Note de bas de page -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <p class="text-muted small">
-                            <em>Note : Les lignes sans heure d'entrée ne sont pas incluses dans ce rapport.</em>
-                        </p>
-                    </div>
-                </div>
             </div>
         </t>
     </template>
@@ -101,7 +92,7 @@
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">pointeur_hr.pointeur_hr_report_attendance</field>
         <field name="report_file">pointeur_hr.pointeur_hr_report_attendance</field>
-        <field name="print_report_name">'Rapport_presence_%s' % (datetime.now().strftime("%Y%m%d_%H%M%S"))</field>
+        <field name="print_report_name">'Rapport_presence_%s' % (time.strftime("%Y%m%d_%H%M%S"))</field>
         <field name="binding_model_id" ref="model_pointeur_hr_attendance_report"/>
         <field name="binding_type">report</field>
     </record>

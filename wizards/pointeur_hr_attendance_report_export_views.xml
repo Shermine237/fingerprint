@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Formulaire du wizard d'export -->
-    <record id="view_pointeur_hr_attendance_report_export_wizard_form" model="ir.ui.view">
+    <record id="pointeur_hr_view_attendance_report_export_wizard_form" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.report.export.wizard.form</field>
         <field name="model">pointeur_hr.attendance.report.export.wizard</field>
         <field name="arch" type="xml">
@@ -18,8 +18,8 @@
     </record>
 
     <!-- Action pour ouvrir le wizard d'export -->
-    <record id="action_pointeur_hr_attendance_report_export_wizard" model="ir.actions.act_window">
-        <field name="name">Exporter</field>
+    <record id="pointeur_hr_action_attendance_report_export_wizard" model="ir.actions.act_window">
+        <field name="name">Export du rapport de présence</field>
         <field name="res_model">pointeur_hr.attendance.report.export.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>

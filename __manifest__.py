@@ -20,6 +20,7 @@
     'depends': [
         'hr_attendance',
         'hr',
+        'web',
     ],
     'data': [
         'security/ir.model.access.csv',
@@ -35,6 +36,8 @@
     'assets': {
         'web.assets_backend': [
             'pointeur_hr/static/src/js/attendance_report_tree.js',
+        ],
+        'web.assets_qweb': [
             'pointeur_hr/static/src/xml/attendance_report_buttons.xml',
         ],
     },

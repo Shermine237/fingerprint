@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="PointeurHr.AttendanceReportButtons">
-        <button type="button" class="btn btn-primary o_list_button_export" title="Exporter">
-            <i class="fa fa-download"/> Exporter
-        </button>
+    <t t-name="pointeur_hr.AttendanceReportButtons">
+        <div class="o_list_buttons">
+            <button type="button" class="btn btn-primary o_list_button_export" title="Exporter le rapport">
+                <i class="fa fa-download"/> Exporter
+            </button>
+        </div>
     </t>
 </templates>

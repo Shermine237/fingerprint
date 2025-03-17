@@ -10,7 +10,7 @@
     <menuitem id="menu_pointeur_import" 
               name="Import du pointeur" 
               parent="menu_pointeur_hr_import" 
-              action="pointeur_hr.pointeur_hr_action_pointeur_import" 
+              action="pointeur_hr_action_import" 
               sequence="10"/>
 
     <!-- Ajout des lignes d'import -->
@@ -30,13 +30,13 @@
     <menuitem id="menu_pointeur_hr_attendance_report" 
               name="Rapport détaillé" 
               parent="menu_pointeur_hr_reporting" 
-              action="pointeur_hr.pointeur_hr_action_hr_attendance_report" 
+              action="pointeur_hr_action_attendance_report" 
               sequence="10"/>
 
     <!-- Ajout des lieux de pointage dans le menu de configuration des présences -->
     <menuitem id="menu_pointeur_location" 
               name="Lieux de pointage" 
               parent="hr_attendance.menu_hr_attendance_settings" 
-              action="pointeur_hr.pointeur_hr_action_location" 
+              action="pointeur_hr_action_location" 
               sequence="10"/>
 </odoo>

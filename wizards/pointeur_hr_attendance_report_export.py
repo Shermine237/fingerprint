@@ -35,37 +35,22 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
             records = Report.browse(active_ids)
         else:
             # Tout exporter en utilisant les filtres actuels
-            # Approche hybride: on utilise une requête SQL directe pour récupérer tous les IDs
-            # mais on applique les filtres de recherche actuels si possible
             try:
-                # Récupérer les filtres de recherche actuels
-                domain = []
-                for key, value in self._context.items():
-                    if key.startswith('search_default_'):
-                        field_name = key.replace('search_default_', '')
-                        if hasattr(Report, field_name) and value:
-                            domain.append((field_name, '=', value))
+                # Récupérer le domaine de l'action principale
+                action = self.env.ref('pointeur_hr.pointeur_hr_action_hr_attendance_report')
+                domain = action.domain or []
                 
-                # Si des filtres sont trouvés, les appliquer
-                if domain:
-                    # Créer un contexte sans active_ids
-                    ctx = dict(self._context)
-                    ctx.pop('active_ids', None)
-                    ctx.pop('active_id', None)
-                    ctx.pop('active_model', None)
-                    
-                    records = Report.with_context(**ctx).search(domain)
-                else:
-                    # Sinon, récupérer toutes les lignes
-                    self.env.cr.execute("SELECT id FROM pointeur_hr_attendance_report")
-                    all_ids = [r[0] for r in self.env.cr.fetchall()]
-                    records = Report.browse(all_ids)
+                # Appliquer le domaine en ignorant les active_ids
+                ctx = dict(self._context)
+                ctx.pop('active_ids', None)
+                ctx.pop('active_id', None)
+                ctx.pop('active_model', None)
+                
+                records = Report.with_context(**ctx).search(domain)
             except Exception as e:
-                _logger.error(f"Erreur lors de l'application des filtres: {e}")
+                _logger.error(f"Erreur lors de l'application du domaine: {e}")
                 # En cas d'erreur, récupérer toutes les lignes
-                self.env.cr.execute("SELECT id FROM pointeur_hr_attendance_report")
-                all_ids = [r[0] for r in self.env.cr.fetchall()]
-                records = Report.browse(all_ids)
+                records = Report.search([])
 
         if not records:
             return {

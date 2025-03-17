@@ -152,4 +152,4 @@ class PointeurHrAttendanceReport(models.Model):
     def action_export_pdf(self):
         """Export des rapports de présence au format PDF"""
         # Retourne l'action pour générer le PDF
-        return self.env.ref('pointeur_hr.action_report_attendance').report_action(self)
+        return self.env.ref('pointeur_hr.pointeur_hr_action_report_attendance').report_action(self)

@@ -1,5 +1,7 @@
 from odoo import api, fields, models
-import ast
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class PointeurHrAttendanceReportExport(models.TransientModel):
     _name = 'pointeur_hr.attendance.report.export.wizard'
@@ -21,7 +23,7 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
         Report = self.env['pointeur_hr.attendance.report']
         
         if self.export_scope == 'selected':
-            # Par défaut : exporter uniquement les lignes sélectionnées
+            # Exporter uniquement les lignes sélectionnées
             active_ids = self._context.get('active_ids', [])
             if not active_ids:
                 return {
@@ -32,21 +34,59 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
                 }
             records = Report.browse(active_ids)
         else:
-            # Tout exporter en utilisant les filtres de recherche actuels
-            # On crée un nouvel environnement sans les active_ids
-            ctx = {}
-            # Conserver uniquement les filtres de recherche
+            # Obtenir la vue actuelle et son domaine
+            action = self.env.ref('pointeur_hr.pointeur_hr_action_hr_attendance_report')
+            action_dict = action.read()[0] if action else {}
+            
+            # Créer un nouveau contexte sans active_ids mais en conservant les filtres
+            new_ctx = {}
+            # Conserver les filtres de recherche
             for key, value in self._context.items():
                 if key.startswith('search_') or key == 'group_by':
-                    ctx[key] = value
+                    new_ctx[key] = value
             
-            # Rechercher toutes les lignes avec les filtres actuels
-            records = Report.with_context(**ctx).search([])
+            # Essai 1: Utiliser action.search_view_id
+            if action.search_view_id:
+                try:
+                    search_view = action.search_view_id.read(['domain'])[0]
+                    domain = search_view.get('domain', [])
+                    if domain:
+                        records = Report.with_context(**new_ctx).search(domain)
+                        if records:
+                            return self._process_export(records)
+                except Exception as e:
+                    _logger.error(f"Erreur lors de la récupération du domaine de la vue de recherche: {e}")
             
-            # Si aucun filtre n'est appliqué, récupérer toutes les lignes
-            if not records:
-                records = Report.search([])
+            # Essai 2: Utiliser le domaine de l'action
+            try:
+                domain = action_dict.get('domain', [])
+                if domain:
+                    records = Report.with_context(**new_ctx).search(domain)
+                    if records:
+                        return self._process_export(records)
+            except Exception as e:
+                _logger.error(f"Erreur lors de la recherche avec le domaine de l'action: {e}")
+                
+            # Essai 3: Utiliser search_default_ du contexte pour créer un domaine
+            domain = []
+            for key, value in self._context.items():
+                if key.startswith('search_default_') and value:
+                    field = key.replace('search_default_', '')
+                    if field in Report._fields:
+                        domain.append((field, '=', value))
+            
+            if domain:
+                records = Report.with_context(**new_ctx).search(domain)
+                if records:
+                    return self._process_export(records)
+            
+            # Solution de secours: exporter toutes les lignes
+            records = Report.search([])
 
+        return self._process_export(records)
+    
+    def _process_export(self, records):
+        """Traite l'export des enregistrements"""
         if not records:
             return {
                 'warning': {

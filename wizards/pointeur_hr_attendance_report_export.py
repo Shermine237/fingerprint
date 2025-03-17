@@ -20,7 +20,7 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
         Report = self.env['pointeur_hr.attendance.report']
         
         if self.export_scope == 'selected':
-            # Exporter uniquement les lignes sélectionnées
+            # Option 1: Exporter uniquement les lignes sélectionnées
             active_ids = self._context.get('active_ids', [])
             if not active_ids:
                 return {
@@ -35,13 +35,10 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
                 }
             records = Report.browse(active_ids)
         else:
-            # Récupérer la liste filtrée en utilisant le contexte actuel
-            # Supprimer uniquement les active_ids pour éviter de filtrer sur la sélection
-            ctx = dict(self._context)
-            ctx.pop('active_ids', None)
-            
-            # Garder tous les autres éléments du contexte pour conserver les filtres
-            records = Report.with_context(**ctx).search([])
+            # Option 2: Tout exporter en utilisant les filtres actuels
+            # Utiliser le contexte actuel avec les filtres de recherche
+            # Odoo gère automatiquement les filtres actifs via la méthode search
+            records = Report.search([])
 
         if not records:
             return {

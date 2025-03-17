@@ -34,59 +34,39 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
                 }
             records = Report.browse(active_ids)
         else:
-            # Obtenir la vue actuelle et son domaine
-            action = self.env.ref('pointeur_hr.pointeur_hr_action_hr_attendance_report')
-            action_dict = action.read()[0] if action else {}
-            
-            # Créer un nouveau contexte sans active_ids mais en conservant les filtres
-            new_ctx = {}
-            # Conserver les filtres de recherche
-            for key, value in self._context.items():
-                if key.startswith('search_') or key == 'group_by':
-                    new_ctx[key] = value
-            
-            # Essai 1: Utiliser action.search_view_id
-            if action.search_view_id:
-                try:
-                    search_view = action.search_view_id.read(['domain'])[0]
-                    domain = search_view.get('domain', [])
-                    if domain:
-                        records = Report.with_context(**new_ctx).search(domain)
-                        if records:
-                            return self._process_export(records)
-                except Exception as e:
-                    _logger.error(f"Erreur lors de la récupération du domaine de la vue de recherche: {e}")
-            
-            # Essai 2: Utiliser le domaine de l'action
+            # Tout exporter en utilisant les filtres actuels
+            # Approche hybride: on utilise une requête SQL directe pour récupérer tous les IDs
+            # mais on applique les filtres de recherche actuels si possible
             try:
-                domain = action_dict.get('domain', [])
-                if domain:
-                    records = Report.with_context(**new_ctx).search(domain)
-                    if records:
-                        return self._process_export(records)
-            except Exception as e:
-                _logger.error(f"Erreur lors de la recherche avec le domaine de l'action: {e}")
+                # Récupérer les filtres de recherche actuels
+                domain = []
+                for key, value in self._context.items():
+                    if key.startswith('search_default_'):
+                        field_name = key.replace('search_default_', '')
+                        if hasattr(Report, field_name) and value:
+                            domain.append((field_name, '=', value))
                 
-            # Essai 3: Utiliser search_default_ du contexte pour créer un domaine
-            domain = []
-            for key, value in self._context.items():
-                if key.startswith('search_default_') and value:
-                    field = key.replace('search_default_', '')
-                    if field in Report._fields:
-                        domain.append((field, '=', value))
-            
-            if domain:
-                records = Report.with_context(**new_ctx).search(domain)
-                if records:
-                    return self._process_export(records)
-            
-            # Solution de secours: exporter toutes les lignes
-            records = Report.search([])
+                # Si des filtres sont trouvés, les appliquer
+                if domain:
+                    # Créer un contexte sans active_ids
+                    ctx = dict(self._context)
+                    ctx.pop('active_ids', None)
+                    ctx.pop('active_id', None)
+                    ctx.pop('active_model', None)
+                    
+                    records = Report.with_context(**ctx).search(domain)
+                else:
+                    # Sinon, récupérer toutes les lignes
+                    self.env.cr.execute("SELECT id FROM pointeur_hr_attendance_report")
+                    all_ids = [r[0] for r in self.env.cr.fetchall()]
+                    records = Report.browse(all_ids)
+            except Exception as e:
+                _logger.error(f"Erreur lors de l'application des filtres: {e}")
+                # En cas d'erreur, récupérer toutes les lignes
+                self.env.cr.execute("SELECT id FROM pointeur_hr_attendance_report")
+                all_ids = [r[0] for r in self.env.cr.fetchall()]
+                records = Report.browse(all_ids)
 
-        return self._process_export(records)
-    
-    def _process_export(self, records):
-        """Traite l'export des enregistrements"""
         if not records:
             return {
                 'warning': {

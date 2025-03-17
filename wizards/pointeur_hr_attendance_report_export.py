@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+import ast
 
 class PointeurHrAttendanceReportExport(models.TransientModel):
     _name = 'pointeur_hr.attendance.report.export.wizard'
@@ -31,24 +32,20 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
                 }
             records = Report.browse(active_ids)
         else:
-            # Récupérer l'action pour obtenir le domaine de recherche actuel
-            action = self.env.ref('pointeur_hr.pointeur_hr_action_hr_attendance_report')
-            if not action:
-                # Si l'action n'est pas trouvée, on exporte tout
+            # Tout exporter en utilisant les filtres de recherche actuels
+            # On crée un nouvel environnement sans les active_ids
+            ctx = {}
+            # Conserver uniquement les filtres de recherche
+            for key, value in self._context.items():
+                if key.startswith('search_') or key == 'group_by':
+                    ctx[key] = value
+            
+            # Rechercher toutes les lignes avec les filtres actuels
+            records = Report.with_context(**ctx).search([])
+            
+            # Si aucun filtre n'est appliqué, récupérer toutes les lignes
+            if not records:
                 records = Report.search([])
-            else:
-                # Exécuter l'action pour obtenir le domaine actuel
-                action_result = action.read()[0]
-                domain = action_result.get('domain', [])
-                
-                # Créer un contexte sans les active_ids
-                ctx = dict(self.env.context)
-                ctx.pop('active_ids', None)
-                ctx.pop('active_id', None)
-                ctx.pop('active_model', None)
-                
-                # Rechercher avec le domaine actuel mais sans les active_ids
-                records = Report.with_context(**ctx).search(domain)
 
         if not records:
             return {

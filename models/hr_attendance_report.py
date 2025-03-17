@@ -1,8 +1,12 @@
 from odoo import api, fields, models, tools
 from datetime import datetime, timedelta
+import pytz
+import base64
+import xlsxwriter
+import io
 
 class HrAttendanceReport(models.Model):
-    _name = 'hr.attendance.report'
+    _name = 'pointeur_hr.attendance.report'
     _description = 'Rapport de présence'
     _auto = False
     _order = 'date desc, employee_id'
@@ -25,7 +29,7 @@ class HrAttendanceReport(models.Model):
     overtime_hours = fields.Float(string='Heures supplémentaires', readonly=True)
     late_hours = fields.Float(string='Heures de retard', readonly=True)
     early_leave_hours = fields.Float(string='Heures de départ anticipé', readonly=True)
-    
+
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
         # Vérifier si la colonne default_location_id existe dans hr_employee
@@ -69,3 +73,83 @@ class HrAttendanceReport(models.Model):
                 JOIN hr_employee e ON e.id = a.employee_id
             )
         """ % (self._table, default_location_field))
+
+    def action_export_xlsx(self):
+        """Export des rapports de présence au format Excel"""
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output)
+        worksheet = workbook.add_worksheet('Rapport de présence')
+
+        # Styles
+        header_style = workbook.add_format({
+            'bold': True,
+            'align': 'center',
+            'valign': 'vcenter',
+            'bg_color': '#D3D3D3',
+            'border': 1
+        })
+        cell_style = workbook.add_format({
+            'align': 'center',
+            'valign': 'vcenter',
+            'border': 1
+        })
+        time_style = workbook.add_format({
+            'align': 'center',
+            'valign': 'vcenter',
+            'border': 1,
+            'num_format': '[h]:mm'
+        })
+
+        # En-têtes
+        headers = [
+            'Date', 'Employé', 'Département', 'Lieu par défaut', 'Lieu de pointage',
+            'Source', 'Entrée', 'Sortie', 'Types de présence', 'Heures travaillées',
+            'Heures normales', 'Heures supplémentaires', 'Retard', 'Départ anticipé'
+        ]
+        for col, header in enumerate(headers):
+            worksheet.write(0, col, header, header_style)
+            worksheet.set_column(col, col, 15)
+
+        # Données
+        row = 1
+        for record in self:
+            # Ignorer les lignes sans heure d'entrée
+            if not record.check_in:
+                continue
+                
+            worksheet.write(row, 0, record.date.strftime('%d/%m/%Y'), cell_style)
+            worksheet.write(row, 1, record.employee_id.name, cell_style)
+            worksheet.write(row, 2, record.department_id.name or '', cell_style)
+            worksheet.write(row, 3, record.default_location_id.name or '', cell_style)
+            worksheet.write(row, 4, record.location_id.name or '', cell_style)
+            worksheet.write(row, 5, dict(self._fields['source'].selection).get(record.source), cell_style)
+            worksheet.write(row, 6, record.check_in.strftime('%H:%M') if record.check_in else '', cell_style)
+            worksheet.write(row, 7, record.check_out.strftime('%H:%M') if record.check_out else '', cell_style)
+            worksheet.write(row, 8, record.attendance_type_ids.replace(',', ', '), cell_style)
+            worksheet.write(row, 9, record.working_hours, time_style)
+            worksheet.write(row, 10, record.regular_hours, time_style)
+            worksheet.write(row, 11, record.overtime_hours, time_style)
+            worksheet.write(row, 12, record.late_hours, time_style)
+            worksheet.write(row, 13, record.early_leave_hours, time_style)
+            row += 1
+
+        workbook.close()
+
+        # Création de la pièce jointe
+        attachment = self.env['ir.attachment'].create({
+            'name': f'Rapport_presence_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx',
+            'datas': base64.b64encode(output.getvalue()),
+            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+
+        # Retourne l'action pour télécharger le fichier
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'self',
+        }
+
+    def action_export_pdf(self):
+        """Export des rapports de présence au format PDF"""
+        # Retourne l'action pour générer le PDF
+        return self.env.ref('pointeur_hr.action_report_attendance').report_action(self)

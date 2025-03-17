@@ -2,10 +2,10 @@
 <odoo>
     <!-- Vue tree pour le rapport de présence -->
     <record id="view_hr_attendance_report_tree" model="ir.ui.view">
-        <field name="name">hr.attendance.report.tree</field>
-        <field name="model">hr.attendance.report</field>
+        <field name="name">pointeur_hr.attendance.report.tree</field>
+        <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
-            <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false">
+            <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false" decoration-danger="not check_in">
                 <field name="name"/>
                 <field name="date"/>
                 <field name="employee_id"/>
@@ -21,14 +21,19 @@
                 <field name="overtime_hours" widget="float_time" sum="Total"/>
                 <field name="late_hours" widget="float_time" sum="Total"/>
                 <field name="early_leave_hours" widget="float_time" sum="Total"/>
+                <button name="%(pointeur_hr.action_hr_attendance_report_export_wizard)d" 
+                        type="action" 
+                        string="Exporter" 
+                        icon="fa-download" 
+                        class="btn-primary"/>
             </tree>
         </field>
     </record>
 
     <!-- Vue search pour le rapport de présence -->
     <record id="view_hr_attendance_report_search" model="ir.ui.view">
-        <field name="name">hr.attendance.report.search</field>
-        <field name="model">hr.attendance.report</field>
+        <field name="name">pointeur_hr.attendance.report.search</field>
+        <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
             <search string="Recherche de présence">
                 <field name="name"/>
@@ -57,6 +62,11 @@
                 <filter string="Même lieu" name="same_location" 
                         domain="[('location_id', '=', 'default_location_id')]"/>
                 
+                <!-- Filtres par heure d'entrée -->
+                <separator/>
+                <filter string="Sans heure d'entrée" name="no_check_in" domain="[('check_in', '=', False)]"/>
+                <filter string="Avec heure d'entrée" name="with_check_in" domain="[('check_in', '!=', False)]"/>
+                
                 <!-- Groupements -->
                 <group expand="0" string="Group By">
                     <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
@@ -75,8 +85,8 @@
 
     <!-- Vue pivot pour le rapport de présence -->
     <record id="view_hr_attendance_report_pivot" model="ir.ui.view">
-        <field name="name">hr.attendance.report.pivot</field>
-        <field name="model">hr.attendance.report</field>
+        <field name="name">pointeur_hr.attendance.report.pivot</field>
+        <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
             <pivot string="Analyse des présences" display_quantity="true">
                 <field name="date" type="row" interval="month"/>
@@ -95,8 +105,8 @@
 
     <!-- Vue graph pour le rapport de présence -->
     <record id="view_hr_attendance_report_graph" model="ir.ui.view">
-        <field name="name">hr.attendance.report.graph</field>
-        <field name="model">hr.attendance.report</field>
+        <field name="name">pointeur_hr.attendance.report.graph</field>
+        <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
             <graph string="Analyse des présences" type="bar" stacked="True">
                 <field name="date" interval="month"/>
@@ -109,12 +119,31 @@
     <!-- Action pour le rapport de présence -->
     <record id="pointeur_hr_action_hr_attendance_report" model="ir.actions.act_window">
         <field name="name">Rapport de présence détaillé</field>
-        <field name="res_model">hr.attendance.report</field>
+        <field name="res_model">pointeur_hr.attendance.report</field>
         <field name="view_mode">tree,pivot,graph</field>
         <field name="search_view_id" ref="view_hr_attendance_report_search"/>
         <field name="context">{
+            'search_default_with_check_in': 1,
             'search_default_this_month': 1,
             'search_default_employee': 1
         }</field>
+    </record>
+
+    <!-- Bouton d'export toujours visible dans la barre d'outils -->
+    <record id="hr_attendance_report_view_toolbar_export" model="ir.ui.view">
+        <field name="name">pointeur_hr.attendance.report.toolbar.export</field>
+        <field name="model">pointeur_hr.attendance.report</field>
+        <field name="inherit_id" ref="view_hr_attendance_report_tree"/>
+        <field name="arch" type="xml">
+            <tree position="before">
+                <header>
+                    <button name="%(pointeur_hr.action_hr_attendance_report_export_wizard)d" 
+                            type="action" 
+                            string="Exporter" 
+                            icon="fa-download" 
+                            class="btn-primary"/>
+                </header>
+            </tree>
+        </field>
     </record>
 </odoo>

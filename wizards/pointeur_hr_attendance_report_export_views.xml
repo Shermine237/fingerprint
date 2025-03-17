@@ -8,6 +8,7 @@
             <form string="Export du rapport de présence">
                 <group>
                     <field name="export_type" widget="radio"/>
+                    <field name="export_scope" widget="radio"/>
                 </group>
                 <footer>
                     <button name="action_export" string="Exporter" type="object" class="btn-primary"/>

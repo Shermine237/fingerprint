@@ -1,15 +1,13 @@
 odoo.define('pointeur_hr.attendance_report_tree', function (require) {
     "use strict";
 
-    const core = require('web.core');
-    const ListController = require('web.ListController');
-    const ListView = require('web.ListView');
-    const viewRegistry = require('web.view_registry');
+    var core = require('web.core');
+    var ListController = require('web.ListController');
+    var ListView = require('web.ListView');
+    var viewRegistry = require('web.view_registry');
+    var _t = core._t;
 
-    const QWeb = core.qweb;
-    const _t = core._t;
-
-    const PointeurHrAttendanceReportController = ListController.extend({
+    var PointeurHrAttendanceReportController = ListController.extend({
         buttons_template: 'pointeur_hr.AttendanceReportButtons',
 
         renderButtons: function () {
@@ -34,7 +32,7 @@ odoo.define('pointeur_hr.attendance_report_tree', function (require) {
         }
     });
 
-    const PointeurHrAttendanceReportListView = ListView.extend({
+    var PointeurHrAttendanceReportListView = ListView.extend({
         config: _.extend({}, ListView.prototype.config, {
             Controller: PointeurHrAttendanceReportController,
         }),

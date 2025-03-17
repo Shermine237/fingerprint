@@ -100,7 +100,7 @@
                 <field name="default_location_id"/>
                 <field name="source"/>
                 <separator/>
-                <filter string="Ce mois" name="this_month" domain="[('date', '>=', context_today().strftime('%Y-%m-01')), ('date', '<=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01')), ('date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Ce jour" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <separator/>
                 <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>

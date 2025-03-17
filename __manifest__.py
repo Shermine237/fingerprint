@@ -18,12 +18,14 @@
     'author': 'Shermine237',
     'website': 'https://github.com/Shermine237',
     'depends': [
+        'base',
         'hr_attendance',
         'hr',
         'web',
     ],
     'data': [
         'security/ir.model.access.csv',
+        'views/pointeur_hr_assets.xml',
         'wizards/pointeur_hr_attendance_report_export_views.xml',
         'views/pointeur_hr_employee_views.xml',
         'views/pointeur_hr_attendance_views.xml',
@@ -32,7 +34,6 @@
         'views/pointeur_hr_import_views.xml',
         'views/pointeur_hr_menus.xml',
         'reports/pointeur_hr_attendance_report_template.xml',
-        'views/pointeur_hr_assets.xml',
     ],
     'installable': True,
     'application': True,

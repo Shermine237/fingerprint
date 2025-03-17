@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Action pour le wizard d'export -->
+    <record id="pointeur_hr_action_attendance_report_export_wizard" model="ir.actions.act_window">
+        <field name="name">Export du rapport de présence</field>
+        <field name="res_model">pointeur_hr.attendance.report.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_pointeur_hr_attendance_report"/>
+        <field name="binding_view_types">list,pivot</field>
+    </record>
+
     <!-- Vue tree pour le rapport de présence -->
     <record id="pointeur_hr_view_attendance_report_tree" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.report.tree</field>
@@ -90,7 +100,7 @@
                 <field name="default_location_id"/>
                 <field name="source"/>
                 <separator/>
-                <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01')), ('date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce mois" name="this_month" domain="[('date', '>=', context_today().strftime('%Y-%m-01')), ('date', '<=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Ce jour" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <separator/>
                 <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
@@ -111,14 +121,5 @@
             'search_default_this_month': 1,
             'search_default_employee': 1
         }</field>
-    </record>
-
-    <!-- Action pour le wizard d'export -->
-    <record id="pointeur_hr_action_attendance_report_export_wizard" model="ir.actions.act_window">
-        <field name="name">Export du rapport</field>
-        <field name="res_model">pointeur_hr.attendance.report.export.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="view_id" ref="pointeur_hr_view_attendance_report_export_wizard_form"/>
-        <field name="target">new</field>
     </record>
 </odoo>

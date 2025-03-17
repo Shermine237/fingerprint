@@ -17,14 +17,4 @@
             </form>
         </field>
     </record>
-
-    <!-- Action pour ouvrir le wizard d'export -->
-    <record id="pointeur_hr_action_attendance_report_export_wizard" model="ir.actions.act_window">
-        <field name="name">Export du rapport de présence</field>
-        <field name="res_model">pointeur_hr.attendance.report.export.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
-        <field name="binding_model_id" ref="model_pointeur_hr_attendance_report"/>
-        <field name="binding_view_types">list,pivot</field>
-    </record>
 </odoo>

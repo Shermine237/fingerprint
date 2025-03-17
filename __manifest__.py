@@ -32,14 +32,8 @@
         'views/pointeur_hr_import_views.xml',
         'views/pointeur_hr_menus.xml',
         'reports/pointeur_hr_attendance_report_template.xml',
+        'views/pointeur_hr_assets.xml',
     ],
-    'qweb': [
-        'static/src/xml/attendance_report_buttons.xml',
-    ],
-    'js': [
-        'static/src/js/attendance_report_tree.js',
-    ],
-    'css': [],
     'installable': True,
     'application': True,
     'license': 'LGPL-3',

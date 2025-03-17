@@ -35,63 +35,10 @@
                     <field name="export_type" widget="radio"/>
                 </group>
                 <footer>
-                    <button name="action_export" string="Exporter" type="object" class="btn-primary" js_class="export_button"/>
+                    <button name="action_export" string="Exporter" type="object" class="btn-primary"/>
                     <button string="Annuler" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
-        </field>
-    </record>
-
-    <!-- Vue search pour le rapport de présence -->
-    <record id="pointeur_hr_view_attendance_report_search" model="ir.ui.view">
-        <field name="name">pointeur_hr.attendance.report.search</field>
-        <field name="model">pointeur_hr.attendance.report</field>
-        <field name="arch" type="xml">
-            <search string="Recherche de présence">
-                <field name="name"/>
-                <field name="employee_id"/>
-                <field name="department_id"/>
-                <field name="default_location_id"/>
-                <field name="location_id"/>
-                <field name="source"/>
-                <field name="attendance_type_ids"/>
-                
-                <!-- Filtres par type de présence -->
-                <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids', 'ilike', 'supplementaire')]"/>
-                <filter name="filter_late" string="Retards" domain="[('attendance_type_ids', 'ilike', 'retard')]"/>
-                <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids', 'ilike', 'depart_anticipe')]"/>
-                
-                <!-- Filtres de date -->
-                <separator/>
-                <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter string="Cette semaine" name="this_week" domain="[('date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d'))]"/>
-                <filter string="Ce mois" name="this_month" domain="[('date', '>=', (context_today().replace(day=1)).strftime('%Y-%m-%d'))]"/>
-                
-                <!-- Filtres de comparaison de lieux -->
-                <separator/>
-                <filter string="Lieu différent" name="different_location" 
-                        domain="[('location_id', '!=', False), ('default_location_id', '!=', False), ('location_id', '!=', 'default_location_id')]"/>
-                <filter string="Même lieu" name="same_location" 
-                        domain="[('location_id', '=', 'default_location_id')]"/>
-                
-                <!-- Filtres par heure d'entrée -->
-                <separator/>
-                <filter string="Sans heure d'entrée" name="no_check_in" domain="[('check_in', '=', False)]"/>
-                <filter string="Avec heure d'entrée" name="with_check_in" domain="[('check_in', '!=', False)]"/>
-                
-                <!-- Groupements -->
-                <group expand="0" string="Group By">
-                    <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
-                    <filter string="Département" name="department" context="{'group_by': 'department_id'}"/>
-                    <filter string="Lieu par défaut" name="default_location" context="{'group_by': 'default_location_id'}"/>
-                    <filter string="Lieu de pointage" name="location" context="{'group_by': 'location_id'}"/>
-                    <filter string="Source" name="source" context="{'group_by': 'source'}"/>
-                    <separator/>
-                    <filter string="Date" name="date" context="{'group_by': 'date:day'}"/>
-                    <filter string="Semaine" name="week" context="{'group_by': 'date:week'}"/>
-                    <filter string="Mois" name="month" context="{'group_by': 'date:month'}"/>
-                </group>
-            </search>
         </field>
     </record>
 
@@ -100,12 +47,9 @@
         <field name="name">pointeur_hr.attendance.report.pivot</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
-            <pivot string="Analyse des présences" display_quantity="true">
-                <field name="date" type="row" interval="month"/>
+            <pivot string="Rapport de présence">
                 <field name="employee_id" type="row"/>
-                <field name="default_location_id" type="row"/>
-                <field name="location_id" type="row"/>
-                <field name="attendance_type_ids" type="col"/>
+                <field name="date" type="col"/>
                 <field name="working_hours" type="measure"/>
                 <field name="regular_hours" type="measure"/>
                 <field name="overtime_hours" type="measure"/>
@@ -120,11 +64,34 @@
         <field name="name">pointeur_hr.attendance.report.graph</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
-            <graph string="Analyse des présences" type="bar" stacked="True">
-                <field name="date" interval="month"/>
-                <field name="employee_id"/>
+            <graph string="Rapport de présence">
+                <field name="date"/>
                 <field name="working_hours" type="measure"/>
             </graph>
+        </field>
+    </record>
+
+    <!-- Vue search pour le rapport de présence -->
+    <record id="pointeur_hr_view_attendance_report_search" model="ir.ui.view">
+        <field name="name">pointeur_hr.attendance.report.search</field>
+        <field name="model">pointeur_hr.attendance.report</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher dans les présences">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="location_id"/>
+                <field name="default_location_id"/>
+                <field name="source"/>
+                <separator/>
+                <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01')), ('date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce jour" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
+                <filter string="Département" name="department" context="{'group_by': 'department_id'}"/>
+                <filter string="Lieu de pointage" name="location" context="{'group_by': 'location_id'}"/>
+                <filter string="Source" name="source" context="{'group_by': 'source'}"/>
+            </search>
         </field>
     </record>
 

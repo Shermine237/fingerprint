@@ -1,11 +1,9 @@
 odoo.define('pointeur_hr.attendance_report_tree', function (require) {
     "use strict";
 
-    var core = require('web.core');
     var ListController = require('web.ListController');
     var ListView = require('web.ListView');
     var viewRegistry = require('web.view_registry');
-    var _t = core._t;
 
     var PointeurHrAttendanceReportController = ListController.extend({
         buttons_template: 'pointeur_hr.AttendanceReportButtons',
@@ -20,7 +18,7 @@ odoo.define('pointeur_hr.attendance_report_tree', function (require) {
         _onExportReport: function () {
             this.do_action({
                 type: 'ir.actions.act_window',
-                name: _t('Export du rapport'),
+                name: 'Export du rapport',
                 res_model: 'pointeur_hr.attendance.report.export.wizard',
                 views: [[false, 'form']],
                 target: 'new',
@@ -33,9 +31,9 @@ odoo.define('pointeur_hr.attendance_report_tree', function (require) {
     });
 
     var PointeurHrAttendanceReportListView = ListView.extend({
-        config: _.extend({}, ListView.prototype.config, {
+        config: {
             Controller: PointeurHrAttendanceReportController,
-        }),
+        },
     });
 
     viewRegistry.add('attendance_report_tree', PointeurHrAttendanceReportListView);

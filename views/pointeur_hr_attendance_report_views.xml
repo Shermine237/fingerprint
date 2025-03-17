@@ -102,6 +102,8 @@
                 <separator/>
                 <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01')), ('date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Ce jour" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Retards" name="late" domain="[('late_hours', '>', 0)]"/>
+                <filter string="Départs anticipés" name="early_leave" domain="[('early_leave_hours', '>', 0)]"/>
                 <separator/>
                 <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
                 <filter string="Département" name="department" context="{'group_by': 'department_id'}"/>

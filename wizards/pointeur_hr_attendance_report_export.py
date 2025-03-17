@@ -36,8 +36,11 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
             records = Report.browse(active_ids)
         else:
             # Récupérer la liste filtrée en utilisant le contexte actuel
-            # Supprimer les active_ids pour éviter de filtrer sur la sélection
-            ctx = {k: v for k, v in self._context.items() if not k.startswith('active_')}
+            # Supprimer uniquement les active_ids pour éviter de filtrer sur la sélection
+            ctx = dict(self._context)
+            ctx.pop('active_ids', None)
+            
+            # Garder tous les autres éléments du contexte pour conserver les filtres
             records = Report.with_context(**ctx).search([])
 
         if not records:

@@ -32,6 +32,12 @@
         'views/pointeur_hr_menus.xml',
         'reports/pointeur_hr_attendance_report_template.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'pointeur_hr/static/src/js/attendance_report_tree.js',
+            'pointeur_hr/static/src/xml/attendance_report_buttons.xml',
+        ],
+    },
     'installable': True,
     'application': True,
     'license': 'LGPL-3',

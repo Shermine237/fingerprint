@@ -6,14 +6,6 @@
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
             <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false" decoration-danger="not check_in">
-                <header>
-                    <button name="%(pointeur_hr_action_attendance_report_export_wizard)d" 
-                            type="action" 
-                            display="always"
-                            string="Exporter" 
-                            icon="fa-download" 
-                            class="btn-primary"/>
-                </header>
                 <field name="name"/>
                 <field name="date"/>
                 <field name="employee_id"/>
@@ -30,6 +22,18 @@
                 <field name="late_hours" widget="float_time" sum="Total"/>
                 <field name="early_leave_hours" widget="float_time" sum="Total"/>
             </tree>
+        </field>
+    </record>
+
+    <!-- Vue tree héritée pour ajouter le bouton d'export -->
+    <record id="pointeur_hr_view_attendance_report_tree_buttons" model="ir.ui.view">
+        <field name="name">pointeur_hr.attendance.report.tree.buttons</field>
+        <field name="model">pointeur_hr.attendance.report</field>
+        <field name="inherit_id" ref="view_pointeur_hr_attendance_report_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="js_class">attendance_report_tree</attribute>
+            </xpath>
         </field>
     </record>
 

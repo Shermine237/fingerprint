@@ -37,6 +37,6 @@
     <menuitem id="menu_pointeur_location" 
               name="Lieux de pointage" 
               parent="hr_attendance.menu_hr_attendance_settings" 
-              action="pointeur_hr.pointeur_hr_pointeur_location_action" 
+              action="pointeur_hr.pointeur_hr_action_location" 
               sequence="10"/>
 </odoo>

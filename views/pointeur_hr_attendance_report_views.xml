@@ -5,12 +5,15 @@
         <field name="name">pointeur_hr.attendance.report.tree</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
-            <button name="%(pointeur_hr_action_attendance_report_export_wizard)d" 
+            <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false" decoration-danger="not check_in">
+                <header>
+                    <button name="%(pointeur_hr_action_attendance_report_export_wizard)d" 
                             type="action" 
+                            display="always"
                             string="Exporter" 
                             icon="fa-download" 
                             class="btn-primary"/>
-            <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false" decoration-danger="not check_in">
+                </header>
                 <field name="name"/>
                 <field name="date"/>
                 <field name="employee_id"/>

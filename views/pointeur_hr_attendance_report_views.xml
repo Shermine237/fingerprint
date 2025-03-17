@@ -123,7 +123,6 @@
         <field name="view_mode">tree,pivot,graph</field>
         <field name="search_view_id" ref="view_pointeur_hr_attendance_report_search"/>
         <field name="context">{
-            'search_default_with_check_in': 1,
             'search_default_this_month': 1,
             'search_default_employee': 1
         }</field>

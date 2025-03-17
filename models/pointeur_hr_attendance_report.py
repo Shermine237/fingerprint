@@ -46,12 +46,6 @@ class PointeurHrAttendanceReport(models.Model):
         
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-                WITH valid_attendances AS (
-                    SELECT a.*
-                    FROM hr_attendance a
-                    WHERE a.check_in IS NOT NULL
-                    AND (a.check_out IS NULL OR a.check_in <= a.check_out)
-                )
                 SELECT
                     a.id as id,
                     CONCAT(e.name, ' - ', to_char(a.check_in, 'YYYY-MM-DD')) as name,
@@ -69,7 +63,7 @@ class PointeurHrAttendanceReport(models.Model):
                     COALESCE(a.overtime_hours, 0) as overtime_hours,
                     COALESCE(a.late_hours, 0) as late_hours,
                     COALESCE(a.early_leave_hours, 0) as early_leave_hours
-                FROM valid_attendances a
+                FROM hr_attendance a
                 JOIN hr_employee e ON e.id = a.employee_id
             )
         """ % (self._table, default_location_field))
@@ -113,10 +107,6 @@ class PointeurHrAttendanceReport(models.Model):
         # Données
         row = 1
         for record in self:
-            # Ignorer les lignes sans heure d'entrée
-            if not record.check_in:
-                continue
-                
             worksheet.write(row, 0, record.date.strftime('%d/%m/%Y'), cell_style)
             worksheet.write(row, 1, record.employee_id.name, cell_style)
             worksheet.write(row, 2, record.department_id.name or '', cell_style)
@@ -125,7 +115,7 @@ class PointeurHrAttendanceReport(models.Model):
             worksheet.write(row, 5, dict(self._fields['source'].selection).get(record.source), cell_style)
             worksheet.write(row, 6, record.check_in.strftime('%H:%M') if record.check_in else '', cell_style)
             worksheet.write(row, 7, record.check_out.strftime('%H:%M') if record.check_out else '', cell_style)
-            worksheet.write(row, 8, record.attendance_type_ids.replace(',', ', '), cell_style)
+            worksheet.write(row, 8, record.attendance_type_ids.replace(',', ', ') if record.attendance_type_ids else '', cell_style)
             worksheet.write(row, 9, record.working_hours, time_style)
             worksheet.write(row, 10, record.regular_hours, time_style)
             worksheet.write(row, 11, record.overtime_hours, time_style)

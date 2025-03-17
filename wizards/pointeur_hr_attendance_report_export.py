@@ -1,5 +1,6 @@
 from odoo import api, fields, models
 import logging
+from datetime import datetime
 
 _logger = logging.getLogger(__name__)
 
@@ -14,16 +15,29 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
 
     export_scope = fields.Selection([
         ('selected', 'Lignes sélectionnées'),
-        ('all', 'Tout exporter (filtres actuels)')
-    ], string='Portée de l\'export', required=True, default='selected',
-        help='Choisissez d\'exporter uniquement les lignes sélectionnées ou toutes les lignes en utilisant les filtres de recherche actuels')
+        ('all', 'Tout exporter (par date)')
+    ], string='Portée de l\'export', required=True, default='selected')
+
+    date_from = fields.Date(string='Date de début')
+    date_to = fields.Date(string='Date de fin')
+
+    @api.onchange('export_scope')
+    def _onchange_export_scope(self):
+        if self.export_scope == 'all':
+            # Initialiser avec le mois en cours
+            today = datetime.today()
+            self.date_from = datetime(today.year, today.month, 1).date()
+            self.date_to = datetime(today.year, today.month + 1, 1).date() if today.month < 12 else datetime(today.year + 1, 1, 1).date()
+        else:
+            self.date_from = False
+            self.date_to = False
 
     def action_export(self):
         """Export le rapport dans le format sélectionné"""
         Report = self.env['pointeur_hr.attendance.report']
         
         if self.export_scope == 'selected':
-            # Exporter uniquement les lignes sélectionnées
+            # Exporter uniquement les lignes sélectionnées (code inchangé)
             active_ids = self._context.get('active_ids', [])
             if not active_ids:
                 return {
@@ -34,29 +48,29 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
                 }
             records = Report.browse(active_ids)
         else:
-            # Tout exporter en utilisant les filtres actuels
-            try:
-                # Récupérer le domaine de l'action principale
-                action = self.env.ref('pointeur_hr.pointeur_hr_action_hr_attendance_report')
-                domain = action.domain or []
-                
-                # Appliquer le domaine en ignorant les active_ids
-                ctx = dict(self._context)
-                ctx.pop('active_ids', None)
-                ctx.pop('active_id', None)
-                ctx.pop('active_model', None)
-                
-                records = Report.with_context(**ctx).search(domain)
-            except Exception as e:
-                _logger.error(f"Erreur lors de l'application du domaine: {e}")
-                # En cas d'erreur, récupérer toutes les lignes
-                records = Report.search([])
+            # Vérifier les dates
+            if not self.date_from or not self.date_to:
+                return {
+                    'warning': {
+                        'title': 'Attention',
+                        'message': 'Veuillez spécifier les dates de début et de fin.'
+                    }
+                }
+            
+            # Rechercher toutes les lignes dans l'intervalle de date
+            domain = [
+                ('date', '>=', self.date_from),
+                ('date', '<=', self.date_to)
+            ]
+            
+            # Récupérer et trier les enregistrements par nom d'employé
+            records = Report.search(domain, order='employee_id')
 
         if not records:
             return {
                 'warning': {
                     'title': 'Attention',
-                    'message': 'Aucune ligne à exporter.'
+                    'message': 'Aucune ligne à exporter pour la période sélectionnée.'
                 }
             }
 

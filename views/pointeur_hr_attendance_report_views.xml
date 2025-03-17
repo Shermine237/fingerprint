@@ -35,7 +35,7 @@
                 <attribute name="js_class">attendance_report_tree</attribute>
             </xpath>
         </field>
-    </record>
+    </record><field name="view_mode">tree,pivot,graph,control</field>
 
     <!-- Vue form pour le wizard d'export -->
     <record id="pointeur_hr_view_attendance_report_export_wizard_form" model="ir.ui.view">

@@ -5,7 +5,7 @@
         <field name="name">pointeur_hr.attendance.report.tree</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
-            <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false" decoration-danger="not check_in" js_class="attendance_report_tree">
+            <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false" js_class="attendance_report_tree">
                 <field name="name"/>
                 <field name="date"/>
                 <field name="employee_id"/>
@@ -15,7 +15,7 @@
                 <field name="source"/>
                 <field name="check_in"/>
                 <field name="check_out"/>
-                <field name="attendance_type_ids" widget="badge"/>
+                <field name="attendance_type_ids" widget="many2many_tags"/>
                 <field name="working_hours" widget="float_time" sum="Total"/>
                 <field name="regular_hours" widget="float_time" sum="Total"/>
                 <field name="overtime_hours" widget="float_time" sum="Total"/>
@@ -131,9 +131,10 @@
     <!-- Action pour le rapport de présence -->
     <record id="pointeur_hr_action_attendance_report" model="ir.actions.act_window">
         <field name="name">Rapport de présence détaillé</field>
+        <field name="type">ir.actions.act_window</field>
         <field name="res_model">pointeur_hr.attendance.report</field>
+        <field name="view_type">form</field>
         <field name="view_mode">tree,pivot,graph</field>
-        <field name="view_id" ref="pointeur_hr_view_attendance_report_tree"/>
         <field name="search_view_id" ref="pointeur_hr_view_attendance_report_search"/>
         <field name="context">{
             'search_default_this_month': 1,

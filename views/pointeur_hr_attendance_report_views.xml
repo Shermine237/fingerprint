@@ -5,7 +5,13 @@
         <field name="name">pointeur_hr.attendance.report.tree</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
-            <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false" js_class="attendance_report_tree">
+            <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false">
+                <header>
+                    <button name="%(pointeur_hr.action_pointeur_hr_attendance_report_export_wizard)d" 
+                            string="Exporter" 
+                            type="action" 
+                            class="btn btn-primary"/>
+                </header>
                 <field name="name"/>
                 <field name="date"/>
                 <field name="employee_id"/>
@@ -96,8 +102,8 @@
     </record>
 
     <!-- Action pour le rapport de présence -->
-    <record id="pointeur_hr_action_hr_attendance_report" model="ir.actions.act_window">
-        <field name="name">Rapport de présence détaillé</field>
+    <record id="pointeur_hr_action_attendance_report" model="ir.actions.act_window">
+        <field name="name">Rapport de présence</field>
         <field name="res_model">pointeur_hr.attendance.report</field>
         <field name="view_mode">tree,pivot,graph</field>
         <field name="search_view_id" ref="pointeur_hr_view_attendance_report_search"/>

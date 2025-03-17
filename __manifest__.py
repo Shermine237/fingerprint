@@ -1,32 +1,16 @@
 {
     'name': 'Pointeur HR',
-    'version': '1.0',
+    'version': '14.0.1.0.0',
     'category': 'Human Resources',
-    'sequence': 80,
-    'summary': 'Gestion des pointages des employés',
+    'summary': 'Gestion des présences avec localisation',
     'description': """
-        Module de gestion des pointages des employés avec importation depuis un pointeur.
-        
-        Fonctionnalités :
-        - Import des pointages depuis un fichier CSV
-        - Gestion des lieux de pointage
-        - Suivi des types de présence (heures supplémentaires, retard, départ anticipé)
-        - Calcul automatique des heures basé sur le calendrier de l'employé
-        - Rapport d'analyse des présences
-        - Export des rapports en Excel et PDF
+        Module de gestion des présences avec localisation
     """,
     'author': 'Shermine237',
     'website': 'https://github.com/Shermine237',
-    'depends': [
-        'base',
-        'hr_attendance',
-        'hr',
-        'web',
-    ],
+    'depends': ['base', 'hr_attendance', 'hr'],
     'data': [
         'security/ir.model.access.csv',
-        'views/pointeur_hr_assets.xml',
-        'wizards/pointeur_hr_attendance_report_export_views.xml',
         'views/pointeur_hr_employee_views.xml',
         'views/pointeur_hr_attendance_views.xml',
         'views/pointeur_hr_attendance_report_views.xml',
@@ -34,8 +18,10 @@
         'views/pointeur_hr_import_views.xml',
         'views/pointeur_hr_menus.xml',
         'reports/pointeur_hr_attendance_report_template.xml',
+        'wizards/pointeur_hr_attendance_report_export_views.xml',
     ],
     'installable': True,
     'application': True,
     'license': 'LGPL-3',
+    'auto_install': False,
 }

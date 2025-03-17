@@ -35,7 +35,7 @@
                     <field name="export_type" widget="radio"/>
                 </group>
                 <footer>
-                    <button name="action_export" string="Exporter" type="object" class="btn-primary"/>
+                    <button name="action_export" string="Exporter" type="object" class="btn-primary" js_class="export_button"/>
                     <button string="Annuler" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
@@ -129,9 +129,8 @@
     </record>
 
     <!-- Action pour le rapport de présence -->
-    <record id="pointeur_hr_action_attendance_report" model="ir.actions.act_window">
+    <record id="pointeur_hr_action_hr_attendance_report" model="ir.actions.act_window">
         <field name="name">Rapport de présence détaillé</field>
-        <field name="type">ir.actions.act_window</field>
         <field name="res_model">pointeur_hr.attendance.report</field>
         <field name="view_mode">tree,pivot,graph</field>
         <field name="search_view_id" ref="pointeur_hr_view_attendance_report_search"/>
@@ -144,7 +143,6 @@
     <!-- Action pour le wizard d'export -->
     <record id="pointeur_hr_action_attendance_report_export_wizard" model="ir.actions.act_window">
         <field name="name">Export du rapport</field>
-        <field name="type">ir.actions.act_window</field>
         <field name="res_model">pointeur_hr.attendance.report.export.wizard</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="pointeur_hr_view_attendance_report_export_wizard_form"/>

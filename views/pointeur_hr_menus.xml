@@ -30,7 +30,7 @@
     <menuitem id="pointeur_hr_menu_attendance_report"
               name="Rapport détaillé"
               parent="pointeur_hr_menu_reporting"
-              action="pointeur_hr_action_attendance_report"
+              action="pointeur_hr_action_hr_attendance_report"
               sequence="10"/>
 
     <!-- Ajout des lieux de pointage dans le menu de configuration des présences -->

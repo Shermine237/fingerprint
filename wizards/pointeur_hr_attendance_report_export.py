@@ -11,22 +11,20 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
 
     export_scope = fields.Selection([
         ('selected', 'Lignes sélectionnées'),
-        ('all', 'Tout exporter')
-    ], string='Portée de l\'export', required=True, default='selected')
+        ('all', 'Tout exporter (filtrace actuelle)')
+    ], string='Portée de l\'export', required=True, default='selected',
+        help='Choisissez d\'exporter uniquement les lignes sélectionnées ou toutes les lignes en utilisant les filtres de recherche actuels')
 
     def action_export(self):
         """Export le rapport dans le format sélectionné"""
-        active_ids = self.env.context.get('active_ids', [])
-        records = self.env['pointeur_hr.attendance.report']
+        Report = self.env['pointeur_hr.attendance.report']
         
-        # Si on veut tout exporter ou s'il n'y a pas de lignes sélectionnées
-        if self.export_scope == 'all':
-            # Exporter toutes les lignes avec les filtres actuels
-            domain = self.env.context.get('search_domain', [])
-            records = records.search(domain)
+        if self.export_scope == 'selected':
+            # Par défaut : exporter uniquement les lignes sélectionnées
+            records = Report.browse(self._context.get('active_ids', []))
         else:
-            # Sinon, exporter uniquement les lignes sélectionnées
-            records = records.browse(active_ids)
+            # Tout exporter en utilisant les filtres de recherche actuels
+            records = Report.search([])  # Les filtres sont automatiquement appliqués
 
         if self.export_type == 'excel':
             return records.action_export_xlsx()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Vue tree pour le rapport de présence -->
-    <record id="view_hr_attendance_report_tree" model="ir.ui.view">
+    <record id="view_pointeur_hr_attendance_report_tree" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.report.tree</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
@@ -31,7 +31,7 @@
     </record>
 
     <!-- Vue search pour le rapport de présence -->
-    <record id="view_hr_attendance_report_search" model="ir.ui.view">
+    <record id="view_pointeur_hr_attendance_report_search" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.report.search</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
@@ -84,7 +84,7 @@
     </record>
 
     <!-- Vue pivot pour le rapport de présence -->
-    <record id="view_hr_attendance_report_pivot" model="ir.ui.view">
+    <record id="view_pointeur_hr_attendance_report_pivot" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.report.pivot</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
@@ -104,7 +104,7 @@
     </record>
 
     <!-- Vue graph pour le rapport de présence -->
-    <record id="view_hr_attendance_report_graph" model="ir.ui.view">
+    <record id="view_pointeur_hr_attendance_report_graph" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.report.graph</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
@@ -121,7 +121,7 @@
         <field name="name">Rapport de présence détaillé</field>
         <field name="res_model">pointeur_hr.attendance.report</field>
         <field name="view_mode">tree,pivot,graph</field>
-        <field name="search_view_id" ref="view_hr_attendance_report_search"/>
+        <field name="search_view_id" ref="view_pointeur_hr_attendance_report_search"/>
         <field name="context">{
             'search_default_with_check_in': 1,
             'search_default_this_month': 1,
@@ -130,10 +130,10 @@
     </record>
 
     <!-- Bouton d'export toujours visible dans la barre d'outils -->
-    <record id="hr_attendance_report_view_toolbar_export" model="ir.ui.view">
+    <record id="view_pointeur_hr_attendance_report_toolbar_export" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.report.toolbar.export</field>
         <field name="model">pointeur_hr.attendance.report</field>
-        <field name="inherit_id" ref="view_hr_attendance_report_tree"/>
+        <field name="inherit_id" ref="pointeur_hr.view_pointeur_hr_attendance_report_tree"/>
         <field name="arch" type="xml">
             <tree position="before">
                 <header>

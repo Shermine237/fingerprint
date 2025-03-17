@@ -21,7 +21,7 @@
     
     <!-- Vue tree complète pour les présences -->
     <record id="pointeur_hr_attendance_view_tree" model="ir.ui.view">
-        <field name="name">pointeur.hr.attendance.tree</field>
+        <field name="name">pointeur_hr.attendance.tree</field>
         <field name="model">hr.attendance</field>
         <field name="arch" type="xml">
             <tree string="Présences" default_order="check_in desc">
@@ -43,7 +43,7 @@
     
     <!-- Vue de filtrage complète pour les présences -->
     <record id="pointeur_hr_attendance_view_filter" model="ir.ui.view">
-        <field name="name">pointeur.hr.attendance.filter</field>
+        <field name="name">pointeur_hr.attendance.filter</field>
         <field name="model">hr.attendance</field>
         <field name="arch" type="xml">
             <search string="Recherche de présences">
@@ -73,7 +73,7 @@
     </record>
     
     <!-- Vue form pour les lieux de pointage -->
-    <record id="pointeur_location_view_form" model="ir.ui.view">
+    <record id="pointeur_hr_location_view_form" model="ir.ui.view">
         <field name="name">pointeur_hr.location.form</field>
         <field name="model">pointeur_hr.location</field>
         <field name="arch" type="xml">
@@ -103,7 +103,7 @@
     </record>
     
     <!-- Vue tree pour les lieux de pointage -->
-    <record id="pointeur_location_view_tree" model="ir.ui.view">
+    <record id="pointeur_hr_location_view_tree" model="ir.ui.view">
         <field name="name">pointeur_hr.location.tree</field>
         <field name="model">pointeur_hr.location</field>
         <field name="arch" type="xml">
@@ -116,7 +116,7 @@
     </record>
     
     <!-- Vue search pour les lieux de pointage -->
-    <record id="pointeur_location_view_search" model="ir.ui.view">
+    <record id="pointeur_hr_location_view_search" model="ir.ui.view">
         <field name="name">pointeur_hr.location.search</field>
         <field name="model">pointeur_hr.location</field>
         <field name="arch" type="xml">
@@ -133,7 +133,7 @@
     </record>
     
     <!-- Action pour les lieux de pointage -->
-    <record id="pointeur_location_action" model="ir.actions.act_window">
+    <record id="pointeur_hr_location_action" model="ir.actions.act_window">
         <field name="name">Lieux de pointage</field>
         <field name="res_model">pointeur_hr.location</field>
         <field name="view_mode">tree,form</field>

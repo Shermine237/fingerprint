@@ -6,7 +6,7 @@
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
             <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false" decoration-danger="not check_in">
-                <button name="%(action_pointeur_hr_attendance_report_export_wizard)d" 
+                <button name="%(pointeur_hr.action_pointeur_hr_attendance_report_export_wizard)d" 
                         type="action" 
                         string="Exporter" 
                         icon="fa-download" 

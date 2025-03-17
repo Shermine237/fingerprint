@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="report_attendance_document">
+    <template id="pointeur_hr_report_attendance_document">
         <t t-call="web.external_layout">
             <div class="page">
                 <h2 class="text-center mb-4">Rapport de présence détaillé</h2>
@@ -87,20 +87,20 @@
         </t>
     </template>
 
-    <template id="report_attendance">
+    <template id="pointeur_hr_report_attendance">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="doc">
-                <t t-call="pointeur_hr.report_attendance_document"/>
+                <t t-call="pointeur_hr.pointeur_hr_report_attendance_document"/>
             </t>
         </t>
     </template>
 
-    <record id="action_report_attendance" model="ir.actions.report">
+    <record id="pointeur_hr_action_report_attendance" model="ir.actions.report">
         <field name="name">Rapport de présence</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">pointeur_hr.report_attendance</field>
-        <field name="report_file">pointeur_hr.report_attendance</field>
+        <field name="report_name">pointeur_hr.pointeur_hr_report_attendance</field>
+        <field name="report_file">pointeur_hr.pointeur_hr_report_attendance</field>
         <field name="print_report_name">'Rapport_presence_%s' % (datetime.now().strftime("%Y%m%d_%H%M%S"))</field>
         <field name="binding_model_id" ref="model_pointeur_hr_attendance_report"/>
         <field name="binding_type">report</field>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Vue form pour l'import des données du pointeur -->
-    <record id="view_pointeur_import_form" model="ir.ui.view">
+    <record id="pointeur_hr_view_import_form" model="ir.ui.view">
         <field name="name">pointeur_hr.import.form</field>
         <field name="model">pointeur_hr.import</field>
         <field name="arch" type="xml">
@@ -68,7 +68,7 @@
     </record>
 
     <!-- Vue tree pour l'import des données du pointeur -->
-    <record id="view_pointeur_import_tree" model="ir.ui.view">
+    <record id="pointeur_hr_view_import_tree" model="ir.ui.view">
         <field name="name">pointeur_hr.import.tree</field>
         <field name="model">pointeur_hr.import</field>
         <field name="arch" type="xml">
@@ -86,7 +86,7 @@
     </record>
 
     <!-- Vue search pour l'import des données du pointeur -->
-    <record id="view_pointeur_import_search" model="ir.ui.view">
+    <record id="pointeur_hr_view_import_search" model="ir.ui.view">
         <field name="name">pointeur_hr.import.search</field>
         <field name="model">pointeur_hr.import</field>
         <field name="arch" type="xml">
@@ -111,7 +111,7 @@
     </record>
 
     <!-- Vue form pour les lignes d'import -->
-    <record id="view_pointeur_import_line_form" model="ir.ui.view">
+    <record id="pointeur_hr_view_import_line_form" model="ir.ui.view">
         <field name="name">pointeur_hr.import.line.form</field>
         <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
@@ -156,7 +156,7 @@
     </record>
 
     <!-- Vue tree pour les lignes d'import -->
-    <record id="view_pointeur_import_line_tree" model="ir.ui.view">
+    <record id="pointeur_hr_view_import_line_tree" model="ir.ui.view">
         <field name="name">pointeur_hr.import.line.tree</field>
         <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
@@ -182,7 +182,7 @@
     </record>
 
     <!-- Vue search pour les lignes d'import -->
-    <record id="view_pointeur_import_line_search" model="ir.ui.view">
+    <record id="pointeur_hr_view_import_line_search" model="ir.ui.view">
         <field name="name">pointeur_hr.import.line.search</field>
         <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">

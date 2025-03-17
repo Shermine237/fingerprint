@@ -6,13 +6,6 @@
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
             <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false" decoration-danger="not check_in">
-                <header>
-                    <button name="%(pointeur_hr.action_pointeur_hr_attendance_report_export_wizard)d" 
-                            type="action" 
-                            string="Exporter" 
-                            icon="fa-download" 
-                            class="btn-primary"/>
-                </header>
                 <field name="name"/>
                 <field name="date"/>
                 <field name="employee_id"/>
@@ -29,6 +22,23 @@
                 <field name="late_hours" widget="float_time" sum="Total"/>
                 <field name="early_leave_hours" widget="float_time" sum="Total"/>
             </tree>
+        </field>
+    </record>
+
+    <!-- Vue form pour le wizard d'export -->
+    <record id="pointeur_hr_view_attendance_report_export_wizard_form" model="ir.ui.view">
+        <field name="name">pointeur_hr.attendance.report.export.wizard.form</field>
+        <field name="model">pointeur_hr.attendance.report.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Export du rapport de présence">
+                <group>
+                    <field name="export_type" widget="radio"/>
+                </group>
+                <footer>
+                    <button name="action_export" string="Exporter" type="object" class="btn-primary"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
         </field>
     </record>
 
@@ -128,5 +138,18 @@
             'search_default_this_month': 1,
             'search_default_employee': 1
         }</field>
+    </record>
+
+    <!-- Action pour le wizard d'export -->
+    <record id="pointeur_hr_action_attendance_report_export_wizard" model="ir.actions.act_window">
+        <field name="name">Export du rapport</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">pointeur_hr.attendance.report.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="pointeur_hr_view_attendance_report_export_wizard_form"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_pointeur_hr_attendance_report"/>
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">tree</field>
     </record>
 </odoo>

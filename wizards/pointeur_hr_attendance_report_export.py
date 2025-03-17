@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import api, fields, models
 
 class PointeurHrAttendanceReportExport(models.TransientModel):
     _name = 'pointeur_hr.attendance.report.export.wizard'
@@ -7,19 +7,20 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
     export_type = fields.Selection([
         ('excel', 'Excel'),
         ('pdf', 'PDF')
-    ], string='Type d\'export', default='excel', required=True)
+    ], string='Type d\'export', required=True, default='excel')
 
     def action_export(self):
+        """Export le rapport dans le format sélectionné"""
         active_ids = self.env.context.get('active_ids', [])
+        records = self.env['pointeur_hr.attendance.report']
         
-        # Si aucune ligne n'est sélectionnée, exporter toutes les lignes
-        if not active_ids:
-            active_ids = self.env['pointeur_hr.attendance.report'].search([]).ids
-            
-        records = self.env['pointeur_hr.attendance.report'].browse(active_ids)
-
-        # Filtrer les enregistrements sans heure d'entrée
-        records = records.filtered(lambda r: r.check_in)
+        # Si des lignes sont sélectionnées, exporter uniquement ces lignes
+        if active_ids:
+            records = records.browse(active_ids)
+        else:
+            # Sinon, exporter toutes les lignes avec les filtres actuels
+            domain = self.env.context.get('search_domain', [])
+            records = records.search(domain)
 
         if self.export_type == 'excel':
             return records.action_export_xlsx()

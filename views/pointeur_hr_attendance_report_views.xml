@@ -144,7 +144,7 @@
     <record id="pointeur_hr_action_hr_attendance_report" model="ir.actions.act_window">
         <field name="name">Rapport de présence détaillé</field>
         <field name="res_model">pointeur_hr.attendance.report</field>
-        <field name="view_mode">tree,pivot,graph</field>
+        <field name="view_mode">tree,pivot,graph,control</field>
         <field name="search_view_id" ref="view_pointeur_hr_attendance_report_search"/>
         <field name="context">{
             'search_default_this_month': 1,

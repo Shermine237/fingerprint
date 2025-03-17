@@ -19,8 +19,20 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
         """Export le rapport dans le format sélectionné"""
         Report = self.env['pointeur_hr.attendance.report']
         
+        # Récupérer la liste filtrée depuis la vue actuelle
+        ctx = dict(self._context)
+        
+        # Supprimer les active_ids pour ne pas filtrer sur la sélection
+        if self.export_scope == 'all':
+            ctx.pop('active_ids', None)
+            ctx.pop('active_id', None)
+            ctx.pop('active_model', None)
+        
+        # Rechercher avec le contexte actuel qui contient les filtres
+        records = Report.with_context(**ctx).search([])
+        
         if self.export_scope == 'selected':
-            # Exporter uniquement les lignes sélectionnées
+            # Filtrer uniquement les lignes sélectionnées
             active_ids = self._context.get('active_ids', [])
             if not active_ids:
                 return {
@@ -33,19 +45,7 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
                         'sticky': False,
                     }
                 }
-            records = Report.browse(active_ids)
-        else:
-            # Récupérer les lignes filtrées depuis la vue liste
-            # Utiliser le contexte actuel qui contient les filtres
-            ctx = dict(self._context)
-            
-            # Supprimer les active_ids pour ne pas filtrer sur la sélection
-            ctx.pop('active_ids', None)
-            ctx.pop('active_id', None)
-            ctx.pop('active_model', None)
-            
-            # Rechercher avec le contexte actuel qui contient les filtres
-            records = Report.with_context(**ctx).search([])
+            records = records.filtered(lambda r: r.id in active_ids)
 
         if not records:
             return {

@@ -1,8 +1,4 @@
 from odoo import api, fields, models
-import logging
-from datetime import datetime
-
-_logger = logging.getLogger(__name__)
 
 class PointeurHrAttendanceReportExport(models.TransientModel):
     _name = 'pointeur_hr.attendance.report.export.wizard'
@@ -15,62 +11,49 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
 
     export_scope = fields.Selection([
         ('selected', 'Lignes sélectionnées'),
-        ('all', 'Tout exporter (par date)')
-    ], string='Portée de l\'export', required=True, default='selected')
-
-    date_from = fields.Date(string='Date de début')
-    date_to = fields.Date(string='Date de fin')
-
-    @api.onchange('export_scope')
-    def _onchange_export_scope(self):
-        if self.export_scope == 'all':
-            # Initialiser avec le mois en cours
-            today = datetime.today()
-            self.date_from = datetime(today.year, today.month, 1).date()
-            self.date_to = datetime(today.year, today.month + 1, 1).date() if today.month < 12 else datetime(today.year + 1, 1, 1).date()
-        else:
-            self.date_from = False
-            self.date_to = False
+        ('all', 'Tout exporter (filtres actuels)')
+    ], string='Portée de l\'export', required=True, default='selected',
+        help='Choisissez d\'exporter uniquement les lignes sélectionnées ou toutes les lignes en utilisant les filtres de recherche actuels')
 
     def action_export(self):
         """Export le rapport dans le format sélectionné"""
         Report = self.env['pointeur_hr.attendance.report']
         
         if self.export_scope == 'selected':
-            # Exporter uniquement les lignes sélectionnées (code inchangé)
+            # Exporter uniquement les lignes sélectionnées
             active_ids = self._context.get('active_ids', [])
             if not active_ids:
                 return {
-                    'warning': {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
                         'title': 'Attention',
-                        'message': 'Veuillez sélectionner au moins une ligne à exporter.'
+                        'message': 'Veuillez sélectionner au moins une ligne à exporter.',
+                        'type': 'warning',
+                        'sticky': False,
                     }
                 }
             records = Report.browse(active_ids)
         else:
-            # Vérifier les dates
-            if not self.date_from or not self.date_to:
-                return {
-                    'warning': {
-                        'title': 'Attention',
-                        'message': 'Veuillez spécifier les dates de début et de fin.'
-                    }
-                }
+            # Tout exporter en utilisant les filtres actuels
+            ctx = dict(self._context)
+            # Supprimer les active_ids pour éviter de filtrer sur la sélection
+            ctx.pop('active_ids', None)
+            ctx.pop('active_id', None)
+            ctx.pop('active_model', None)
             
-            # Rechercher toutes les lignes dans l'intervalle de date
-            domain = [
-                ('date', '>=', self.date_from),
-                ('date', '<=', self.date_to)
-            ]
-            
-            # Récupérer et trier les enregistrements par nom d'employé
-            records = Report.search(domain, order='employee_id')
+            # Rechercher les enregistrements avec le contexte actuel
+            records = Report.with_context(**ctx).search([])
 
         if not records:
             return {
-                'warning': {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
                     'title': 'Attention',
-                    'message': 'Aucune ligne à exporter pour la période sélectionnée.'
+                    'message': 'Aucune ligne à exporter.',
+                    'type': 'warning',
+                    'sticky': False,
                 }
             }
 

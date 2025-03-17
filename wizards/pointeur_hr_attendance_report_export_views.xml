@@ -9,8 +9,6 @@
                 <group>
                     <field name="export_type" widget="radio"/>
                     <field name="export_scope" widget="radio"/>
-                    <field name="date_from" attrs="{'invisible': [('export_scope', '!=', 'all')], 'required': [('export_scope', '=', 'all')]}"/>
-                    <field name="date_to" attrs="{'invisible': [('export_scope', '!=', 'all')], 'required': [('export_scope', '=', 'all')]}"/>
                 </group>
                 <footer>
                     <button name="action_export" string="Exporter" type="object" class="btn-primary"/>

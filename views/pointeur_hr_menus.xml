@@ -1,42 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Menu Pointeur sous le menu des présences -->
-    <menuitem id="menu_pointeur_hr_import" 
-              name="Pointeur" 
-              parent="hr_attendance.menu_hr_attendance_root" 
-              sequence="20"/>
+    <!-- Menu racine -->
+    <menuitem id="pointeur_hr_menu_root"
+              name="Pointeur HR"
+              web_icon="pointeur_hr,static/description/icon.png"
+              sequence="80"/>
 
-    <!-- Ajout de l'import des données du pointeur -->
-    <menuitem id="menu_pointeur_import" 
-              name="Import du pointeur" 
-              parent="menu_pointeur_hr_import" 
-              action="pointeur_hr_action_import" 
+    <!-- Menu principal -->
+    <menuitem id="pointeur_hr_menu_main"
+              name="Pointages"
+              parent="pointeur_hr_menu_root"
               sequence="10"/>
 
-    <!-- Ajout des lignes d'import -->
-    <menuitem id="menu_pointeur_import_line" 
-              name="Lignes d'import" 
-              parent="menu_pointeur_hr_import" 
-              action="pointeur_hr.pointeur_hr_action_pointeur_import_line" 
+    <!-- Menu Configuration -->
+    <menuitem id="pointeur_hr_menu_config"
+              name="Configuration"
+              parent="pointeur_hr_menu_root"
+              sequence="100"/>
+
+    <!-- Menu Reporting -->
+    <menuitem id="pointeur_hr_menu_reporting"
+              name="Reporting"
+              parent="pointeur_hr_menu_root"
               sequence="20"/>
 
-    <!-- Menu Reporting des présences -->
-    <menuitem id="menu_pointeur_hr_reporting" 
-              name="Reporting" 
-              parent="hr_attendance.menu_hr_attendance_root" 
+    <!-- Sous-menus Pointages -->
+    <menuitem id="pointeur_hr_menu_attendance"
+              name="Pointages"
+              parent="pointeur_hr_menu_main"
+              action="hr_attendance.hr_attendance_action"
+              sequence="10"/>
+
+    <menuitem id="pointeur_hr_menu_import"
+              name="Import des pointages"
+              parent="pointeur_hr_menu_main"
+              action="pointeur_hr_action_import"
+              sequence="20"/>
+
+    <menuitem id="pointeur_hr_menu_import_line"
+              name="Lignes d'import"
+              parent="pointeur_hr_menu_main"
+              action="pointeur_hr_action_import_line"
               sequence="30"/>
 
-    <!-- Ajout du rapport détaillé dans le menu Reporting -->
-    <menuitem id="menu_pointeur_hr_attendance_report" 
-              name="Rapport détaillé" 
-              parent="menu_pointeur_hr_reporting" 
-              action="pointeur_hr_action_attendance_report" 
+    <!-- Sous-menus Reporting -->
+    <menuitem id="pointeur_hr_menu_attendance_report"
+              name="Rapport de présence"
+              parent="pointeur_hr_menu_reporting"
+              action="pointeur_hr_action_attendance_report"
               sequence="10"/>
 
-    <!-- Ajout des lieux de pointage dans le menu de configuration des présences -->
-    <menuitem id="menu_pointeur_location" 
-              name="Lieux de pointage" 
-              parent="hr_attendance.menu_hr_attendance_settings" 
-              action="pointeur_hr_action_location" 
+    <!-- Sous-menus Configuration -->
+    <menuitem id="pointeur_hr_menu_location"
+              name="Lieux de pointage"
+              parent="pointeur_hr_menu_config"
+              action="pointeur_hr_action_location"
               sequence="10"/>
 </odoo>

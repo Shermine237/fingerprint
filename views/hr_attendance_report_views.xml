@@ -6,6 +6,11 @@
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
             <tree string="Rapport de présence détaillé" create="false" edit="false" delete="false" decoration-danger="not check_in">
+                <button name="%(action_pointeur_hr_attendance_report_export_wizard)d" 
+                        type="action" 
+                        string="Exporter" 
+                        icon="fa-download" 
+                        class="btn-primary"/>
                 <field name="name"/>
                 <field name="date"/>
                 <field name="employee_id"/>
@@ -21,11 +26,6 @@
                 <field name="overtime_hours" widget="float_time" sum="Total"/>
                 <field name="late_hours" widget="float_time" sum="Total"/>
                 <field name="early_leave_hours" widget="float_time" sum="Total"/>
-                <button name="%(pointeur_hr.action_hr_attendance_report_export_wizard)d" 
-                        type="action" 
-                        string="Exporter" 
-                        icon="fa-download" 
-                        class="btn-primary"/>
             </tree>
         </field>
     </record>
@@ -127,23 +127,5 @@
             'search_default_this_month': 1,
             'search_default_employee': 1
         }</field>
-    </record>
-
-    <!-- Bouton d'export toujours visible dans la barre d'outils -->
-    <record id="view_pointeur_hr_attendance_report_toolbar_export" model="ir.ui.view">
-        <field name="name">pointeur_hr.attendance.report.toolbar.export</field>
-        <field name="model">pointeur_hr.attendance.report</field>
-        <field name="inherit_id" ref="pointeur_hr.view_pointeur_hr_attendance_report_tree"/>
-        <field name="arch" type="xml">
-            <tree position="before">
-                <header>
-                    <button name="%(pointeur_hr.action_hr_attendance_report_export_wizard)d" 
-                            type="action" 
-                            string="Exporter" 
-                            icon="fa-download" 
-                            class="btn-primary"/>
-                </header>
-            </tree>
-        </field>
     </record>
 </odoo>

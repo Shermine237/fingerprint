@@ -5,7 +5,7 @@
         <field name="name">pointeur_hr.employee.mapping.tree</field>
         <field name="model">pointeur_hr.employee.mapping</field>
         <field name="arch" type="xml">
-            <tree string="Correspondances employés" decoration-info="auto_created == True" decoration-success="similarity_score >= 0.8" decoration-warning="similarity_score < 0.5">
+            <tree string="Correspondances employés" decoration-info="auto_created == True" decoration-success="similarity_score &gt;= 0.8" decoration-warning="similarity_score &lt; 0.5">
                 <field name="imported_name"/>
                 <field name="employee_id"/>
                 <field name="similarity_score" widget="percentage"/>

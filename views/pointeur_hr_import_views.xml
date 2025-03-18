@@ -8,7 +8,6 @@
             <form string="Import des données du pointeur">
                 <header>
                     <button name="action_import_file" string="Importer" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
-                    <button name="action_search_employee_mappings" string="Rechercher correspondances" type="object" attrs="{'invisible': [('state', '!=', 'imported')]}"/>
                     <button name="action_create_attendances" string="Créer présences" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'imported')]}"/>
                     <button name="action_view_attendances" string="Voir présences" type="object" attrs="{'invisible': [('state', '!=', 'done')]}"/>
                     <button name="action_view_mappings" string="Voir correspondances" type="object" attrs="{'invisible': [('state', 'in', ['draft', 'cancelled'])]}"/>
@@ -122,8 +121,6 @@
         <field name="arch" type="xml">
             <form string="Ligne d'import">
                 <header>
-                    <button name="find_employee_mapping" string="Rechercher correspondance" type="object" class="oe_highlight" attrs="{'invisible': ['|', ('employee_id', '!=', False), ('state', '=', 'done')]}"/>
-                    <button name="action_create_mapping" string="Créer correspondance" type="object" class="oe_highlight" attrs="{'invisible': ['|', ('employee_id', '=', False), ('state', '=', 'done')]}"/>
                     <field name="state" widget="statusbar" statusbar_visible="imported,mapped,done,error"/>
                 </header>
                 <sheet>

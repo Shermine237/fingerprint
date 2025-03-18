@@ -345,13 +345,14 @@ class PointeurHrImport(models.Model):
                 'context': {
                     'active_id': self.id,
                     'active_model': 'pointeur_hr.import',
+                    'default_mapped_count': mapped_count,
                 }
             }
         
         # Sinon, créer directement les présences
-        return self._create_attendances()
+        return self._create_attendances(mapped_count)
     
-    def _create_attendances(self):
+    def _create_attendances(self, mapped_count=0):
         """Créer les présences pour les lignes avec un employé"""
         self.ensure_one()
         
@@ -391,7 +392,7 @@ class PointeurHrImport(models.Model):
 - {} présences ont été créées
 - {} erreurs ont été rencontrées
 - {} lignes restent sans correspondance""").format(
-            mapped_count if 'mapped_count' in locals() else 0, 
+            mapped_count, 
             attendance_count, 
             error_count, 
             len(self.line_ids.filtered(lambda l: not l.employee_id))

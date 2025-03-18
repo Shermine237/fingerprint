@@ -7,6 +7,7 @@ class PointeurHrSelectEmployees(models.TransientModel):
     
     import_id = fields.Many2one('pointeur_hr.import', string='Import', required=True)
     line_ids = fields.One2many('pointeur_hr.select.employees.line', 'wizard_id', string='Lignes')
+    mapped_count = fields.Integer(string='Lignes mappées automatiquement', readonly=True)
     
     @api.model
     def default_get(self, fields_list):
@@ -40,6 +41,9 @@ class PointeurHrSelectEmployees(models.TransientModel):
         """Confirmer les sélections et créer les présences"""
         self.ensure_one()
         
+        # Compter les nouvelles correspondances créées
+        manual_mapped_count = 0
+        
         # Mettre à jour les lignes d'import avec les employés sélectionnés
         for line in self.line_ids:
             if line.employee_id:
@@ -47,34 +51,27 @@ class PointeurHrSelectEmployees(models.TransientModel):
                     'employee_id': line.employee_id.id,
                     'state': 'mapped'
                 })
+                manual_mapped_count += 1
                 
                 # Créer une correspondance permanente si demandé
                 if line.create_mapping:
                     mapping = self.env['pointeur_hr.employee.mapping'].search([
-                        ('imported_name', '=', line.employee_name),
+                        ('name', '=', line.employee_name),
                         ('employee_id', '=', line.employee_id.id)
                     ], limit=1)
                     
                     if not mapping:
                         self.env['pointeur_hr.employee.mapping'].create({
-                            'imported_name': line.employee_name,
-                            'employee_id': line.employee_id.id
+                            'name': line.employee_name,
+                            'employee_id': line.employee_id.id,
+                            'import_id': self.import_id.id,
                         })
         
         # Créer les présences
-        self.import_id.action_create_attendances()
-        
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Présences créées'),
-                'message': _('Les présences ont été créées avec succès.'),
-                'sticky': False,
-                'type': 'success',
-            }
-        }
-        
+        total_mapped = self.mapped_count + manual_mapped_count
+        return self.import_id._create_attendances(total_mapped)
+
+
 class PointeurHrSelectEmployeesLine(models.TransientModel):
     _name = 'pointeur_hr.select.employees.line'
     _description = 'Ligne de l\'assistant de sélection des employés'

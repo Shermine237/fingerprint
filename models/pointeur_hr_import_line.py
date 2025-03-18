@@ -51,7 +51,7 @@ class PointeurHrImportLine(models.Model):
             for record in self:
                 if record.employee_name:  # On vérifie qu'il y a un nom à mapper
                     mapping = self.env['pointeur_hr.employee.mapping'].search(
-                        [('imported_name', '=', record.employee_name)], limit=1)
+                        [('name', '=', record.employee_name)], limit=1)
                     if mapping:
                         mapping.write({
                             'employee_id': vals['employee_id'],
@@ -60,8 +60,9 @@ class PointeurHrImportLine(models.Model):
                         })
                     else:
                         self.env['pointeur_hr.employee.mapping'].create({
-                            'imported_name': record.employee_name,
+                            'name': record.employee_name,
                             'employee_id': vals['employee_id'],
+                            'import_id': record.import_id.id,
                         })
 
         # Si on met à jour l'attendance_id, on met à jour l'état
@@ -95,7 +96,7 @@ class PointeurHrImportLine(models.Model):
             if not record.employee_id and record.employee_name:
                 # Chercher d'abord dans les correspondances existantes
                 mapping = self.env['pointeur_hr.employee.mapping'].search(
-                    [('imported_name', '=', record.employee_name)], limit=1)
+                    [('name', '=', record.employee_name)], limit=1)
                 if mapping:
                     record.write({'employee_id': mapping.employee_id.id})
                     continue

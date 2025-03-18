@@ -9,6 +9,7 @@ class PointeurHrAttendance(models.Model):
 
     # Champs de base
     location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage')
+    import_id = fields.Many2one('pointeur_hr.import', string='Import source')
     import_line_id = fields.Many2one('pointeur_hr.import.line', string='Ligne d\'import')
     source = fields.Selection([
         ('manual', 'Manuel'),

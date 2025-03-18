@@ -9,6 +9,8 @@
             <xpath expr="//field[@name='check_out']" position="after">
                 <field name="location_id"/>
                 <field name="source"/>
+                <field name="import_id" attrs="{'invisible': [('source', '!=', 'import')]}"/>
+                <field name="import_line_id" attrs="{'invisible': [('source', '!=', 'import')]}"/>
                 <field name="attendance_type_ids" widget="badge"/>
                 <field name="working_hours" widget="float_time"/>
                 <field name="regular_hours" widget="float_time"/>
@@ -31,6 +33,7 @@
                 <field name="check_out"/>
                 <field name="location_id"/>
                 <field name="source"/>
+                <field name="import_id" invisible="1"/>
                 <field name="attendance_type_ids" widget="badge"/>
                 <field name="working_hours" widget="float_time" sum="Total"/>
                 <field name="regular_hours" widget="float_time" sum="Total"/>
@@ -49,12 +52,16 @@
             <search string="Recherche de présences">
                 <field name="employee_id"/>
                 <field name="department_id"/>
+                <field name="check_in"/>
+                <field name="check_out"/>
                 <field name="location_id"/>
                 <field name="source"/>
+                <field name="import_id"/>
                 <field name="attendance_type_ids"/>
                 <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids', 'ilike', 'supplementaire')]"/>
                 <filter name="filter_late" string="Retards" domain="[('attendance_type_ids', 'ilike', 'retard')]"/>
                 <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids', 'ilike', 'depart_anticipe')]"/>
+                <filter string="Aujourd'hui" name="today" domain="[('check_in', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))), ('check_in', '&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
                 <separator/>
                 <filter name="group_by_employee" string="Employé" context="{'group_by': 'employee_id'}"/>
                 <filter name="group_by_department" string="Département" context="{'group_by': 'department_id'}"/>

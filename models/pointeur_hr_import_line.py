@@ -9,6 +9,7 @@ class PointeurHrImportLine(models.Model):
 
     import_id = fields.Many2one('pointeur_hr.import', string='Import', required=True, ondelete='cascade')
     employee_name = fields.Char(string='Nom employé', required=True)
+    employee_id = fields.Many2one('hr.employee', string='Employé correspondant')
     display_id = fields.Char(string='ID Badge')
     payroll_id = fields.Char(string='ID Paie')
     department = fields.Char(string='Département')
@@ -29,6 +30,7 @@ class PointeurHrImportLine(models.Model):
 
     state = fields.Selection([
         ('imported', 'Importé'),
+        ('mapped', 'Correspondance trouvée'),
         ('done', 'Terminé'),
         ('error', 'Erreur')
     ], string='État', default='imported', required=True)
@@ -43,6 +45,25 @@ class PointeurHrImportLine(models.Model):
                 line.total_hours = 0.0
 
     def write(self, vals):
+        # Si on met à jour l'employee_id, on met à jour l'état et on crée/met à jour la correspondance
+        if 'employee_id' in vals and vals['employee_id']:
+            vals['state'] = 'mapped'
+            for record in self:
+                if record.employee_name:  # On vérifie qu'il y a un nom à mapper
+                    mapping = self.env['pointeur_hr.employee.mapping'].search(
+                        [('imported_name', '=', record.employee_name)], limit=1)
+                    if mapping:
+                        mapping.write({
+                            'employee_id': vals['employee_id'],
+                            'last_used': fields.Datetime.now(),
+                            'import_count': mapping.import_count + 1
+                        })
+                    else:
+                        self.env['pointeur_hr.employee.mapping'].create({
+                            'imported_name': record.employee_name,
+                            'employee_id': vals['employee_id'],
+                        })
+
         # Si on met à jour l'attendance_id, on met à jour l'état
         if 'attendance_id' in vals and vals['attendance_id']:
             vals['state'] = 'done'
@@ -67,3 +88,23 @@ class PointeurHrImportLine(models.Model):
         for record in self:
             if record.check_in and record.check_out and record.check_out < record.check_in:
                 raise ValidationError(_('La date/heure de sortie ne peut pas être antérieure à la date/heure d\'entrée.'))
+
+    def find_employee_mapping(self):
+        """Recherche automatique des correspondances employés"""
+        for record in self:
+            if not record.employee_id and record.employee_name:
+                # Chercher d'abord dans les correspondances existantes
+                mapping = self.env['pointeur_hr.employee.mapping'].search(
+                    [('imported_name', '=', record.employee_name)], limit=1)
+                if mapping:
+                    record.write({'employee_id': mapping.employee_id.id})
+                    continue
+
+                # Si pas de correspondance, chercher un employé avec un nom similaire
+                employee = self.env['hr.employee'].search([
+                    '|',
+                    ('name', '=ilike', record.employee_name),
+                    ('name', '=ilike', record.employee_name.strip())
+                ], limit=1)
+                if employee:
+                    record.write({'employee_id': employee.id})

@@ -61,7 +61,9 @@
                 <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids', 'ilike', 'supplementaire')]"/>
                 <filter name="filter_late" string="Retards" domain="[('attendance_type_ids', 'ilike', 'retard')]"/>
                 <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids', 'ilike', 'depart_anticipe')]"/>
-                <filter string="Aujourd'hui" name="today" domain="[('check_in', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))), ('check_in', '&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+                <separator/>
+                <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01')), ('date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce jour" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <separator/>
                 <filter name="group_by_employee" string="Employé" context="{'group_by': 'employee_id'}"/>
                 <filter name="group_by_department" string="Département" context="{'group_by': 'department_id'}"/>
@@ -77,5 +79,8 @@
         <field name="view_id" ref="pointeur_hr_attendance_view_tree"/>
         <field name="search_view_id" ref="pointeur_hr_attendance_view_filter"/>
         <field name="name">Présences</field>
+        <field name="context">{
+            'search_default_this_month': 1,
+        }</field>
     </record>
 </odoo>

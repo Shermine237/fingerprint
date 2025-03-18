@@ -1,6 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+        <!-- Menu Configuration -->
+        <menuitem id="menu_pointeur_hr_config"
+                  name="Configuration Pointeur"
+                  parent="hr_attendance.menu_hr_attendance_settings"
+                  sequence="100"/>
+
+        <!-- Menu Lieux de pointage -->
+        <menuitem id="menu_pointeur_hr_location"
+                  name="Lieux de pointage"
+                  parent="menu_pointeur_hr_config"
+                  action="pointeur_hr.action_pointeur_hr_location"
+                  sequence="10"/>
+
+        <!-- Menu Correspondances employés -->
+        <menuitem id="menu_pointeur_hr_employee_mapping"
+                  name="Correspondances employés"
+                  parent="menu_pointeur_hr_config"
+                  action="pointeur_hr.action_pointeur_hr_employee_mapping"
+                  sequence="20"/>
+
         <!-- Menu Pointeur sous le menu des présences -->
         <menuitem id="pointeur_hr_menu_import_root"
                   name="Pointeur"
@@ -33,25 +53,5 @@
                   parent="pointeur_hr_menu_reporting"
                   action="pointeur_hr.action_pointeur_hr_attendance_report"
                   sequence="10"/>
-
-        <!-- Menu Configuration -->
-        <menuitem id="menu_pointeur_hr_config"
-                  name="Configuration Pointeur"
-                  parent="hr_attendance.menu_hr_attendance_settings"
-                  sequence="100"/>
-
-        <!-- Menu Lieux de pointage -->
-        <menuitem id="menu_pointeur_hr_location"
-                  name="Lieux de pointage"
-                  parent="menu_pointeur_hr_config"
-                  action="pointeur_hr.action_pointeur_hr_location"
-                  sequence="10"/>
-
-        <!-- Menu Correspondances employés -->
-        <menuitem id="menu_pointeur_hr_employee_mapping"
-                  name="Correspondances employés"
-                  parent="menu_pointeur_hr_config"
-                  action="pointeur_hr.action_pointeur_hr_employee_mapping"
-                  sequence="20"/>
     </data>
 </odoo>

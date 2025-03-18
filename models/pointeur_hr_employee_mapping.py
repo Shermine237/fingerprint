@@ -5,15 +5,12 @@ from odoo.tools.translate import _
 class PointeurHrEmployeeMapping(models.Model):
     _name = 'pointeur_hr.employee.mapping'
     _description = 'Correspondance des noms importés avec les employés'
-    _rec_name = 'imported_name'
+    _order = 'last_used desc, import_count desc'
 
     imported_name = fields.Char(string='Nom importé', required=True, index=True)
     employee_id = fields.Many2one('hr.employee', string='Employé', required=True)
     last_used = fields.Datetime(string='Dernière utilisation', default=fields.Datetime.now)
     import_count = fields.Integer(string='Nombre d\'imports', default=1)
-    similarity_score = fields.Float(string='Score de similarité', compute='_compute_similarity_score')
-    auto_created = fields.Boolean(string='Créé automatiquement')
-    parent_mapping_id = fields.Many2one('pointeur_hr.employee.mapping', string='Correspondance parente')
     import_ids = fields.Many2many('pointeur_hr.import', string='Imports', compute='_compute_import_ids')
 
     _sql_constraints = [
@@ -24,124 +21,83 @@ class PointeurHrEmployeeMapping(models.Model):
     def name_get(self):
         return [(rec.id, f"{rec.imported_name} → {rec.employee_id.name}") for rec in self]
 
-    def _compute_similarity_score(self):
-        """Calcule le score de similarité entre le nom importé et le nom de l'employé"""
-        for record in self:
-            if record.imported_name and record.employee_id:
-                record.similarity_score = self.env['pointeur_hr.import']._name_similarity_score(
-                    record.imported_name, record.employee_id.name)
-            else:
-                record.similarity_score = 0
-
     def action_find_similar_names(self):
-        """Recherche d'autres noms similaires qui pourraient correspondre au même employé"""
+        """Recherche d'autres noms qui correspondent au même employé"""
         self.ensure_one()
         if not self.employee_id:
             raise UserError(_("Vous devez d'abord sélectionner un employé."))
             
-        # Recherche des correspondances existantes
+        # Recherche des correspondances existantes pour cet employé
         other_mappings = self.search([
             ('employee_id', '=', self.employee_id.id),
             ('id', '!=', self.id)
         ])
         
-        # Recherche des lignes d'import avec des noms similaires
+        # Recherche des lignes d'import avec le même nom
         import_lines = self.env['pointeur_hr.import.line'].search([
-            ('employee_name', '!=', self.imported_name),
+            ('employee_name', '=', self.imported_name),
             ('employee_id', '=', False)
-        ], limit=100)
-        
-        similar_names = []
-        for line in import_lines:
-            score = self.env['pointeur_hr.import']._name_similarity_score(
-                self.imported_name, line.employee_name)
-            if score >= 0.5:  # Seuil de similarité
-                similar_names.append((line, score))
-                
-        # Trier par score de similarité
-        similar_names.sort(key=lambda x: x[1], reverse=True)
+        ], limit=10)
         
         # Construire le message
-        message = _("<h3>Noms similaires pour '{}'</h3>").format(self.imported_name)
+        message = _("<h3>Informations pour '{}'</h3>").format(self.imported_name)
         
         # Ajouter les correspondances existantes
         if other_mappings:
-            message += _("<h4>Autres correspondances pour cet employé :</h4><ul>")
+            message += _("<h4>Autres noms utilisés pour cet employé :</h4><ul>")
             for mapping in other_mappings:
                 message += _("<li>{} (utilisé {} fois)</li>").format(
                     mapping.imported_name, mapping.import_count)
             message += "</ul>"
             
-        # Ajouter les noms similaires trouvés
-        if similar_names:
-            message += _("<h4>Noms similaires trouvés dans les imports :</h4><ul>")
-            for line, score in similar_names[:10]:  # Limiter aux 10 meilleurs
-                message += _("<li>{} (score : {:.2f}) - <a href='#' data-oe-model='pointeur_hr.import.line' data-oe-id='{}'>Voir</a></li>").format(
-                    line.employee_name, score, line.id)
+        # Ajouter les lignes d'import trouvées
+        if import_lines:
+            message += _("<h4>Lignes d'import avec ce nom :</h4><ul>")
+            for line in import_lines:
+                message += _("<li>Import #{} - {} - <a href='#' data-oe-model='pointeur_hr.import.line' data-oe-id='{}'>Voir</a></li>").format(
+                    line.import_id.id, line.import_id.name, line.id)
             message += "</ul>"
-            
-            # Ajouter un bouton pour créer des correspondances automatiquement
-            message += _("<p><a class='btn btn-primary' href='/web#action=create_similar_mappings&mapping_id={}'>Créer les correspondances pour les noms similaires</a></p>").format(self.id)
         else:
-            message += _("<p>Aucun nom similaire trouvé.</p>")
+            message += _("<p>Aucune ligne d'import avec ce nom n'a été trouvée.</p>")
             
         # Afficher le message
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Recherche de noms similaires'),
+                'title': _('Informations sur la correspondance'),
                 'message': message,
                 'sticky': True,
                 'type': 'info',
             }
         }
     
-    def action_create_similar_mappings(self):
-        """Crée des correspondances pour tous les noms similaires"""
+    def action_create_mapping(self):
+        """Crée une correspondance pour l'employé sélectionné"""
         self.ensure_one()
         if not self.employee_id:
             raise UserError(_("Vous devez d'abord sélectionner un employé."))
             
-        # Recherche des lignes d'import avec des noms similaires
+        # Recherche des lignes d'import avec le même nom
         import_lines = self.env['pointeur_hr.import.line'].search([
-            ('employee_name', '!=', self.imported_name),
+            ('employee_name', '=', self.imported_name),
             ('employee_id', '=', False)
-        ], limit=100)
+        ])
         
-        created_count = 0
+        # Mise à jour des lignes d'import
         for line in import_lines:
-            score = self.env['pointeur_hr.import']._name_similarity_score(
-                self.imported_name, line.employee_name)
-            if score >= 0.7:  # Seuil plus élevé pour la création automatique
-                # Vérifier si une correspondance existe déjà pour ce nom et cet employé
-                existing = self.search([
-                    ('imported_name', '=', line.employee_name),
-                    ('employee_id', '=', self.employee_id.id)
-                ], limit=1)
-                if not existing:
-                    # Créer une nouvelle correspondance
-                    self.create({
-                        'imported_name': line.employee_name,
-                        'employee_id': self.employee_id.id,
-                        'auto_created': True,
-                        'parent_mapping_id': self.id
-                    })
-                    created_count += 1
-                    
-                    # Mettre à jour la ligne d'import
-                    line.write({
-                        'employee_id': self.employee_id.id,
-                        'state': 'mapped'
-                    })
+            line.write({
+                'employee_id': self.employee_id.id,
+                'state': 'mapped'
+            })
         
         # Message de confirmation
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Création de correspondances'),
-                'message': _('%d nouvelles correspondances créées.') % created_count,
+                'title': _('Mise à jour des lignes d\'import'),
+                'message': _('%d lignes d\'import mises à jour.') % len(import_lines),
                 'sticky': False,
                 'type': 'success',
             }

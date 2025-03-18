@@ -5,14 +5,13 @@
         <field name="name">pointeur_hr.employee.mapping.tree</field>
         <field name="model">pointeur_hr.employee.mapping</field>
         <field name="arch" type="xml">
-            <tree string="Correspondances employés" decoration-info="auto_created == True" decoration-success="similarity_score &gt;= 0.8" decoration-warning="similarity_score &lt; 0.5">
+            <tree string="Correspondances employés">
                 <field name="imported_name"/>
                 <field name="employee_id"/>
-                <field name="similarity_score" widget="percentage"/>
                 <field name="import_count"/>
                 <field name="last_used"/>
-                <field name="auto_created"/>
-                <button name="action_find_similar_names" type="object" icon="fa-search" string="Rechercher similaires"/>
+                <button name="action_find_similar_names" type="object" icon="fa-info-circle" string="Informations"/>
+                <button name="action_create_mapping" type="object" icon="fa-check" string="Appliquer"/>
             </tree>
         </field>
     </record>
@@ -24,8 +23,8 @@
         <field name="arch" type="xml">
             <form string="Correspondance employé">
                 <header>
-                    <button name="action_find_similar_names" string="Rechercher noms similaires" type="object" class="oe_highlight"/>
-                    <button name="action_create_similar_mappings" string="Créer correspondances similaires" type="object" confirm="Cela va créer des correspondances pour tous les noms similaires. Continuer ?"/>
+                    <button name="action_find_similar_names" string="Voir informations" type="object" class="oe_highlight"/>
+                    <button name="action_create_mapping" string="Appliquer correspondance" type="object" confirm="Cela va mettre à jour toutes les lignes d'import avec ce nom. Continuer ?"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -36,13 +35,10 @@
                     <group>
                         <group>
                             <field name="employee_id" options="{'no_create': True}"/>
-                            <field name="similarity_score" widget="percentage"/>
                         </group>
                         <group>
                             <field name="last_used"/>
                             <field name="import_count"/>
-                            <field name="auto_created"/>
-                            <field name="parent_mapping_id" attrs="{'invisible': [('parent_mapping_id', '=', False)]}"/>
                         </group>
                     </group>
                     <group string="Imports utilisant cette correspondance" attrs="{'invisible': [('import_count', '=', 0)]}">

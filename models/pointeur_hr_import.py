@@ -4,6 +4,7 @@ import base64
 import csv
 import io
 import logging
+import re
 from datetime import datetime, timedelta, time
 import pytz
 
@@ -150,140 +151,45 @@ class PointeurHrImport(models.Model):
             return False
 
     def _normalize_name(self, name):
-        """Normalise un nom pour la comparaison
-        - Convertit en minuscules
-        - Supprime les espaces en début/fin
-        - Supprime les espaces multiples
-        - Gère les initiales"""
+        """Normalise un nom pour la comparaison"""
         if not name:
-            return ''
-            
-        # Conversion en minuscules et suppression des espaces
-        name = name.lower().strip()
-        
-        # Suppression des espaces multiples
-        name = ' '.join(name.split())
-        
+            return ""
+        # Conversion en minuscules
+        name = name.lower()
+        # Suppression des espaces en début et fin
+        name = name.strip()
+        # Remplacement des caractères spéciaux par des espaces
+        name = re.sub(r'[^\w\s]', ' ', name)
+        # Remplacement des espaces multiples par un seul espace
+        name = re.sub(r'\s+', ' ', name)
         return name
-
+        
     def _get_initials(self, name):
         """Extrait les initiales d'un nom"""
         if not name:
-            return ''
-        
-        # Découpage en mots
-        words = name.split()
-        
+            return ""
+        # Normalisation
+        name = self._normalize_name(name)
         # Extraction des initiales
+        words = name.split()
         initials = ''.join(word[0] for word in words if word)
-        
         return initials.lower()
 
     def _name_similarity_score(self, name1, name2):
-        """Calcule un score de similarité entre deux noms
-        - Score de 0 à 1, 1 étant une correspondance parfaite
-        - Prend en compte :
-          * Les mots exacts
-          * Les mots partiels (min 3 caractères)
-          * Les initiales
-          * Les noms composés
-          * Les inversions de prénom/nom"""
+        """Calcule un score de similarité entre deux noms.
+        Retourne 1 si les noms sont identiques, 0 sinon."""
         if not name1 or not name2:
             return 0
             
-        # Normalisation des noms
-        name1 = self._normalize_name(name1)
-        name2 = self._normalize_name(name2)
+        # Normalisation des noms (minuscules, suppression des espaces en début/fin)
+        name1 = name1.lower().strip()
+        name2 = name2.lower().strip()
         
-        # Si les noms sont identiques après normalisation
+        # Vérification d'égalité exacte
         if name1 == name2:
             return 1
-            
-        # Découpage en mots
-        words1 = name1.split()
-        words2 = name2.split()
-        
-        # Score basé sur les mots communs
-        common_words = set(words1).intersection(set(words2))
-        if not common_words:
-            # Si aucun mot commun, on vérifie les initiales
-            initials1 = self._get_initials(name1)
-            initials2 = self._get_initials(name2)
-            if initials1 and initials2 and initials1 == initials2:
-                return 0.6
-                
-            # Vérifier l'inversion prénom/nom
-            if len(words1) >= 2 and len(words2) >= 2:
-                # Essayer avec l'inversion du premier et dernier mot
-                inverted1 = ' '.join([words1[-1]] + words1[:-1])
-                inverted2 = ' '.join([words2[-1]] + words2[:-1])
-                
-                if inverted1 == name2:
-                    return 0.9  # Forte probabilité que ce soit la même personne
-                if inverted2 == name1:
-                    return 0.9
-                    
-                # Vérifier si l'inversion partielle correspond
-                inverted_common = set(inverted1.split()).intersection(set(words2))
-                if inverted_common:
-                    return 0.7 * len(inverted_common) / max(len(words1), len(words2))
-            
-            # Vérifier les abréviations (ex: J. Doe vs John Doe)
-            for w1 in words1:
-                for w2 in words2:
-                    if (len(w1) == 2 and w1.endswith('.') and w2.startswith(w1[0].lower())) or \
-                       (len(w2) == 2 and w2.endswith('.') and w1.startswith(w2[0].lower())):
-                        return 0.7
-            
+        else:
             return 0
-            
-        # Score de base sur les mots exacts
-        exact_score = len(common_words) / max(len(words1), len(words2))
-        
-        # Score pour les mots partiels et composés
-        partial_matches = 0
-        for w1 in words1:
-            for w2 in words2:
-                # Si un mot est contenu dans l'autre (minimum 3 caractères)
-                if w1 != w2 and (w1 in w2 or w2 in w1) and len(min(w1, w2, key=len)) >= 3:
-                    partial_matches += 0.5
-                # Si les 3 premiers caractères sont identiques
-                elif len(w1) >= 3 and len(w2) >= 3 and w1[:3] == w2[:3]:
-                    partial_matches += 0.3
-                # Si c'est un nom composé (avec tiret ou espace)
-                elif ('-' in w1 or '-' in w2) and any(part in w2 for part in w1.split('-')) or any(part in w1 for part in w2.split('-')):
-                    partial_matches += 0.4
-                # Gestion des diminutifs courants (ex: Bob/Robert, Will/William)
-                elif self._check_diminutives(w1, w2):
-                    partial_matches += 0.6
-                    
-        partial_score = partial_matches / max(len(words1), len(words2))
-        
-        # Score final combiné
-        return min(1.0, exact_score + partial_score)
-
-    def _check_diminutives(self, name1, name2):
-        """Vérifie si deux noms sont des diminutifs l'un de l'autre"""
-        diminutives = {
-            'bob': 'robert',
-            'will': 'william',
-            'joe': 'joseph',
-            'sam': 'samuel',
-            'tom': 'thomas',
-            'tim': 'timothy',
-            'nick': 'nicolas',
-            'alex': 'alexandre',
-        }
-        
-        name1 = name1.lower()
-        name2 = name2.lower()
-        
-        if name1 in diminutives and diminutives[name1] == name2:
-            return True
-        if name2 in diminutives and diminutives[name2] == name1:
-            return True
-            
-        return False
 
     def message_post(self, **kwargs):
         """Surcharge pour formater les dates dans le fuseau horaire de l'utilisateur"""
@@ -473,80 +379,6 @@ class PointeurHrImport(models.Model):
             
         return True
 
-    def action_find_employee_mapping(self):
-        """Recherche automatique des correspondances employés"""
-        self.ensure_one()
-        if self.state != 'imported':
-            raise UserError(_("Vous ne pouvez rechercher les correspondances que si l'import est à l'état 'Importé'."))
-            
-        # Vérification qu'il y a des lignes à traiter
-        if not self.line_ids:
-            raise UserError(_("Aucune ligne à traiter."))
-            
-        # Recherche des correspondances pour chaque ligne
-        mapped_before = len(self.line_ids.filtered(lambda l: l.employee_id))
-        mapped_count = 0
-        new_mappings = 0
-        existing_mappings = 0
-        
-        for line in self.line_ids:
-            if line.employee_id or line.state == 'done':
-                continue  # Déjà traitée ou correspondance déjà trouvée
-            
-            # Vérifier si une correspondance existe déjà
-            mapping = self.env['pointeur_hr.employee.mapping'].search(
-                [('imported_name', '=', line.employee_name)], limit=1)
-                
-            if mapping:
-                line.write({'employee_id': mapping.employee_id.id, 'state': 'mapped'})
-                mapping.write({
-                    'last_used': fields.Datetime.now(),
-                    'import_count': mapping.import_count + 1
-                })
-                mapped_count += 1
-                existing_mappings += 1
-                continue
-                
-            # Si pas de correspondance existante, chercher un employé
-            employee = self._find_employee_by_name(line.employee_name)
-            if employee:
-                line.write({'employee_id': employee.id, 'state': 'mapped'})
-                
-                # Créer une nouvelle correspondance
-                self.env['pointeur_hr.employee.mapping'].create({
-                    'imported_name': line.employee_name,
-                    'employee_id': employee.id,
-                })
-                mapped_count += 1
-                new_mappings += 1
-                
-        # Message de confirmation détaillé
-        total_count = len(self.line_ids)
-        total_mapped = mapped_before + mapped_count
-        
-        message = _("""Recherche des correspondances terminée :
-- {}/{} lignes ont maintenant une correspondance ({} nouvelles)
-- {} correspondances existantes utilisées
-- {} nouvelles correspondances créées
-- {} lignes restent sans correspondance""").format(
-            total_mapped, total_count, mapped_count,
-            existing_mappings, new_mappings,
-            total_count - total_mapped
-        )
-        
-        self.message_post(body=message)
-        
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Recherche des correspondances'),
-                'message': _('%s/%s lignes ont une correspondance.') % (total_mapped, total_count),
-                'sticky': False,
-                'type': 'info',
-            }
-        }
-
     def action_view_attendances(self):
         """Voir les présences créées"""
         self.ensure_one()
@@ -591,13 +423,9 @@ class PointeurHrImport(models.Model):
         self.line_ids.unlink()
 
     def _find_employee_by_name(self, name):
-        """Trouve un employé par son nom de manière intelligente.
-        Gère les variations dans l'écriture des noms :
-        - Majuscules/minuscules
-        - Espaces
-        - Initiales
-        - Noms composés
-        - Ordres des mots"""
+        """Trouve un employé par son nom.
+        Vérifie d'abord dans les correspondances existantes,
+        puis recherche un employé avec le même nom."""
         if not name:
             return False
             
@@ -616,76 +444,29 @@ class PointeurHrImport(models.Model):
             })
             return mapping.employee_id
             
-        # Recherche de tous les employés
-        employees = self.env['hr.employee'].search([])
-        best_match = False
-        best_score = 0
-        matches = []
+        # Recherche d'un employé avec le même nom
+        employee = self.env['hr.employee'].search([
+            ('name', '=', name)
+        ], limit=1)
         
-        # Log pour le débogage
-        _logger.info("Recherche de correspondance pour le nom : %s", name)
-        
-        for employee in employees:
-            # Calcul du score de similarité
-            score = self._name_similarity_score(name, employee.name)
+        if employee:
+            _logger.info("Employé trouvé avec le même nom : %s", name)
             
-            # Log des scores pour le débogage
-            if score > 0:
-                _logger.info("Score de correspondance : %.2f entre '%s' et '%s'", score, name, employee.name)
-                matches.append((employee, score))
-            
-            # Si le score est meilleur que le précédent
-            if score > best_score:
-                best_score = score
-                best_match = employee
-                _logger.info("Nouveau meilleur score : %.2f avec l'employé '%s'", score, employee.name)
-                
-            # Si correspondance parfaite, on arrête là
-            if score == 1:
-                _logger.info("Correspondance parfaite trouvée avec l'employé '%s'", employee.name)
-                
-                # Créer une correspondance pour la prochaine fois
-                if not self.env['pointeur_hr.employee.mapping'].search([
-                    ('imported_name', '=', name),
-                    ('employee_id', '=', employee.id)
-                ]):
-                    self.env['pointeur_hr.employee.mapping'].create({
-                        'imported_name': name,
-                        'employee_id': employee.id
-                    })
-                    _logger.info("Nouvelle correspondance créée : %s -> %s", name, employee.name)
-                
-                return employee
-                
-        # Log du résultat final
-        if best_match and best_score >= 0.5:
-            _logger.info("Meilleure correspondance trouvée : '%s' (score : %.2f)", best_match.name, best_score)
-            
-            # Créer une correspondance automatique si le score est très bon
-            if best_score >= 0.8 and not self.env['pointeur_hr.employee.mapping'].search([
+            # Créer une correspondance pour la prochaine fois
+            if not self.env['pointeur_hr.employee.mapping'].search([
                 ('imported_name', '=', name),
-                ('employee_id', '=', best_match.id)
+                ('employee_id', '=', employee.id)
             ]):
                 self.env['pointeur_hr.employee.mapping'].create({
                     'imported_name': name,
-                    'employee_id': best_match.id,
-                    'auto_created': True
+                    'employee_id': employee.id
                 })
-                _logger.info("Nouvelle correspondance automatique créée : %s -> %s (score: %.2f)", 
-                            name, best_match.name, best_score)
-        else:
-            _logger.warning("Aucune correspondance trouvée pour le nom : '%s' (meilleur score : %.2f)", name, best_score)
+                _logger.info("Nouvelle correspondance créée : %s -> %s", name, employee.name)
+            
+            return employee
         
-        # Affichage des correspondances dans l'interface
-        if matches:
-            matches.sort(key=lambda x: x[1], reverse=True)
-            message = _("Correspondances trouvées pour '%s' :\n") % name
-            for employee, score in matches[:5]:  # On affiche les 5 meilleures correspondances
-                message += _("- %s (score : %.2f)\n") % (employee.name, score)
-            self.message_post(body=message)
-        
-        # On retourne le meilleur match si son score est suffisant
-        return best_match if best_score >= 0.5 else False
+        _logger.warning("Aucun employé trouvé avec le nom : %s", name)
+        return False
 
     def action_import_file(self):
         """Importer le fichier CSV"""
@@ -769,3 +550,44 @@ class PointeurHrImport(models.Model):
         
         self.message_post(body=report)
         return True
+
+    def action_search_employee_mappings(self):
+        """Recherche des correspondances employés pour les lignes sélectionnées"""
+        self.ensure_one()
+        
+        # Vérifier qu'il y a des lignes sélectionnées
+        if not self.env.context.get('active_ids'):
+            raise UserError(_("Aucune ligne sélectionnée."))
+            
+        lines = self.env['pointeur_hr.import.line'].browse(self.env.context.get('active_ids'))
+        
+        # Vérifier que les lignes appartiennent au même import
+        if len(lines.mapped('import_id')) > 1:
+            raise UserError(_("Les lignes sélectionnées doivent appartenir au même import."))
+            
+        # Recherche des correspondances pour chaque ligne
+        mapped_count = 0
+        for line in lines:
+            if line.employee_id:
+                continue  # Déjà mappée
+                
+            # Recherche d'un employé par son nom
+            employee = self._find_employee_by_name(line.employee_name)
+            if employee:
+                line.write({
+                    'employee_id': employee.id,
+                    'state': 'mapped'
+                })
+                mapped_count += 1
+                
+        # Message de confirmation
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Recherche des correspondances'),
+                'message': _('%s/%s lignes ont une correspondance.') % (mapped_count, len(lines)),
+                'sticky': False,
+                'type': 'info',
+            }
+        }

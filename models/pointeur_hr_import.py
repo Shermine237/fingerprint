@@ -298,7 +298,7 @@ class PointeurHrImport(models.Model):
         
         return super(PointeurHrImport, self).message_post(**kwargs)
 
-    def action_import(self):
+    def _import_csv_file(self):
         """Importer les données du fichier CSV"""
         self.ensure_one()
         _logger.info("=== DÉBUT IMPORT ===")
@@ -380,7 +380,7 @@ class PointeurHrImport(models.Model):
                 success_count += 1
 
             except Exception as e:
-                error_message = f"Erreur ligne {reader.line_num} ({employee_name}): {str(e)}"
+                error_message = f"Erreur ligne {reader.line_num} ({employee_name if 'employee_name' in locals() else 'inconnu'}): {str(e)}"
                 error_lines.append(error_message)
                 _logger.error(error_message)
 
@@ -388,8 +388,6 @@ class PointeurHrImport(models.Model):
         if line_vals:
             _logger.info("Création de %d lignes", len(line_vals))
             self.env['pointeur_hr.import.line'].create(line_vals)
-            self.state = 'imported'
-            self.import_date = fields.Datetime.now()
             
             # Message de confirmation avec statistiques
             message = _("""Import réussi le %s :
@@ -402,9 +400,12 @@ class PointeurHrImport(models.Model):
             
             if error_lines:
                 message += _("\n\nErreurs :\n%s") % '\n'.join(error_lines)
-                self.state = 'error'
                 
             self.message_post(body=message)
+            
+            return True
+        else:
+            raise UserError(_("Aucune ligne valide trouvée dans le fichier."))
 
     def action_create_attendances(self):
         """Créer les présences à partir des lignes importées"""

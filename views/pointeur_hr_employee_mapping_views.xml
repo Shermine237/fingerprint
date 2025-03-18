@@ -5,11 +5,14 @@
         <field name="name">pointeur_hr.employee.mapping.tree</field>
         <field name="model">pointeur_hr.employee.mapping</field>
         <field name="arch" type="xml">
-            <tree string="Correspondances employés">
+            <tree string="Correspondances employés" decoration-info="auto_created == True" decoration-success="similarity_score >= 0.8" decoration-warning="similarity_score < 0.5">
                 <field name="imported_name"/>
                 <field name="employee_id"/>
-                <field name="last_used"/>
+                <field name="similarity_score" widget="percentage"/>
                 <field name="import_count"/>
+                <field name="last_used"/>
+                <field name="auto_created"/>
+                <button name="action_find_similar_names" type="object" icon="fa-search" string="Rechercher similaires"/>
             </tree>
         </field>
     </record>
@@ -20,12 +23,37 @@
         <field name="model">pointeur_hr.employee.mapping</field>
         <field name="arch" type="xml">
             <form string="Correspondance employé">
+                <header>
+                    <button name="action_find_similar_names" string="Rechercher noms similaires" type="object" class="oe_highlight"/>
+                    <button name="action_create_similar_mappings" string="Créer correspondances similaires" type="object" confirm="Cela va créer des correspondances pour tous les noms similaires. Continuer ?"/>
+                </header>
                 <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="imported_name" placeholder="Nom importé"/>
+                        </h1>
+                    </div>
                     <group>
-                        <field name="imported_name"/>
-                        <field name="employee_id"/>
-                        <field name="last_used" readonly="1"/>
-                        <field name="import_count" readonly="1"/>
+                        <group>
+                            <field name="employee_id" options="{'no_create': True}"/>
+                            <field name="similarity_score" widget="percentage"/>
+                        </group>
+                        <group>
+                            <field name="last_used"/>
+                            <field name="import_count"/>
+                            <field name="auto_created"/>
+                            <field name="parent_mapping_id" attrs="{'invisible': [('parent_mapping_id', '=', False)]}"/>
+                        </group>
+                    </group>
+                    <group string="Imports utilisant cette correspondance" attrs="{'invisible': [('import_count', '=', 0)]}">
+                        <field name="import_ids" readonly="1">
+                            <tree>
+                                <field name="name"/>
+                                <field name="import_date"/>
+                                <field name="user_id"/>
+                                <field name="state"/>
+                            </tree>
+                        </field>
                     </group>
                 </sheet>
             </form>

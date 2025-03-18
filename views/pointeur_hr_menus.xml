@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Menu racine -->
-        <menuitem id="pointeur_hr_menu_root"
-                  name="Pointeur HR"
-                  sequence="80"/>
-
-        <!-- Sous-menu Présences -->
-        <menuitem id="pointeur_hr_menu_attendance"
-                  name="Présences"
-                  parent="pointeur_hr_menu_root"
-                  sequence="10"/>
-
         <!-- Menu Pointeur sous le menu des présences -->
         <menuitem id="pointeur_hr_menu_import_root"
                   name="Pointeur"
@@ -22,14 +11,14 @@
         <menuitem id="pointeur_hr_menu_import"
                   name="Import du pointeur"
                   parent="pointeur_hr_menu_import_root"
-                  action="pointeur_hr_action_import"
+                  action="action_pointeur_hr_import"
                   sequence="10"/>
 
         <!-- Ajout des lignes d'import -->
         <menuitem id="pointeur_hr_menu_import_line"
                   name="Lignes d'import"
                   parent="pointeur_hr_menu_import_root"
-                  action="pointeur_hr_action_import_line"
+                  action="action_pointeur_hr_import_line"
                   sequence="20"/>
 
         <!-- Menu Reporting des présences -->
@@ -42,7 +31,7 @@
         <menuitem id="pointeur_hr_menu_attendance_report"
                   name="Rapport de présence"
                   parent="pointeur_hr_menu_reporting"
-                  action="pointeur_hr_action_hr_attendance_report"
+                  action="action_pointeur_hr_attendance_report"
                   sequence="10"/>
 
         <!-- Menu Configuration -->
@@ -52,10 +41,10 @@
                   sequence="100"/>
 
         <!-- Menu Lieux de pointage -->
-        <menuitem id="pointeur_hr_menu_location"
+        <menuitem id="menu_pointeur_hr_location"
                   name="Lieux de pointage"
                   parent="menu_pointeur_hr_config"
-                  action="pointeur_hr_action_location"
+                  action="action_pointeur_hr_location"
                   sequence="10"/>
 
         <!-- Menu Correspondances employés -->

@@ -601,6 +601,21 @@ class PointeurHrImport(models.Model):
         if not name:
             return False
             
+        # Recherche dans les correspondances existantes
+        mapping = self.env['pointeur_hr.employee.mapping'].search([
+            ('imported_name', '=', name)
+        ], limit=1)
+        
+        if mapping:
+            _logger.info("Correspondance trouvée dans la table de mapping : %s -> %s", 
+                        name, mapping.employee_id.name)
+            # Mise à jour des statistiques de la correspondance
+            mapping.write({
+                'last_used': fields.Datetime.now(),
+                'import_count': mapping.import_count + 1
+            })
+            return mapping.employee_id
+            
         # Recherche de tous les employés
         employees = self.env['hr.employee'].search([])
         best_match = False
@@ -628,14 +643,39 @@ class PointeurHrImport(models.Model):
             # Si correspondance parfaite, on arrête là
             if score == 1:
                 _logger.info("Correspondance parfaite trouvée avec l'employé '%s'", employee.name)
+                
+                # Créer une correspondance pour la prochaine fois
+                if not self.env['pointeur_hr.employee.mapping'].search([
+                    ('imported_name', '=', name),
+                    ('employee_id', '=', employee.id)
+                ]):
+                    self.env['pointeur_hr.employee.mapping'].create({
+                        'imported_name': name,
+                        'employee_id': employee.id
+                    })
+                    _logger.info("Nouvelle correspondance créée : %s -> %s", name, employee.name)
+                
                 return employee
                 
         # Log du résultat final
         if best_match and best_score >= 0.5:
             _logger.info("Meilleure correspondance trouvée : '%s' (score : %.2f)", best_match.name, best_score)
+            
+            # Créer une correspondance automatique si le score est très bon
+            if best_score >= 0.8 and not self.env['pointeur_hr.employee.mapping'].search([
+                ('imported_name', '=', name),
+                ('employee_id', '=', best_match.id)
+            ]):
+                self.env['pointeur_hr.employee.mapping'].create({
+                    'imported_name': name,
+                    'employee_id': best_match.id,
+                    'auto_created': True
+                })
+                _logger.info("Nouvelle correspondance automatique créée : %s -> %s (score: %.2f)", 
+                            name, best_match.name, best_score)
         else:
             _logger.warning("Aucune correspondance trouvée pour le nom : '%s' (meilleur score : %.2f)", name, best_score)
-            
+        
         # Affichage des correspondances dans l'interface
         if matches:
             matches.sort(key=lambda x: x[1], reverse=True)

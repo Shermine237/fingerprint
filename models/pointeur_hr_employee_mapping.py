@@ -17,8 +17,8 @@ class PointeurHrEmployeeMapping(models.Model):
     import_ids = fields.Many2many('pointeur_hr.import', string='Imports', compute='_compute_import_ids')
 
     _sql_constraints = [
-        ('unique_imported_name', 'unique(imported_name)', 
-         'Une correspondance existe déjà pour ce nom importé !')
+        ('unique_imported_name_employee', 'unique(imported_name, employee_id)', 
+         'Une correspondance existe déjà pour ce nom importé et cet employé !')
     ]
 
     def name_get(self):
@@ -114,8 +114,11 @@ class PointeurHrEmployeeMapping(models.Model):
             score = self.env['pointeur_hr.import']._name_similarity_score(
                 self.imported_name, line.employee_name)
             if score >= 0.7:  # Seuil plus élevé pour la création automatique
-                # Vérifier si une correspondance existe déjà
-                existing = self.search([('imported_name', '=', line.employee_name)], limit=1)
+                # Vérifier si une correspondance existe déjà pour ce nom et cet employé
+                existing = self.search([
+                    ('imported_name', '=', line.employee_name),
+                    ('employee_id', '=', self.employee_id.id)
+                ], limit=1)
                 if not existing:
                     # Créer une nouvelle correspondance
                     self.create({

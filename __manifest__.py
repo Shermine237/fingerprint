@@ -16,6 +16,7 @@
         'views/pointeur_hr_attendance_report_views.xml',
         'views/pointeur_hr_location_views.xml',
         'views/pointeur_hr_import_views.xml',
+        'views/pointeur_hr_employee_mapping_views.xml',
         'views/pointeur_hr_menus.xml',
         'reports/pointeur_hr_attendance_report_template.xml',
         'wizards/pointeur_hr_attendance_report_export_views.xml',

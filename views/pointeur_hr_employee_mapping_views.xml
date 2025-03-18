@@ -59,10 +59,4 @@
         </field>
     </record>
 
-    <!-- Menu Item -->
-    <menuitem id="menu_pointeur_hr_employee_mapping"
-              name="Correspondances employés"
-              parent="pointeur_hr.menu_pointeur_hr_config"
-              action="action_pointeur_hr_employee_mapping"
-              sequence="20"/>
 </odoo>

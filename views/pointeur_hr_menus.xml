@@ -32,13 +32,6 @@
                   action="pointeur_hr_action_import_line"
                   sequence="20"/>
 
-        <!-- Menu Lieux de pointage -->
-        <menuitem id="pointeur_hr_menu_location"
-                  name="Lieux de pointage"
-                  parent="hr_attendance.menu_hr_attendance_settings"
-                  action="pointeur_hr_action_location"
-                  sequence="10"/>
-
         <!-- Menu Reporting des présences -->
         <menuitem id="pointeur_hr_menu_reporting"
                   name="Reporting"
@@ -52,10 +45,24 @@
                   action="pointeur_hr_action_hr_attendance_report"
                   sequence="10"/>
 
-        <!-- Sous-menu Configuration -->
-        <menuitem id="pointeur_hr_menu_config"
-                  name="Configuration"
-                  parent="pointeur_hr_menu_attendance"
+        <!-- Menu Configuration -->
+        <menuitem id="menu_pointeur_hr_config"
+                  name="Configuration Pointeur"
+                  parent="hr_attendance.menu_hr_attendance_settings"
                   sequence="100"/>
+
+        <!-- Menu Lieux de pointage -->
+        <menuitem id="pointeur_hr_menu_location"
+                  name="Lieux de pointage"
+                  parent="menu_pointeur_hr_config"
+                  action="pointeur_hr_action_location"
+                  sequence="10"/>
+
+        <!-- Menu Correspondances employés -->
+        <menuitem id="menu_pointeur_hr_employee_mapping"
+                  name="Correspondances employés"
+                  parent="menu_pointeur_hr_config"
+                  action="action_pointeur_hr_employee_mapping"
+                  sequence="20"/>
     </data>
 </odoo>

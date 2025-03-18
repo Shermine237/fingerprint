@@ -7,11 +7,14 @@
         <field name="arch" type="xml">
             <form string="Import des données du pointeur">
                 <header>
-                    <button name="action_import" string="Importer" type="object" class="oe_highlight" states="draft"/>
-                    <button name="action_create_attendances" string="Créer les présences" type="object" class="oe_highlight" states="imported"/>
-                    <button name="action_cancel" string="Annuler" type="object" states="draft,imported"/>
-                    <button name="action_reset" string="Réinitialiser" type="object" states="cancelled,error"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,imported,done,error"/>
+                    <button name="action_import_file" string="Importer" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                    <button name="action_find_employee_mapping" string="Rechercher correspondances" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'imported')]}"/>
+                    <button name="action_create_attendances" string="Créer présences" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'imported')]}"/>
+                    <button name="action_view_attendances" string="Voir présences" type="object" attrs="{'invisible': [('state', '!=', 'done')]}"/>
+                    <button name="action_view_mappings" string="Voir correspondances" type="object" attrs="{'invisible': [('state', 'in', ['draft', 'cancelled'])]}"/>
+                    <button name="action_cancel" string="Annuler" type="object" attrs="{'invisible': [('state', 'in', ['draft', 'cancelled', 'done'])]}"/>
+                    <button name="action_reset" string="Réinitialiser" type="object" attrs="{'invisible': [('state', '=', 'draft')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,imported,done"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -28,7 +31,7 @@
                         <group>
                             <field name="file" filename="file_name" attrs="{'readonly': [('state', '!=', 'draft')]}" accept=".csv"/>
                             <field name="file_name" invisible="1"/>
-                            <field name="location_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="location_id" attrs="{'readonly': [('state', '!=', 'draft')]}" />
                             <field name="import_date" widget="datetime" readonly="1"/>
                         </group>
                         <group>
@@ -39,8 +42,9 @@
                     <notebook attrs="{'invisible': [('state', '=', 'draft')]}">
                         <page string="Lignes importées">
                             <field name="line_ids" readonly="1">
-                                <tree decoration-success="state == 'done'" decoration-danger="state == 'error'" decoration-info="state == 'imported'">
+                                <tree decoration-success="state == 'done'" decoration-danger="state == 'error'" decoration-info="state == 'imported'" decoration-warning="state == 'mapped'" editable="bottom">
                                     <field name="employee_name"/>
+                                    <field name="employee_id" options="{'no_create': True, 'no_open': False}" attrs="{'readonly': [('state', '=', 'done')]}"/>
                                     <field name="display_id"/>
                                     <field name="date" widget="datetime"/>
                                     <field name="check_in" widget="datetime"/>
@@ -54,6 +58,7 @@
                                     <field name="error_message"/>
                                     <field name="attendance_id" invisible="1"/>
                                     <button name="action_view_attendance" type="object" icon="fa-calendar" attrs="{'invisible': [('attendance_id', '=', False)]}"/>
+                                    <button name="find_employee_mapping" type="object" icon="fa-search" string="Rechercher" attrs="{'invisible': ['|', ('employee_id', '!=', False), ('state', '=', 'done')]}"/>
                                 </tree>
                             </field>
                         </page>
@@ -116,11 +121,17 @@
         <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
             <form string="Ligne d'import">
+                <header>
+                    <button name="find_employee_mapping" string="Rechercher correspondance" type="object" class="oe_highlight" attrs="{'invisible': ['|', ('employee_id', '!=', False), ('state', '=', 'done')]}"/>
+                    <button name="action_create_mapping" string="Créer correspondance" type="object" class="oe_highlight" attrs="{'invisible': ['|', ('employee_id', '=', False), ('state', '=', 'done')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="imported,mapped,done,error"/>
+                </header>
                 <sheet>
                     <group>
                         <group>
                             <field name="import_id" readonly="1"/>
                             <field name="employee_name"/>
+                            <field name="employee_id" options="{'no_create': True}"/>
                             <field name="display_id"/>
                             <field name="payroll_id"/>
                             <field name="date" widget="datetime"/>
@@ -160,9 +171,10 @@
         <field name="name">pointeur_hr.import.line.tree</field>
         <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
-            <tree string="Lignes d'import" decoration-success="state == 'done'" decoration-danger="state == 'error'" decoration-info="state == 'imported'">
+            <tree string="Lignes d'import" decoration-success="state == 'done'" decoration-danger="state == 'error'" decoration-info="state == 'imported'" editable="bottom">
                 <field name="import_id"/>
                 <field name="employee_name"/>
+                <field name="employee_id"/>
                 <field name="display_id"/>
                 <field name="date" widget="datetime"/>
                 <field name="check_in" widget="datetime"/>

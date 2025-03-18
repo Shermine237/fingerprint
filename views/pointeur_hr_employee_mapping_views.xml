@@ -40,6 +40,13 @@
             <search string="Rechercher une correspondance">
                 <field name="imported_name"/>
                 <field name="employee_id"/>
+                <field name="last_used"/>
+                <filter string="Utilisé récemment" name="recent" domain="[('last_used', '>=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Utilisé fréquemment" name="frequent" domain="[('import_count', '>=', 5)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Dernière utilisation" name="last_used" context="{'group_by': 'last_used:month'}"/>
+                </group>
             </search>
         </field>
     </record>

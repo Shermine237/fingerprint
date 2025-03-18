@@ -1,6 +1,6 @@
 from odoo import api, fields, models, _
 from datetime import datetime, timedelta
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 class PointeurHrImportLine(models.Model):
     _name = 'pointeur_hr.import.line'
@@ -100,11 +100,62 @@ class PointeurHrImportLine(models.Model):
                     record.write({'employee_id': mapping.employee_id.id})
                     continue
 
-                # Si pas de correspondance, chercher un employé avec un nom similaire
-                employee = self.env['hr.employee'].search([
-                    '|',
-                    ('name', '=ilike', record.employee_name),
-                    ('name', '=ilike', record.employee_name.strip())
-                ], limit=1)
+                # Si pas de correspondance, utiliser la recherche intelligente
+                employee = self.env['pointeur_hr.import']._find_employee_by_name(record.employee_name)
                 if employee:
                     record.write({'employee_id': employee.id})
+        
+        # Message de notification
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Recherche de correspondance'),
+                'message': _('Recherche terminée.'),
+                'sticky': False,
+                'type': 'info',
+            }
+        }
+    
+    def action_create_mapping(self):
+        """Créer une correspondance permanente pour cet employé"""
+        self.ensure_one()
+        if not self.employee_id or not self.employee_name:
+            raise UserError(_("Vous devez d'abord sélectionner un employé correspondant."))
+            
+        # Vérifier si une correspondance existe déjà
+        mapping = self.env['pointeur_hr.employee.mapping'].search(
+            [('imported_name', '=', self.employee_name)], limit=1)
+            
+        if mapping:
+            # Mettre à jour la correspondance existante
+            mapping.write({
+                'employee_id': self.employee_id.id,
+                'last_used': fields.Datetime.now(),
+                'import_count': mapping.import_count + 1
+            })
+            message = _("Correspondance mise à jour pour '%s' → '%s'") % (
+                self.employee_name, self.employee_id.name)
+        else:
+            # Créer une nouvelle correspondance
+            self.env['pointeur_hr.employee.mapping'].create({
+                'imported_name': self.employee_name,
+                'employee_id': self.employee_id.id,
+            })
+            message = _("Nouvelle correspondance créée pour '%s' → '%s'") % (
+                self.employee_name, self.employee_id.name)
+                
+        # Mettre à jour l'état
+        self.write({'state': 'mapped'})
+        
+        # Message de notification
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Correspondance employé'),
+                'message': message,
+                'sticky': False,
+                'type': 'success',
+            }
+        }

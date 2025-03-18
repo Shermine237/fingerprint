@@ -7,19 +7,20 @@ class PointeurHrEmployeeMapping(models.Model):
     _description = 'Correspondance des noms importés avec les employés'
     _order = 'last_used desc, import_count desc'
 
-    imported_name = fields.Char(string='Nom importé', required=True, index=True)
+    name = fields.Char(string='Nom importé', required=True, index=True)
     employee_id = fields.Many2one('hr.employee', string='Employé', required=True)
     last_used = fields.Datetime(string='Dernière utilisation', default=fields.Datetime.now)
     import_count = fields.Integer(string='Nombre d\'imports', default=1)
+    import_id = fields.Many2one('pointeur_hr.import', string='Import d\'origine')
     import_ids = fields.Many2many('pointeur_hr.import', string='Imports', compute='_compute_import_ids')
 
     _sql_constraints = [
-        ('unique_imported_name_employee', 'unique(imported_name, employee_id)', 
+        ('unique_name_employee', 'unique(name, employee_id)', 
          'Une correspondance existe déjà pour ce nom importé et cet employé !')
     ]
 
     def name_get(self):
-        return [(rec.id, f"{rec.imported_name} → {rec.employee_id.name}") for rec in self]
+        return [(rec.id, f"{rec.name} → {rec.employee_id.name}") for rec in self]
 
     def action_find_similar_names(self):
         """Recherche d'autres noms qui correspondent au même employé"""
@@ -35,80 +36,65 @@ class PointeurHrEmployeeMapping(models.Model):
         
         # Recherche des lignes d'import avec le même nom
         import_lines = self.env['pointeur_hr.import.line'].search([
-            ('employee_name', '=', self.imported_name),
+            ('employee_name', '=', self.name),
             ('employee_id', '=', False)
         ], limit=10)
         
         # Construire le message
-        message = _("<h3>Informations pour '{}'</h3>").format(self.imported_name)
+        message = _("<h3>Informations pour '{}'</h3>").format(self.name)
         
         # Ajouter les correspondances existantes
         if other_mappings:
             message += _("<h4>Autres noms utilisés pour cet employé :</h4><ul>")
             for mapping in other_mappings:
                 message += _("<li>{} (utilisé {} fois)</li>").format(
-                    mapping.imported_name, mapping.import_count)
+                    mapping.name, mapping.import_count)
             message += "</ul>"
-            
-        # Ajouter les lignes d'import trouvées
+        
+        # Ajouter les lignes d'import sans correspondance
         if import_lines:
-            message += _("<h4>Lignes d'import avec ce nom :</h4><ul>")
+            message += _("<h4>Lignes d'import sans correspondance :</h4><ul>")
             for line in import_lines:
-                message += _("<li>Import #{} - {} - <a href='#' data-oe-model='pointeur_hr.import.line' data-oe-id='{}'>Voir</a></li>").format(
-                    line.import_id.id, line.import_id.name, line.id)
+                message += _("<li>Import #{} - {} ({})</li>").format(
+                    line.import_id.id, line.employee_name, 
+                    line.check_in.strftime('%d/%m/%Y') if line.check_in else '')
             message += "</ul>"
-        else:
-            message += _("<p>Aucune ligne d'import avec ce nom n'a été trouvée.</p>")
             
-        # Afficher le message
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Informations sur la correspondance'),
+                'title': _('Analyse des correspondances'),
                 'message': message,
                 'sticky': True,
                 'type': 'info',
+                'next': {
+                    'type': 'ir.actions.act_window',
+                    'name': _('Lignes sans correspondance'),
+                    'res_model': 'pointeur_hr.import.line',
+                    'view_mode': 'tree,form',
+                    'domain': [('employee_name', '=', self.name), ('employee_id', '=', False)],
+                }
             }
         }
-    
-    def action_create_mapping(self):
-        """Crée une correspondance pour l'employé sélectionné"""
-        self.ensure_one()
-        if not self.employee_id:
-            raise UserError(_("Vous devez d'abord sélectionner un employé."))
-            
-        # Recherche des lignes d'import avec le même nom
-        import_lines = self.env['pointeur_hr.import.line'].search([
-            ('employee_name', '=', self.imported_name),
-            ('employee_id', '=', False)
-        ])
         
-        # Mise à jour des lignes d'import
-        for line in import_lines:
-            line.write({
-                'employee_id': self.employee_id.id,
-                'state': 'mapped'
-            })
-        
-        # Message de confirmation
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Mise à jour des lignes d\'import'),
-                'message': _('%d lignes d\'import mises à jour.') % len(import_lines),
-                'sticky': False,
-                'type': 'success',
-            }
-        }
-
     def _compute_import_ids(self):
-        for record in self:
-            # Rechercher les lignes d'import qui utilisent cette correspondance
+        """Calcule les imports qui ont utilisé cette correspondance"""
+        for rec in self:
             import_lines = self.env['pointeur_hr.import.line'].search([
-                ('employee_name', '=', record.imported_name),
-                ('employee_id', '=', record.employee_id.id)
+                ('employee_name', '=', rec.name),
+                ('employee_id', '=', rec.employee_id.id)
             ])
-            # Récupérer les imports associés
-            record.import_ids = import_lines.mapped('import_id')
+            rec.import_ids = import_lines.mapped('import_id')
+            
+    def action_view_imports(self):
+        """Voir les imports qui ont utilisé cette correspondance"""
+        self.ensure_one()
+        
+        return {
+            'name': _('Imports'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'pointeur_hr.import',
+            'view_mode': 'tree,form',
+            'domain': [('id', 'in', self.import_ids.ids)],
+        }

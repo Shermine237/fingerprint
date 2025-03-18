@@ -1,6 +1,6 @@
 {
     'name': 'Pointeur HR',
-    'version': '14.0.1.0.0',
+    'version': '14.0.1.1.0',
     'category': 'Human Resources',
     'summary': 'Gestion des présences avec localisation',
     'description': """
@@ -20,6 +20,7 @@
         'views/pointeur_hr_menus.xml',
         'reports/pointeur_hr_attendance_report_template.xml',
         'wizards/pointeur_hr_attendance_report_export_views.xml',
+        'wizards/pointeur_hr_select_employees_views.xml',
     ],
     'installable': True,
     'application': True,

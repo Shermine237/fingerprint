@@ -118,42 +118,43 @@ class PointeurHrImportLine(models.Model):
         }
     
     def action_create_mapping(self):
-        """Créer une correspondance permanente pour cet employé"""
+        """Créer une correspondance pour cette ligne"""
         self.ensure_one()
-        if not self.employee_id or not self.employee_name:
-            raise UserError(_("Vous devez d'abord sélectionner un employé correspondant."))
+        
+        if not self.employee_id:
+            raise UserError(_("Vous devez d'abord sélectionner un employé."))
             
         # Vérifier si une correspondance existe déjà
-        mapping = self.env['pointeur_hr.employee.mapping'].search(
-            [('imported_name', '=', self.employee_name)], limit=1)
-            
-        if mapping:
+        existing = self.env['pointeur_hr.employee.mapping'].search([
+            ('name', '=', self.employee_name)
+        ], limit=1)
+        
+        if existing:
             # Mettre à jour la correspondance existante
-            mapping.write({
+            existing.write({
                 'employee_id': self.employee_id.id,
                 'last_used': fields.Datetime.now(),
-                'import_count': mapping.import_count + 1
+                'import_count': existing.import_count + 1
             })
-            message = _("Correspondance mise à jour pour '%s' → '%s'") % (
-                self.employee_name, self.employee_id.name)
+            message = _("Correspondance mise à jour : %s -> %s") % (self.employee_name, self.employee_id.name)
         else:
             # Créer une nouvelle correspondance
             self.env['pointeur_hr.employee.mapping'].create({
-                'imported_name': self.employee_name,
+                'name': self.employee_name,
                 'employee_id': self.employee_id.id,
+                'import_id': self.import_id.id,
             })
-            message = _("Nouvelle correspondance créée pour '%s' → '%s'") % (
-                self.employee_name, self.employee_id.name)
-                
-        # Mettre à jour l'état
+            message = _("Nouvelle correspondance créée : %s -> %s") % (self.employee_name, self.employee_id.name)
+            
+        # Mettre à jour l'état de la ligne
         self.write({'state': 'mapped'})
         
-        # Message de notification
+        # Afficher un message de confirmation
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Correspondance employé'),
+                'title': _('Correspondance créée'),
                 'message': message,
                 'sticky': False,
                 'type': 'success',

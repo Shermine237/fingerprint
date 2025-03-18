@@ -6,7 +6,7 @@
         <field name="model">pointeur_hr.employee.mapping</field>
         <field name="arch" type="xml">
             <tree string="Correspondances employés">
-                <field name="imported_name"/>
+                <field name="name"/>
                 <field name="employee_id"/>
                 <field name="import_count"/>
                 <field name="last_used"/>
@@ -29,7 +29,7 @@
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="imported_name" placeholder="Nom importé"/>
+                            <field name="name" placeholder="Nom importé"/>
                         </h1>
                     </div>
                     <group>
@@ -62,7 +62,7 @@
         <field name="model">pointeur_hr.employee.mapping</field>
         <field name="arch" type="xml">
             <search string="Rechercher une correspondance">
-                <field name="imported_name"/>
+                <field name="name"/>
                 <field name="employee_id"/>
                 <field name="last_used"/>
                 <filter string="Utilisé récemment" name="recent" domain="[('last_used', '>=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>

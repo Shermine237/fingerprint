@@ -38,7 +38,7 @@
     </record>
     
     <!-- Action -->
-    <record id="action_pointeur_hr_select_employees" model="ir.actions.act_window">
+    <record id="action_select_employees" model="ir.actions.act_window">
         <field name="name">Sélectionner les employés</field>
         <field name="res_model">pointeur_hr.select.employees</field>
         <field name="view_mode">form</field>

@@ -80,7 +80,8 @@
         </t>
     </template>
 
-    <record id="pointeur_hr_action_report_attendance" model="ir.actions.report">
+    <!-- Action du rapport de présence -->
+    <record id="action_report_attendance" model="ir.actions.report">
         <field name="name">Rapport de présence</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="report_type">qweb-pdf</field>

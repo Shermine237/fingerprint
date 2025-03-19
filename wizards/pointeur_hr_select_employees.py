@@ -68,10 +68,10 @@ class PointeurHrSelectEmployees(models.TransientModel):
         mapping_errors = []
         
         # Mettre à jour les lignes d'import avec les employés sélectionnés
-        for wizard_line in self.line_ids:
+        for wizard_line in self.filtered(lambda w: w.line_ids).line_ids.filtered(lambda l: l.employee_name):
             _logger.info("Traitement de la ligne pour %s", wizard_line.employee_name)
             
-            if wizard_line.employee_id and wizard_line.employee_name:
+            if wizard_line.employee_id:
                 _logger.info("Employé sélectionné : %s", wizard_line.employee_id.name)
                 
                 # Mettre à jour toutes les lignes d'import associées
@@ -120,8 +120,8 @@ class PointeurHrSelectEmployees(models.TransientModel):
                             'last_used': fields.Datetime.now()
                         })
         
-        # Calculer les noms non mappés
-        unmapped_names = [line.employee_name for line in self.line_ids if not line.employee_id]
+        # Calculer les noms non mappés (seulement ceux qui ont un nom)
+        unmapped_names = [line.employee_name for line in self.line_ids.filtered(lambda l: l.employee_name and not l.employee_id)]
         
         # Créer les présences seulement s'il y a des lignes mappées
         total_mapped = self.mapped_count + manual_mapped_count

@@ -188,6 +188,8 @@ class PointeurHrSelectEmployeesLine(models.TransientModel):
                 lambda l: l.id != self.id and l.employee_id.id == self.employee_id.id and l.employee_name != self.employee_name
             )
             if other_lines:
+                # Récupérer le nom de l'employé avant de réinitialiser
+                employee_name = self.employee_id.name
                 # Réinitialiser l'employé et afficher un avertissement
                 self.employee_id = False
                 return {
@@ -196,7 +198,7 @@ class PointeurHrSelectEmployeesLine(models.TransientModel):
                         'message': _(
                             "L'employé '%s' est déjà attribué au nom '%s'. "
                             "Un employé ne peut avoir qu'une seule correspondance de nom."
-                        ) % (self.employee_id.name, other_lines[0].employee_name)
+                        ) % (employee_name, other_lines[0].employee_name)
                     }
                 }
             

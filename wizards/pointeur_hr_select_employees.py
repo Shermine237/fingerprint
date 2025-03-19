@@ -69,7 +69,11 @@ class PointeurHrSelectEmployees(models.TransientModel):
         
         # Mettre à jour les lignes d'import avec les employés sélectionnés
         for wizard_line in self.line_ids:
-            if wizard_line.employee_id and wizard_line.employee_name:  # S'assurer que les deux champs sont remplis
+            _logger.info("Traitement de la ligne pour %s", wizard_line.employee_name)
+            
+            if wizard_line.employee_id and wizard_line.employee_name:
+                _logger.info("Employé sélectionné : %s", wizard_line.employee_id.name)
+                
                 # Mettre à jour toutes les lignes d'import associées
                 wizard_line.import_line_ids.write({
                     'employee_id': wizard_line.employee_id.id,
@@ -80,27 +84,32 @@ class PointeurHrSelectEmployees(models.TransientModel):
                 
                 # Créer une correspondance permanente si demandé
                 if wizard_line.create_mapping:
-                    try:
-                        # Vérifier si une correspondance existe déjà
-                        mapping = self.env['pointeur_hr.employee.mapping'].search([
-                            ('name', '=', wizard_line.employee_name),
-                            ('employee_id', '=', wizard_line.employee_id.id)
-                        ], limit=1)
-                        
-                        if not mapping and wizard_line.employee_name:  # Vérifier que le nom n'est pas vide
+                    _logger.info("Création de la correspondance pour %s -> %s", 
+                               wizard_line.employee_name, wizard_line.employee_id.name)
+                    
+                    # Vérifier si une correspondance existe déjà
+                    mapping = self.env['pointeur_hr.employee.mapping'].search([
+                        ('name', '=', wizard_line.employee_name),
+                        ('employee_id', '=', wizard_line.employee_id.id)
+                    ], limit=1)
+                    
+                    if not mapping:
+                        try:
                             self.env['pointeur_hr.employee.mapping'].create({
                                 'name': wizard_line.employee_name,
                                 'employee_id': wizard_line.employee_id.id,
                                 'import_id': self.import_id.id,
                             })
-                    except Exception as e:
-                        # Log l'erreur mais continuer le processus
-                        _logger.error("Erreur lors de la création du mapping pour %s: %s", 
-                                    wizard_line.employee_name, str(e))
-                        mapping_errors.append(wizard_line.employee_name)
+                            _logger.info("Correspondance créée avec succès")
+                        except Exception as e:
+                            _logger.error("Erreur lors de la création du mapping pour %s: %s", 
+                                        wizard_line.employee_name, str(e))
+                            mapping_errors.append(wizard_line.employee_name)
+                    else:
+                        _logger.info("Une correspondance existe déjà")
         
         # Calculer les noms non mappés
-        unmapped_names = [line.employee_name for line in self.line_ids if line.employee_name not in mapped_names]
+        unmapped_names = [line.employee_name for line in self.line_ids if not line.employee_id]
         
         # Créer les présences seulement s'il y a des lignes mappées
         total_mapped = self.mapped_count + manual_mapped_count
@@ -114,7 +123,7 @@ class PointeurHrSelectEmployees(models.TransientModel):
             if total_mapped > manual_mapped_count:
                 message_parts.append(_("%d lignes étaient déjà mappées") % (total_mapped - manual_mapped_count))
         if unmapped_names:
-            message_parts.append(_("%d noms restent non mappés (aucune présence ne sera créée pour ces lignes)") % len(unmapped_names))
+            message_parts.append(_("%d noms restent non mappés") % len(unmapped_names))
         if mapping_errors:
             message_parts.append(_("Erreur lors de la création des correspondances pour : %s") % ", ".join(mapping_errors))
         

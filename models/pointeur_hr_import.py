@@ -339,15 +339,19 @@ class PointeurHrImport(models.Model):
                     })
                     mapped_count += 1
                     
-        # Message pour les correspondances trouvées
-        if mapped_count > 0:
-            message = _("Recherche automatique des correspondances :\n- %d lignes ont été mappées") % mapped_count
-            self.message_post(body=message)
-        
         # S'il reste des lignes sans correspondance, ouvrir l'assistant de sélection
         remaining_unmapped = self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done')
         if remaining_unmapped:
             _logger.info("Il reste %d lignes non mappées -> ouverture assistant", len(remaining_unmapped))
+            
+            # Message pour les correspondances trouvées
+            if mapped_count > 0:
+                self.message_post(
+                    body=_("Recherche automatique des correspondances :\n- %d lignes ont été mappées") % mapped_count,
+                    message_type='notification',
+                    subtype_id=self.env.ref('mail.mt_note').id
+                )
+            
             return {
                 'name': _('Sélectionner les employés'),
                 'type': 'ir.actions.act_window',
@@ -363,6 +367,12 @@ class PointeurHrImport(models.Model):
         
         # Sinon, créer directement les présences
         _logger.info("Toutes les lignes sont mappées -> création des présences")
+        if mapped_count > 0:
+            self.message_post(
+                body=_("Recherche automatique des correspondances :\n- %d lignes ont été mappées") % mapped_count,
+                message_type='notification',
+                subtype_id=self.env.ref('mail.mt_note').id
+            )
         return self._create_attendances(mapped_count)
 
     def _create_attendances(self, mapped_count=0):

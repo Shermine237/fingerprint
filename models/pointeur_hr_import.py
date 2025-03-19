@@ -24,6 +24,7 @@ class PointeurHrImport(models.Model):
     user_id = fields.Many2one('res.users', string='Utilisateur', default=lambda self: self.env.user, readonly=True)
     line_count = fields.Integer(string='Nombre de lignes', compute='_compute_line_count')
     attendance_count = fields.Integer(string='Nombre de présences', compute='_compute_attendance_count')
+    notes = fields.Text(string='Notes', tracking=True)
     
     state = fields.Selection([
         ('draft', 'Brouillon'),

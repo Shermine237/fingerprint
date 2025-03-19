@@ -29,7 +29,7 @@ odoo.define('pointeur_hr.import_form_view', function (require) {
                     title: message.title || _t('Information'),
                     message: message.message,
                     type: message.type || 'info',
-                    sticky: message.sticky || false
+                    sticky: false // Toujours mettre à false pour que le message disparaisse
                 });
             }
         }

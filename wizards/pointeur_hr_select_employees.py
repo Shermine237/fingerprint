@@ -184,8 +184,7 @@ class PointeurHrSelectEmployees(models.TransientModel):
                     'type': 'ir.actions.act_window_close'
                 }
             }
-        }{{ ... }}
-
+        }
 
 class PointeurHrSelectEmployeesLine(models.TransientModel):
     _name = 'pointeur_hr.select.employees.line'

@@ -140,7 +140,6 @@ class PointeurHrSelectEmployees(models.TransientModel):
                             'import_id': self.import_id.id,
                         })
                     except Exception as e:
-                        _logger.error("Erreur lors de la création de la correspondance : %s", str(e))
                         raise UserError(_("Impossible de créer la correspondance pour %s : le nom est invalide ou vide.") % wizard_line.employee_name)
         
         # Créer les présences

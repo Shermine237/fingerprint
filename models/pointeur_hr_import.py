@@ -412,7 +412,6 @@ class PointeurHrImport(models.Model):
                 
             except Exception as e:
                 error_message = str(e)
-                _logger.error("Erreur création présence pour ligne %s : %s", line.id, error_message)
                 line.write({
                     'state': 'error',
                     'notes': _("Erreur lors de la création de la présence : %s") % error_message
@@ -425,19 +424,15 @@ class PointeurHrImport(models.Model):
             
         # Message de confirmation
         unmapped_count = len(self.line_ids.filtered(lambda l: not l.employee_id))
-        message_parts = []
+        error_count = len(self.line_ids.filtered(lambda l: l.state == 'error'))
         
-        if mapped_count > 0:
-            message_parts.append(_("%d lignes ont été mappées automatiquement") % mapped_count)
-        if attendance_count > 0:
-            message_parts.append(_("%d présences ont été créées") % attendance_count)
-        if error_count > 0:
-            message_parts.append(_("%d erreurs ont été rencontrées") % error_count)
-        if unmapped_count > 0:
-            message_parts.append(_("%d lignes restent sans correspondance") % unmapped_count)
-            
-        message = _("Création des présences terminée :\n- %s") % "\n- ".join(message_parts)
-        _logger.info(message)
+        message = _("""
+Création des présences terminée :
+- %d présences créées
+- %d lignes sans correspondance
+- %d lignes en erreur
+""") % (attendance_count, unmapped_count, error_count)
+
         self.message_post(body=message)
         
         return True
@@ -697,7 +692,6 @@ class PointeurHrImport(models.Model):
             ('import_id', '=', self.id)
         ])
         
-        # Créer l'action pour afficher les correspondances
         action = {
             'name': _('Correspondances'),
             'type': 'ir.actions.act_window',

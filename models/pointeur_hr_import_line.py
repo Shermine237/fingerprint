@@ -98,13 +98,13 @@ class PointeurHrImportLine(models.Model):
                                record.employee_name, employee.name)
                     
                     # Rechercher une correspondance existante (active ou inactive)
-                    mapping = self.env['pointeur_hr.employee.mapping'].search([
-                        ('name', '=', record.employee_name),
+                    mapping = self.env['pointeur_hr.employee.mapping'].search(
+                        [('name', '=', record.employee_name),
                         ('employee_id', '=', vals['employee_id']),
                         '|',
                         ('active', '=', True),
                         ('active', '=', False)
-                    ], limit=1)
+                        ], limit=1)
                     
                     # Vérifier si l'employé a déjà une correspondance avec un autre nom
                     existing_employee_mapping = self.env['pointeur_hr.employee.mapping'].search([
@@ -118,10 +118,7 @@ class PointeurHrImportLine(models.Model):
                         try:
                             # Si l'employé a déjà une correspondance avec un autre nom, ne pas créer de nouvelle correspondance
                             if existing_employee_mapping and existing_employee_mapping.name != record.employee_name:
-                                _logger.warning(
-                                    "L'employé %s a déjà une correspondance avec le nom '%s'. Pas de création de nouvelle correspondance.", 
-                                    employee.name, existing_employee_mapping.name
-                                )
+                                pass
                             else:
                                 # Créer une nouvelle correspondance
                                 mapping_vals = {
@@ -129,15 +126,12 @@ class PointeurHrImportLine(models.Model):
                                     'employee_id': vals['employee_id'],
                                     'import_id': record.import_id.id,
                                 }
-                                _logger.info("Création correspondance : %s", mapping_vals)
                                 self.env['pointeur_hr.employee.mapping'].sudo().create(mapping_vals)
-                                _logger.info("Correspondance créée avec succès")
                         except Exception as e:
                             _logger.error("Erreur création correspondance : %s", str(e))
                             # Ne pas bloquer la mise à jour de la ligne
                     else:
                         # Réactiver et mettre à jour le compteur d'utilisation
-                        _logger.info("Mise à jour correspondance existante (ID: %s)", mapping.id)
                         mapping.write({
                             'active': True,
                             'import_count': mapping.import_count + 1,

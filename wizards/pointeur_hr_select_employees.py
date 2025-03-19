@@ -67,10 +67,21 @@ class PointeurHrSelectEmployees(models.TransientModel):
         """Confirmer les sélections et créer les présences"""
         self.ensure_one()
         
-        # Vérifier qu'au moins une ligne a un employé sélectionné
         valid_lines = self.line_ids.filtered(lambda l: l.employee_id)
         if not valid_lines:
             raise UserError(_("Veuillez sélectionner au moins un employé."))
+            
+        # Vérifier que le même employé n'est pas attribué à plusieurs noms
+        employee_names = {}
+        for line in valid_lines:
+            if line.employee_id.id in employee_names:
+                if employee_names[line.employee_id.id] != line.employee_name:
+                    raise UserError(_(
+                        "L'employé '%s' est attribué à plusieurs noms différents ('%s' et '%s'). "
+                        "Un employé ne peut avoir qu'une seule correspondance de nom."
+                    ) % (line.employee_id.name, employee_names[line.employee_id.id], line.employee_name))
+            else:
+                employee_names[line.employee_id.id] = line.employee_name
             
         manual_mapped_count = 0
         mapped_names = []
@@ -148,7 +159,7 @@ class PointeurHrSelectEmployees(models.TransientModel):
                 'title': _("Mapping terminé"),
                 'message': message,
                 'type': 'success',
-                'sticky': True,
+                'sticky': False,
                 'next': {
                     'type': 'ir.actions.act_window_close'
                 }

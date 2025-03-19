@@ -378,7 +378,6 @@ class PointeurHrImport(models.Model):
     def _create_attendances(self, mapped_count=0):
         """Créer les présences pour les lignes avec un employé"""
         self.ensure_one()
-        _logger.info("=== DÉBUT CRÉATION PRÉSENCES ===")
         
         # Création des présences pour les lignes avec un employé
         attendance_count = 0
@@ -386,11 +385,9 @@ class PointeurHrImport(models.Model):
         
         # Récupérer toutes les lignes mappées qui n'ont pas encore de présence
         mapped_lines = self.line_ids.filtered(lambda l: l.employee_id and l.state in ['mapped'])
-        _logger.info("Nombre de lignes à traiter : %d", len(mapped_lines))
         
         for line in mapped_lines:
             try:
-                _logger.info("Création présence pour %s (ID: %s)", line.employee_name, line.id)
                 # Vérifier les données obligatoires
                 if not line.check_in:
                     raise ValidationError(_("L'heure d'entrée est obligatoire"))
@@ -403,10 +400,8 @@ class PointeurHrImport(models.Model):
                     'location_id': line.location_id.id,
                     'source': 'import',  # Ajouter la source
                 }
-                _logger.info("Valeurs de la présence : %s", attendance_vals)
                 
                 attendance = self.env['hr.attendance'].create(attendance_vals)
-                _logger.info("Présence créée avec succès (ID: %s)", attendance.id)
                 
                 # Mettre à jour la ligne
                 line.write({
@@ -427,7 +422,6 @@ class PointeurHrImport(models.Model):
         # Mise à jour de l'état de l'import si au moins une présence a été créée
         if attendance_count > 0:
             self.write({'state': 'done'})
-            _logger.info("Import marqué comme terminé")
             
         # Message de confirmation
         unmapped_count = len(self.line_ids.filtered(lambda l: not l.employee_id))
@@ -446,7 +440,6 @@ class PointeurHrImport(models.Model):
         _logger.info(message)
         self.message_post(body=message)
         
-        _logger.info("=== FIN CRÉATION PRÉSENCES ===")
         return True
 
     def action_view_attendances(self):

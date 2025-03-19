@@ -65,6 +65,7 @@ class PointeurHrSelectEmployees(models.TransientModel):
         # Compter les nouvelles correspondances créées
         manual_mapped_count = 0
         mapped_names = []
+        mapping_errors = []
         
         # Mettre à jour les lignes d'import avec les employés sélectionnés
         for wizard_line in self.line_ids:
@@ -79,23 +80,24 @@ class PointeurHrSelectEmployees(models.TransientModel):
                 
                 # Créer une correspondance permanente si demandé
                 if wizard_line.create_mapping:
-                    # Vérifier si une correspondance existe déjà
-                    mapping = self.env['pointeur_hr.employee.mapping'].search([
-                        ('name', '=', wizard_line.employee_name),
-                        ('employee_id', '=', wizard_line.employee_id.id)
-                    ], limit=1)
-                    
-                    if not mapping and wizard_line.employee_name:  # Vérifier que le nom n'est pas vide
-                        try:
+                    try:
+                        # Vérifier si une correspondance existe déjà
+                        mapping = self.env['pointeur_hr.employee.mapping'].search([
+                            ('name', '=', wizard_line.employee_name),
+                            ('employee_id', '=', wizard_line.employee_id.id)
+                        ], limit=1)
+                        
+                        if not mapping and wizard_line.employee_name:  # Vérifier que le nom n'est pas vide
                             self.env['pointeur_hr.employee.mapping'].create({
                                 'name': wizard_line.employee_name,
                                 'employee_id': wizard_line.employee_id.id,
                                 'import_id': self.import_id.id,
                             })
-                        except Exception as e:
-                            # Log l'erreur mais continuer le processus
-                            _logger.error("Erreur lors de la création du mapping pour %s: %s", 
-                                        wizard_line.employee_name, str(e))
+                    except Exception as e:
+                        # Log l'erreur mais continuer le processus
+                        _logger.error("Erreur lors de la création du mapping pour %s: %s", 
+                                    wizard_line.employee_name, str(e))
+                        mapping_errors.append(wizard_line.employee_name)
         
         # Calculer les noms non mappés
         unmapped_names = [line.employee_name for line in self.line_ids if line.employee_name not in mapped_names]
@@ -113,6 +115,8 @@ class PointeurHrSelectEmployees(models.TransientModel):
                 message_parts.append(_("%d lignes étaient déjà mappées") % (total_mapped - manual_mapped_count))
         if unmapped_names:
             message_parts.append(_("%d noms restent non mappés (aucune présence ne sera créée pour ces lignes)") % len(unmapped_names))
+        if mapping_errors:
+            message_parts.append(_("Erreur lors de la création des correspondances pour : %s") % ", ".join(mapping_errors))
         
         # Afficher le message et rediriger vers la vue de l'import
         return {

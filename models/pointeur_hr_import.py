@@ -469,17 +469,12 @@ class PointeurHrImport(models.Model):
         if not employee_name:
             return False
             
-        _logger.info("=== DÉBUT RECHERCHE EMPLOYÉ ===")
-        _logger.info("Recherche pour le nom : %s", employee_name)
-        
         # 1. Rechercher dans les correspondances existantes
         mapping = self.env['pointeur_hr.employee.mapping'].search([
             ('name', '=', employee_name)
         ], limit=1)
         
         if mapping:
-            _logger.info("Correspondance trouvée (ID: %s) -> Employé %s", 
-                        mapping.id, mapping.employee_id.name)
             # Mettre à jour le compteur d'utilisation
             mapping.write({
                 'import_count': mapping.import_count + 1,
@@ -494,7 +489,6 @@ class PointeurHrImport(models.Model):
         ], limit=1)
         
         if employee:
-            _logger.info("Employé trouvé avec nom exact : %s", employee.name)
             # Créer une correspondance
             try:
                 self.env['pointeur_hr.employee.mapping'].create({
@@ -502,14 +496,24 @@ class PointeurHrImport(models.Model):
                     'employee_id': employee.id,
                     'import_id': self.id
                 })
-                _logger.info("Nouvelle correspondance créée")
             except Exception as e:
                 _logger.error("Erreur création correspondance : %s", str(e))
             return employee
             
-        _logger.info("Aucun employé trouvé")
-        _logger.info("=== FIN RECHERCHE EMPLOYÉ ===")
         return False
+
+    def message_post(self, **kwargs):
+        """Surcharge pour formater les dates dans le fuseau horaire de l'utilisateur"""
+        # Conversion de la date dans le fuseau horaire de l'utilisateur
+        user_tz = self.env.user.tz or 'UTC'
+        local_tz = pytz.timezone(user_tz)
+        utc_now = fields.Datetime.now()
+        local_now = pytz.utc.localize(utc_now).astimezone(local_tz)
+
+        # Ajout de la date locale dans le message
+        kwargs['subject'] = kwargs.get('subject', '') + ' - ' + local_now.strftime('%d/%m/%Y %H:%M:%S')
+        
+        return super(PointeurHrImport, self).message_post(**kwargs)
 
     def action_view_mappings(self):
         """Voir les correspondances d'employés utilisées dans cet import"""

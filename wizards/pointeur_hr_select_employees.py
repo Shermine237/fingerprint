@@ -44,11 +44,16 @@ class PointeurHrSelectEmployees(models.TransientModel):
             for employee_name, lines in lines_by_name.items():
                 # Prendre la première ligne comme référence
                 reference_line = lines[0]
+                # Récupérer les IDs des lignes d'import
+                import_line_ids = [l.id for l in lines]
+                if not import_line_ids:  # Ne pas créer de ligne si pas de lignes d'import
+                    continue
+                    
                 line_vals.append((0, 0, {
                     'employee_name': employee_name,
                     'line_count': len(lines),
                     'reference_line_id': reference_line.id,
-                    'import_line_ids': [(6, 0, [l.id for l in lines])],
+                    'import_line_ids': [(6, 0, import_line_ids)],
                     'check_in': reference_line.check_in,
                     'check_out': reference_line.check_out,
                 }))
@@ -70,6 +75,10 @@ class PointeurHrSelectEmployees(models.TransientModel):
         
         if not valid_lines:
             raise UserError(_("Aucun employé sélectionné."))
+            
+        # Vérifier que les lignes ont bien des lignes d'import associées
+        if not any(line.import_line_ids for line in valid_lines):
+            raise UserError(_("Aucune ligne d'import associée aux employés sélectionnés."))
             
         # Compter les nouvelles correspondances créées
         manual_mapped_count = 0

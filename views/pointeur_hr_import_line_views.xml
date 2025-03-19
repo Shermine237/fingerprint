@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vue tree -->
+    <record id="pointeur_hr_import_line_view_tree" model="ir.ui.view">
+        <field name="name">pointeur_hr.import.line.tree</field>
+        <field name="model">pointeur_hr.import.line</field>
+        <field name="arch" type="xml">
+            <tree string="Lignes d'import" decoration-danger="state=='error'" decoration-success="state=='done'" decoration-info="state=='mapped'">
+                <field name="employee_name"/>
+                <field name="employee_id"/>
+                <field name="date"/>
+                <field name="check_in"/>
+                <field name="check_out"/>
+                <field name="total_hours" sum="Total"/>
+                <field name="location_id"/>
+                <field name="state"/>
+                <button name="action_reset" type="object" 
+                        string="Réinitialiser" icon="fa-refresh"
+                        attrs="{'invisible': [('state', 'not in', ['error'])]}"/>
+                <button name="action_view_attendance" type="object" 
+                        string="Voir présence" icon="fa-calendar"
+                        attrs="{'invisible': [('state', '!=', 'done')]}"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue form -->
+    <record id="pointeur_hr_import_line_view_form" model="ir.ui.view">
+        <field name="name">pointeur_hr.import.line.form</field>
+        <field name="model">pointeur_hr.import.line</field>
+        <field name="arch" type="xml">
+            <form string="Ligne d'import">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="imported,mapped,done"/>
+                    <button name="action_reset" type="object" 
+                            string="Réinitialiser" class="btn-warning"
+                            attrs="{'invisible': [('state', 'not in', ['error'])]}"/>
+                    <button name="action_view_attendance" type="object" 
+                            string="Voir présence" class="btn-primary"
+                            attrs="{'invisible': [('state', '!=', 'done')]}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="employee_name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="employee_id" attrs="{'readonly': [('state', '=', 'done')]}"/>
+                            <field name="date" readonly="1"/>
+                            <field name="check_in" readonly="1"/>
+                            <field name="check_out" readonly="1"/>
+                            <field name="total_hours" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="display_id" readonly="1"/>
+                            <field name="payroll_id" readonly="1"/>
+                            <field name="department" readonly="1"/>
+                            <field name="dept_code" readonly="1"/>
+                            <field name="location_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Informations complémentaires">
+                        <group>
+                            <field name="reg_hours" readonly="1"/>
+                            <field name="ot1_hours" readonly="1"/>
+                            <field name="ot2_hours" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="in_note" readonly="1"/>
+                            <field name="out_note" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Notes et erreurs">
+                        <field name="error_message" readonly="1"/>
+                        <field name="notes"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue search -->
+    <record id="pointeur_hr_import_line_view_search" model="ir.ui.view">
+        <field name="name">pointeur_hr.import.line.search</field>
+        <field name="model">pointeur_hr.import.line</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher dans les lignes d'import">
+                <field name="employee_name"/>
+                <field name="employee_id"/>
+                <field name="date"/>
+                <field name="location_id"/>
+                <separator/>
+                <filter string="Sans employé" name="no_employee" domain="[('employee_id', '=', False)]"/>
+                <filter string="En erreur" name="error" domain="[('state', '=', 'error')]"/>
+                <filter string="Non terminé" name="not_done" domain="[('state', '!=', 'done')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="État" name="state" context="{'group_by': 'state'}"/>
+                    <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Date" name="date" context="{'group_by': 'date'}"/>
+                    <filter string="Lieu" name="location" context="{'group_by': 'location_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="pointeur_hr_import_line_action" model="ir.actions.act_window">
+        <field name="name">Lignes d'import</field>
+        <field name="res_model">pointeur_hr.import.line</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_not_done': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune ligne d'import trouvée
+            </p>
+            <p>
+                Les lignes d'import sont créées automatiquement lors de l'import des données de pointage.
+                Elles permettent de visualiser et de corriger les données avant la création des présences.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -13,6 +13,7 @@
         'security/ir.model.access.csv',
         'views/pointeur_hr_location_views.xml',
         'views/pointeur_hr_import_views.xml',
+        'views/pointeur_hr_import_line_views.xml',  
         'views/pointeur_hr_employee_mapping_views.xml',
         'views/pointeur_hr_employee_views.xml',
         'views/pointeur_hr_attendance_views.xml',

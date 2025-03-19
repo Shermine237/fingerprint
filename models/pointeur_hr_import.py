@@ -609,42 +609,149 @@ class PointeurHrImport(models.Model):
         return True
 
     def action_search_employee_mappings(self):
-        """Recherche des correspondances employés pour les lignes sélectionnées"""
+        """Rechercher les correspondances pour les lignes sans employé"""
         self.ensure_one()
+        _logger.info("=== DÉBUT RECHERCHE CORRESPONDANCES ===")
         
-        # Vérifier qu'il y a des lignes sélectionnées
-        if not self.env.context.get('active_ids'):
-            raise UserError(_("Aucune ligne sélectionnée."))
-            
-        lines = self.env['pointeur_hr.import.line'].browse(self.env.context.get('active_ids'))
+        # Récupérer les lignes sans employé
+        unmapped_lines = self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done')
         
-        # Vérifier que les lignes appartiennent au même import
-        if len(lines.mapped('import_id')) > 1:
-            raise UserError(_("Les lignes sélectionnées doivent appartenir au même import."))
+        if not unmapped_lines:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': _("Toutes les lignes ont déjà un employé associé."),
+                    'type': 'info',
+                }
+            }
             
-        # Recherche des correspondances pour chaque ligne
-        mapped_count = 0
-        for line in lines:
-            if line.employee_id:
-                continue  # Déjà mappée
-                
-            # Recherche d'un employé par son nom
-            employee = self._find_employee_by_name(line.employee_name)
-            if employee:
-                line.write({
-                    'employee_id': employee.id,
-                    'state': 'mapped'
-                })
-                mapped_count += 1
-                
-        # Message de confirmation
+        # Rechercher les correspondances existantes
+        for line in unmapped_lines:
+            _logger.info("Recherche correspondance pour : %s", line.employee_name)
+            mapping = self.env['pointeur_hr.employee.mapping'].search([
+                ('name', '=', line.employee_name),
+                ('active', '=', True)
+            ], limit=1)
+            
+            if mapping:
+                try:
+                    _logger.info("Correspondance trouvée : %s -> %s", 
+                               mapping.name, mapping.employee_id.name)
+                    line.write({
+                        'employee_id': mapping.employee_id.id,
+                        'state': 'mapped'
+                    })
+                    # Mettre à jour le compteur d'utilisation
+                    mapping.write({
+                        'import_count': mapping.import_count + 1,
+                        'last_used': fields.Datetime.now()
+                    })
+                except Exception as e:
+                    _logger.error("Erreur mise à jour ligne : %s", str(e))
+                    
+        # Compter les lignes restantes sans correspondance
+        remaining = len(self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done'))
+        
+        # Préparer le message de retour
+        if remaining == 0:
+            message = _("Toutes les correspondances ont été trouvées.")
+            msg_type = 'success'
+        else:
+            message = _(
+                "%d ligne(s) reste(nt) sans correspondance. "
+                "Utilisez le wizard de sélection pour les associer manuellement."
+            ) % remaining
+            msg_type = 'warning'
+            
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Recherche des correspondances'),
-                'message': _('%s/%s lignes ont une correspondance.') % (mapped_count, len(lines)),
-                'sticky': False,
-                'type': 'info',
+                'message': message,
+                'type': msg_type,
+                'sticky': True
             }
         }
+
+    def action_view_mappings(self):
+        """Voir les correspondances associées à cet import"""
+        self.ensure_one()
+        
+        # Récupérer toutes les correspondances liées à cet import
+        mappings = self.env['pointeur_hr.employee.mapping'].search([
+            ('import_id', '=', self.id)
+        ])
+        
+        # Créer l'action pour afficher les correspondances
+        action = {
+            'name': _('Correspondances'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'pointeur_hr.employee.mapping',
+            'view_mode': 'tree,form',
+            'domain': [('id', 'in', mappings.ids)],
+            'context': {'default_import_id': self.id},
+            'target': 'current',
+        }
+        
+        # Si une seule correspondance, ouvrir directement le formulaire
+        if len(mappings) == 1:
+            action['res_id'] = mappings.id
+            action['view_mode'] = 'form'
+            
+        return action
+
+    def action_view_attendances(self):
+        """Voir les présences créées pour cet import"""
+        self.ensure_one()
+        
+        # Récupérer toutes les présences liées à cet import
+        attendances = self.line_ids.mapped('attendance_id')
+        
+        # Créer l'action pour afficher les présences
+        action = {
+            'name': _('Présences'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'hr.attendance',
+            'view_mode': 'tree,form',
+            'domain': [('id', 'in', attendances.ids)],
+            'context': {'create': False},  # Empêcher la création manuelle
+            'target': 'current',
+        }
+        
+        # Si une seule présence, ouvrir directement le formulaire
+        if len(attendances) == 1:
+            action['res_id'] = attendances.id
+            action['view_mode'] = 'form'
+            
+        return action
+
+    def action_cancel(self):
+        """Annuler l'import"""
+        for record in self:
+            if record.state == 'done':
+                raise UserError(_("Impossible d'annuler un import terminé."))
+            record.write({'state': 'cancelled'})
+            
+    def action_reset(self):
+        """Réinitialiser l'import"""
+        for record in self:
+            # Supprimer les présences si elles existent
+            attendances = record.line_ids.mapped('attendance_id')
+            if attendances:
+                attendances.unlink()
+            
+            # Réinitialiser les lignes
+            record.line_ids.write({
+                'state': 'imported',
+                'error_message': False,
+                'notes': False,
+                'employee_id': False,
+                'attendance_id': False
+            })
+            
+            # Réinitialiser l'import
+            record.write({
+                'state': 'imported',
+                'import_date': fields.Datetime.now()
+            })

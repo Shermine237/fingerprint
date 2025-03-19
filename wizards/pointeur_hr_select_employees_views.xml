@@ -20,6 +20,7 @@
                     <field name="line_ids">
                         <tree editable="bottom" create="0" delete="0">
                             <field name="reference_line_id" invisible="1"/>
+                            <field name="import_line_ids" invisible="1"/>
                             <field name="employee_name"/>
                             <field name="line_count" string="Nombre de lignes"/>
                             <field name="check_in" widget="datetime" string="Entrée (exemple)"/>

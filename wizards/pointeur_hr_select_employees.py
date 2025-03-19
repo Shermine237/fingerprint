@@ -160,3 +160,16 @@ class PointeurHrSelectEmployeesLine(models.TransientModel):
     check_out = fields.Datetime(string='Sortie (exemple)', readonly=True)
     create_mapping = fields.Boolean(string='Créer correspondance', default=True)
     line_count = fields.Integer(string='Nombre de lignes', readonly=True)
+
+    @api.onchange('employee_id')
+    def _onchange_employee_id(self):
+        """Mettre à jour les lignes d'import quand l'employé change"""
+        if self.employee_id and not self.import_line_ids:
+            # Récupérer les lignes d'import depuis la ligne de référence
+            lines = self.env['pointeur_hr.import.line'].search([
+                ('import_id', '=', self.wizard_id.import_id.id),
+                ('employee_name', '=', self.employee_name),
+                ('state', 'not in', ['done', 'error'])
+            ])
+            if lines:
+                self.import_line_ids = [(6, 0, lines.ids)]

@@ -10,6 +10,7 @@
     'website': 'https://github.com/Shermine237',
     'depends': ['base', 'hr_attendance', 'hr'],
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/pointeur_hr_location_views.xml',
         'views/pointeur_hr_import_views.xml',

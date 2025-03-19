@@ -22,6 +22,11 @@
         'wizards/pointeur_hr_attendance_report_export_views.xml',
         'wizards/pointeur_hr_select_employees_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'pointeur_hr/static/src/js/import_form_view.js',
+        ],
+    },
     'installable': True,
     'application': True,
     'license': 'LGPL-3',

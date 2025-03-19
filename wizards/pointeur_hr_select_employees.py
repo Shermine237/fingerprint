@@ -102,9 +102,8 @@ class PointeurHrSelectEmployees(models.TransientModel):
         
         # Créer les présences seulement s'il y a des lignes mappées
         total_mapped = self.mapped_count + manual_mapped_count
-        next_action = None
         if total_mapped > 0:
-            next_action = self.import_id._create_attendances(total_mapped)
+            self.import_id._create_attendances(total_mapped)
         
         # Créer le message de retour
         message_parts = []
@@ -115,30 +114,22 @@ class PointeurHrSelectEmployees(models.TransientModel):
         if unmapped_names:
             message_parts.append(_("%d noms restent non mappés (aucune présence ne sera créée pour ces lignes)") % len(unmapped_names))
         
-        # Retourner l'action avec un message
-        action = {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Mapping terminé'),
-                'message': ' - '.join(message_parts),
-                'type': 'info',
-                'sticky': True,
-                'next': next_action
+        # Afficher le message et rediriger vers la vue de l'import
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'pointeur_hr.import',
+            'res_id': self.import_id.id,
+            'view_mode': 'form',
+            'target': 'current',
+            'context': {
+                'default_message': {
+                    'title': _('Mapping terminé'),
+                    'message': ' - '.join(message_parts),
+                    'type': 'info',
+                    'sticky': True
+                }
             }
         }
-        
-        # Si aucune ligne n'a été mappée, rediriger vers la vue de l'import
-        if not next_action:
-            action['params']['next'] = {
-                'type': 'ir.actions.act_window',
-                'res_model': 'pointeur_hr.import',
-                'res_id': self.import_id.id,
-                'view_mode': 'form',
-                'target': 'current',
-            }
-        
-        return action
 
 
 class PointeurHrSelectEmployeesLine(models.TransientModel):

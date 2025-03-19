@@ -98,7 +98,7 @@ class PointeurHrSelectEmployees(models.TransientModel):
             mapped_names.append(wizard_line.employee_name)
             
             # Créer une correspondance permanente si demandé
-            if wizard_line.create_mapping:
+            if wizard_line.create_mapping and wizard_line.employee_name and wizard_line.employee_id:
                 # Vérifier si une correspondance existe déjà
                 mapping = self.env['pointeur_hr.employee.mapping'].sudo().search([
                     ('name', '=', wizard_line.employee_name),
@@ -118,11 +118,15 @@ class PointeurHrSelectEmployees(models.TransientModel):
                     })
                 else:
                     # Créer la nouvelle correspondance
-                    self.env['pointeur_hr.employee.mapping'].sudo().create({
-                        'name': wizard_line.employee_name,
-                        'employee_id': wizard_line.employee_id.id,
-                        'import_id': self.import_id.id,
-                    })
+                    try:
+                        self.env['pointeur_hr.employee.mapping'].sudo().create({
+                            'name': wizard_line.employee_name.strip(),  # Nettoyer les espaces
+                            'employee_id': wizard_line.employee_id.id,
+                            'import_id': self.import_id.id,
+                        })
+                    except Exception as e:
+                        _logger.error("Erreur lors de la création de la correspondance : %s", str(e))
+                        raise UserError(_("Impossible de créer la correspondance pour %s : le nom est invalide ou vide.") % wizard_line.employee_name)
         
         # Créer les présences
         if manual_mapped_count > 0:

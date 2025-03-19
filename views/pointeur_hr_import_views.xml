@@ -56,8 +56,6 @@
                             class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
                     <button name="action_create_attendances" string="Créer présences" type="object" 
                             class="oe_highlight" attrs="{'invisible': [('state', '!=', 'imported')]}"/>
-                    <button name="action_search_employee_mappings" string="Rechercher correspondances" type="object"
-                            class="btn-primary" attrs="{'invisible': [('state', '!=', 'imported')]}"/>
                     <button name="action_cancel" string="Annuler" type="object" 
                             attrs="{'invisible': [('state', 'in', ['cancelled', 'done'])]}"/>
                     <button name="action_reset" string="Réinitialiser" type="object" 

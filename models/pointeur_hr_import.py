@@ -338,6 +338,11 @@ class PointeurHrImport(models.Model):
                         'state': 'mapped'
                     })
                     mapped_count += 1
+                    
+        # Message pour les correspondances trouvées
+        if mapped_count > 0:
+            message = _("Recherche automatique des correspondances :\n- %d lignes ont été mappées") % mapped_count
+            self.message_post(body=message)
         
         # S'il reste des lignes sans correspondance, ouvrir l'assistant de sélection
         remaining_unmapped = self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done')

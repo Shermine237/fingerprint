@@ -61,124 +61,76 @@ class PointeurHrSelectEmployees(models.TransientModel):
     def action_confirm(self):
         """Confirmer les sélections et créer les présences"""
         self.ensure_one()
-        _logger.info("=== DÉBUT CONFIRMATION WIZARD ===")
-        
-        # Recharger le wizard pour avoir les dernières données
-        self = self.with_context(active_test=False).browse(self.id)
         
         if not self.line_ids:
             raise UserError(_("Aucune ligne à traiter."))
             
-        # Compter les nouvelles correspondances créées
-        manual_mapped_count = 0
-        mapped_names = []
-        mapping_errors = []
-        
         # Mettre à jour les lignes d'import avec les employés sélectionnés
-        # Utiliser sudo() pour éviter les problèmes de droits d'accès
-        valid_lines = self.sudo().line_ids.filtered(lambda l: l.employee_id)
-        _logger.info("Nombre de lignes valides : %d", len(valid_lines))
+        valid_lines = self.line_ids.filtered(lambda l: l.employee_id)
         
         if not valid_lines:
             raise UserError(_("Aucun employé sélectionné."))
+            
+        # Compter les nouvelles correspondances créées
+        manual_mapped_count = 0
+        mapped_names = []
         
         for wizard_line in valid_lines:
-            try:
-                _logger.info("Traitement de la ligne pour %s -> %s", 
-                            wizard_line.employee_name, wizard_line.employee_id.name)
-                
-                # Mettre à jour toutes les lignes d'import associées
-                import_lines = wizard_line.import_line_ids.sudo()
-                if not import_lines:
-                    _logger.warning("Aucune ligne d'import associée pour %s", wizard_line.employee_name)
-                    continue
-                    
-                _logger.info("Mise à jour de %d lignes d'import", len(import_lines))
-                
-                # Mettre à jour les lignes d'import une par une pour éviter les problèmes de cache
-                for import_line in import_lines:
-                    import_line.write({
-                        'employee_id': wizard_line.employee_id.id,
-                        'state': 'mapped'
-                    })
-                    manual_mapped_count += 1
-                
-                mapped_names.append(wizard_line.employee_name)
-                
-                # Créer une correspondance permanente si demandé
-                if wizard_line.create_mapping:
-                    _logger.info("Création de la correspondance pour %s -> %s", 
-                               wizard_line.employee_name, wizard_line.employee_id.name)
-                    
-                    # Vérifier si une correspondance existe déjà
-                    mapping = self.env['pointeur_hr.employee.mapping'].sudo().search([
-                        ('name', '=', wizard_line.employee_name),
-                        ('employee_id', '=', wizard_line.employee_id.id),
-                        '|',
-                        ('active', '=', True),
-                        ('active', '=', False)
-                    ], limit=1)
-                    
-                    if mapping:
-                        _logger.info("Une correspondance existe déjà (ID: %s)", mapping.id)
-                        # Réactiver et mettre à jour si nécessaire
-                        mapping.sudo().write({
-                            'active': True,
-                            'import_count': mapping.import_count + 1,
-                            'last_used': fields.Datetime.now(),
-                            'import_id': self.import_id.id
-                        })
-                    else:
-                        # Créer la nouvelle correspondance
-                        mapping_vals = {
-                            'name': wizard_line.employee_name,
-                            'employee_id': wizard_line.employee_id.id,
-                            'import_id': self.import_id.id,
-                        }
-                        _logger.info("Création nouvelle correspondance : %s", mapping_vals)
-                        mapping = self.env['pointeur_hr.employee.mapping'].sudo().create(mapping_vals)
-                        _logger.info("Correspondance créée avec succès (ID: %s)", mapping.id)
-                        
-            except Exception as e:
-                error_msg = str(e)
-                _logger.error("Erreur lors du traitement de %s: %s", wizard_line.employee_name, error_msg)
-                mapping_errors.append(f"{wizard_line.employee_name}: {error_msg}")
-                # Ne pas interrompre le traitement des autres lignes
+            # Mettre à jour toutes les lignes d'import associées
+            import_lines = wizard_line.import_line_ids
+            if not import_lines:
                 continue
-        
-        # Calculer les noms non mappés (seulement ceux qui ont un nom)
-        unmapped_lines = self.line_ids.filtered(lambda l: l.employee_name and not l.employee_id)
-        unmapped_names = [line.employee_name for line in unmapped_lines]
-        _logger.info("Noms non mappés : %s", unmapped_names)
-        
-        # Créer les présences seulement s'il y a des lignes mappées
-        total_mapped = self.mapped_count + manual_mapped_count
-        if total_mapped > 0:
-            _logger.info("Création des présences pour %d lignes", total_mapped)
-            self.import_id.sudo()._create_attendances(total_mapped)
-        
-        # Créer le message de retour
-        message_parts = []
-        if mapped_names:
-            message_parts.append(_("%d lignes ont été mappées pour %d noms") % (manual_mapped_count, len(mapped_names)))
-            if self.mapped_count > 0:
-                message_parts.append(_("%d lignes étaient déjà mappées") % self.mapped_count)
-        if unmapped_names:
-            message_parts.append(_("%d noms restent non mappés : %s") % (len(unmapped_names), ", ".join(unmapped_names)))
-        if mapping_errors:
-            message_parts.append(_("Erreurs lors de la création des correspondances :\n%s") % "\n".join(mapping_errors))
+                
+            import_lines.write({
+                'employee_id': wizard_line.employee_id.id,
+                'state': 'mapped'
+            })
+            manual_mapped_count += len(import_lines)
+            mapped_names.append(wizard_line.employee_name)
             
-        message = _("Résultat du mapping :\n- %s") % "\n- ".join(message_parts)
-        _logger.info(message)
+            # Créer une correspondance permanente si demandé
+            if wizard_line.create_mapping:
+                # Vérifier si une correspondance existe déjà
+                mapping = self.env['pointeur_hr.employee.mapping'].sudo().search([
+                    ('name', '=', wizard_line.employee_name),
+                    ('employee_id', '=', wizard_line.employee_id.id),
+                    '|',
+                    ('active', '=', True),
+                    ('active', '=', False)
+                ], limit=1)
+                
+                if mapping:
+                    # Réactiver et mettre à jour si nécessaire
+                    mapping.sudo().write({
+                        'active': True,
+                        'import_count': mapping.import_count + 1,
+                        'last_used': fields.Datetime.now(),
+                        'import_id': self.import_id.id
+                    })
+                else:
+                    # Créer la nouvelle correspondance
+                    self.env['pointeur_hr.employee.mapping'].sudo().create({
+                        'name': wizard_line.employee_name,
+                        'employee_id': wizard_line.employee_id.id,
+                        'import_id': self.import_id.id,
+                    })
         
-        # Afficher le message à l'utilisateur
+        # Créer les présences
+        if manual_mapped_count > 0:
+            self.import_id._create_attendances()
+            
+        # Créer le message de retour
+        message = _("%d lignes ont été mappées avec succès.") % manual_mapped_count
+        if mapped_names:
+            message += _("\nEmployés mappés : %s") % ", ".join(mapped_names)
+            
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': _('Mapping terminé'),
                 'message': message,
-                'type': 'success' if not mapping_errors else 'warning',
+                'type': 'success',
                 'sticky': True,
                 'next': {
                     'type': 'ir.actions.act_window_close'

@@ -67,26 +67,17 @@ class PointeurHrSelectEmployees(models.TransientModel):
         """Confirmer les sélections et créer les présences"""
         self.ensure_one()
         
-        if not self.line_ids:
-            raise UserError(_("Aucune ligne à traiter."))
-            
-        # Mettre à jour les lignes d'import avec les employés sélectionnés
+        # Vérifier qu'au moins une ligne a un employé sélectionné
         valid_lines = self.line_ids.filtered(lambda l: l.employee_id)
-        
         if not valid_lines:
-            raise UserError(_("Aucun employé sélectionné."))
+            raise UserError(_("Veuillez sélectionner au moins un employé."))
             
-        # Vérifier que les lignes ont bien des lignes d'import associées
-        if not any(line.import_line_ids for line in valid_lines):
-            raise UserError(_("Aucune ligne d'import associée aux employés sélectionnés."))
-            
-        # Compter les nouvelles correspondances créées
         manual_mapped_count = 0
         mapped_names = []
         
         for wizard_line in valid_lines:
-            # Mettre à jour toutes les lignes d'import associées
-            import_lines = wizard_line.import_line_ids
+            # Utiliser les lignes d'import déjà associées
+            import_lines = wizard_line.import_line_ids.filtered(lambda l: l.state not in ['done', 'error'])
             if not import_lines:
                 continue
                 
@@ -95,7 +86,8 @@ class PointeurHrSelectEmployees(models.TransientModel):
                 'state': 'mapped'
             })
             manual_mapped_count += len(import_lines)
-            mapped_names.append(wizard_line.employee_name)
+            if wizard_line.employee_name:  # S'assurer que le nom n'est pas vide
+                mapped_names.append(wizard_line.employee_name)
             
             # Créer une correspondance permanente si demandé
             if wizard_line.create_mapping and wizard_line.employee_name and wizard_line.employee_id:
@@ -133,15 +125,15 @@ class PointeurHrSelectEmployees(models.TransientModel):
             self.import_id._create_attendances()
             
         # Créer le message de retour
-        message = _("%d lignes ont été mappées avec succès.") % manual_mapped_count
-        if mapped_names:
+        message = _("%d lignes ont été mappées manuellement.") % manual_mapped_count
+        if mapped_names:  # Vérifier que la liste n'est pas vide
             message += _("\nEmployés mappés : %s") % ", ".join(mapped_names)
             
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Mapping terminé'),
+                'title': _("Mapping terminé"),
                 'message': message,
                 'type': 'success',
                 'sticky': True,

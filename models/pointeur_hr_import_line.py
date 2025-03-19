@@ -63,8 +63,6 @@ class PointeurHrImportLine(models.Model):
 
     def write(self, vals):
         """Surcharge de l'écriture pour gérer les états et les correspondances"""
-        _logger.info("=== DÉBUT WRITE IMPORT LINE ===")
-        _logger.info("Valeurs reçues : %s", vals)
         
         # Si on met à jour l'employee_id, on met à jour l'état
         if 'employee_id' in vals:
@@ -72,12 +70,10 @@ class PointeurHrImportLine(models.Model):
                 # Ne pas changer l'état si déjà terminé
                 if self.filtered(lambda l: l.state != 'done'):
                     vals['state'] = 'mapped'
-                    _logger.info("Mise à jour état : mapped")
             else:
                 # Ne pas changer l'état si déjà terminé
                 if self.filtered(lambda l: l.state != 'done'):
                     vals['state'] = 'imported'
-                    _logger.info("Mise à jour état : imported (employee_id vide)")
                     
         # Si on change l'état en 'done', vérifier que l'employé est défini
         if vals.get('state') == 'done':
@@ -139,7 +135,6 @@ class PointeurHrImportLine(models.Model):
                             'import_id': record.import_id.id
                         })
         
-        _logger.info("=== FIN WRITE IMPORT LINE ===")
         return result
 
     def action_view_attendance(self):

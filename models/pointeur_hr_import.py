@@ -401,6 +401,7 @@ class PointeurHrImport(models.Model):
                     'check_in': line.check_in,
                     'check_out': line.check_out,
                     'location_id': line.location_id.id,
+                    'source': 'import',  # Ajouter la source
                 }
                 _logger.info("Valeurs de la présence : %s", attendance_vals)
                 

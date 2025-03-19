@@ -19,7 +19,9 @@ class PointeurHrEmployeeMapping(models.Model):
 
     _sql_constraints = [
         ('unique_name_employee', 'unique(name, employee_id)', 
-         'Une correspondance existe déjà pour ce nom importé et cet employé !')
+         'Une correspondance existe déjà pour ce nom importé et cet employé !'),
+        ('unique_employee', 'unique(employee_id)', 
+         'Cet employé a déjà une correspondance de nom !')
     ]
 
     @api.model_create_multi

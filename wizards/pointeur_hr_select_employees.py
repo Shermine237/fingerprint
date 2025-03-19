@@ -91,7 +91,19 @@ class PointeurHrSelectEmployees(models.TransientModel):
             
             # Créer une correspondance permanente si demandé
             if wizard_line.create_mapping and wizard_line.employee_name and wizard_line.employee_id:
-                # Vérifier si une correspondance existe déjà
+                # Vérifier si une correspondance existe déjà pour cet employé
+                existing_employee_mapping = self.env['pointeur_hr.employee.mapping'].sudo().search([
+                    ('employee_id', '=', wizard_line.employee_id.id),
+                    '|',
+                    ('active', '=', True),
+                    ('active', '=', False)
+                ], limit=1)
+                
+                if existing_employee_mapping and existing_employee_mapping.name != wizard_line.employee_name:
+                    raise UserError(_("L'employé %s a déjà une correspondance avec le nom '%s'. Un employé ne peut avoir qu'une seule correspondance de nom.") 
+                                   % (wizard_line.employee_id.name, existing_employee_mapping.name))
+                
+                # Vérifier si une correspondance existe déjà pour ce nom et cet employé
                 mapping = self.env['pointeur_hr.employee.mapping'].sudo().search([
                     ('name', '=', wizard_line.employee_name),
                     ('employee_id', '=', wizard_line.employee_id.id),

@@ -105,6 +105,9 @@
                 <filter string="Retards" name="late" domain="[('late_hours', '>', 0)]"/>
                 <filter string="Départs anticipés" name="early_leave" domain="[('early_leave_hours', '>', 0)]"/>
                 <separator/>
+                <filter string="Importées" name="imported" domain="[('source', '=', 'import')]"/>
+                <filter string="Manuelles" name="manual" domain="[('source', '=', 'manual')]"/>
+                <separator/>
                 <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
                 <filter string="Département" name="department" context="{'group_by': 'department_id'}"/>
                 <filter string="Lieu de pointage" name="location" context="{'group_by': 'location_id'}"/>

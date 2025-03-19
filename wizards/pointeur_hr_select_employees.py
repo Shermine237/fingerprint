@@ -63,6 +63,9 @@ class PointeurHrSelectEmployees(models.TransientModel):
         self.ensure_one()
         _logger.info("=== DÉBUT CONFIRMATION WIZARD ===")
         
+        # Recharger le wizard pour avoir les dernières données
+        self = self.with_context(active_test=False).browse(self.id)
+        
         if not self.line_ids:
             raise UserError(_("Aucune ligne à traiter."))
             
@@ -72,7 +75,8 @@ class PointeurHrSelectEmployees(models.TransientModel):
         mapping_errors = []
         
         # Mettre à jour les lignes d'import avec les employés sélectionnés
-        valid_lines = self.line_ids.filtered(lambda l: l.employee_name and l.employee_id)
+        # Utiliser sudo() pour éviter les problèmes de droits d'accès
+        valid_lines = self.sudo().line_ids.filtered(lambda l: l.employee_id)
         _logger.info("Nombre de lignes valides : %d", len(valid_lines))
         
         if not valid_lines:
@@ -84,17 +88,21 @@ class PointeurHrSelectEmployees(models.TransientModel):
                             wizard_line.employee_name, wizard_line.employee_id.name)
                 
                 # Mettre à jour toutes les lignes d'import associées
-                import_lines = wizard_line.import_line_ids
+                import_lines = wizard_line.import_line_ids.sudo()
                 if not import_lines:
                     _logger.warning("Aucune ligne d'import associée pour %s", wizard_line.employee_name)
                     continue
                     
                 _logger.info("Mise à jour de %d lignes d'import", len(import_lines))
-                import_lines.write({
-                    'employee_id': wizard_line.employee_id.id,
-                    'state': 'mapped'
-                })
-                manual_mapped_count += len(import_lines)
+                
+                # Mettre à jour les lignes d'import une par une pour éviter les problèmes de cache
+                for import_line in import_lines:
+                    import_line.write({
+                        'employee_id': wizard_line.employee_id.id,
+                        'state': 'mapped'
+                    })
+                    manual_mapped_count += 1
+                
                 mapped_names.append(wizard_line.employee_name)
                 
                 # Créer une correspondance permanente si demandé
@@ -147,7 +155,7 @@ class PointeurHrSelectEmployees(models.TransientModel):
         total_mapped = self.mapped_count + manual_mapped_count
         if total_mapped > 0:
             _logger.info("Création des présences pour %d lignes", total_mapped)
-            self.import_id._create_attendances(total_mapped)
+            self.import_id.sudo()._create_attendances(total_mapped)
         
         # Créer le message de retour
         message_parts = []
@@ -164,15 +172,19 @@ class PointeurHrSelectEmployees(models.TransientModel):
         _logger.info(message)
         
         # Afficher le message à l'utilisateur
-        self.env['bus.bus']._sendone(self.env.user.partner_id, 'notification', {
-            'type': 'info',
-            'title': _("Résultat du mapping"),
-            'message': message,
-            'sticky': True
-        })
-        
-        _logger.info("=== FIN CONFIRMATION WIZARD ===")
-        return self.import_id._create_attendances(total_mapped)
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Mapping terminé'),
+                'message': message,
+                'type': 'success' if not mapping_errors else 'warning',
+                'sticky': True,
+                'next': {
+                    'type': 'ir.actions.act_window_close'
+                }
+            }
+        }{{ ... }}
 
 
 class PointeurHrSelectEmployeesLine(models.TransientModel):

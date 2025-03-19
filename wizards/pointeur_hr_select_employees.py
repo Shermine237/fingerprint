@@ -182,6 +182,47 @@ class PointeurHrSelectEmployeesLine(models.TransientModel):
     @api.onchange('employee_id')
     def _onchange_employee_id(self):
         """Mettre à jour les lignes d'import quand l'employé change"""
+        # Vérifier si l'employé est déjà attribué à un autre nom dans le wizard
+        if self.employee_id:
+            other_lines = self.wizard_id.line_ids.filtered(
+                lambda l: l.id != self.id and l.employee_id.id == self.employee_id.id and l.employee_name != self.employee_name
+            )
+            if other_lines:
+                # Réinitialiser l'employé et afficher un avertissement
+                self.employee_id = False
+                return {
+                    'warning': {
+                        'title': _("Employé déjà attribué"),
+                        'message': _(
+                            "L'employé '%s' est déjà attribué au nom '%s'. "
+                            "Un employé ne peut avoir qu'une seule correspondance de nom."
+                        ) % (self.employee_id.name, other_lines[0].employee_name)
+                    }
+                }
+            
+            # Vérifier si l'employé a déjà une correspondance dans la base de données
+            if self.employee_id and self.employee_name:
+                existing_mapping = self.env['pointeur_hr.employee.mapping'].search([
+                    ('employee_id', '=', self.employee_id.id),
+                    ('name', '!=', self.employee_name),
+                    '|',
+                    ('active', '=', True),
+                    ('active', '=', False)
+                ], limit=1)
+                
+                if existing_mapping:
+                    # Afficher un avertissement mais ne pas réinitialiser l'employé
+                    return {
+                        'warning': {
+                            'title': _("Correspondance existante"),
+                            'message': _(
+                                "Attention: L'employé '%s' a déjà une correspondance avec le nom '%s'. "
+                                "Si vous continuez, vous ne pourrez pas créer de correspondance pour cet employé."
+                            ) % (self.employee_id.name, existing_mapping.name)
+                        }
+                    }
+        
+        # Mise à jour des lignes d'import
         if self.employee_id and not self.import_line_ids:
             # Récupérer les lignes d'import depuis la ligne de référence
             lines = self.env['pointeur_hr.import.line'].search([

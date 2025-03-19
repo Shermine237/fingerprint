@@ -77,10 +77,12 @@ class PointeurHrSelectEmployees(models.TransientModel):
                         wizard_line.employee_name, wizard_line.employee_id.name)
             
             # Mettre à jour toutes les lignes d'import associées
-            wizard_line.import_line_ids.write({
-                'employee_id': wizard_line.employee_id.id,
-                'state': 'mapped'
-            })
+            for import_line in wizard_line.import_line_ids:
+                _logger.info("Mise à jour ligne import ID %s", import_line.id)
+                import_line.write({
+                    'employee_id': wizard_line.employee_id.id,
+                    'state': 'mapped'
+                })
             manual_mapped_count += len(wizard_line.import_line_ids)
             mapped_names.append(wizard_line.employee_name)
             
@@ -97,7 +99,7 @@ class PointeurHrSelectEmployees(models.TransientModel):
                 
                 if not mapping:
                     try:
-                        # Créer la correspondance dans une transaction séparée
+                        # Créer la correspondance
                         mapping_vals = {
                             'name': wizard_line.employee_name,
                             'employee_id': wizard_line.employee_id.id,

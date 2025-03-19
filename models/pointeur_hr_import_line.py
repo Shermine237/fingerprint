@@ -1,6 +1,9 @@
 from odoo import api, fields, models, _
 from datetime import datetime, timedelta
 from odoo.exceptions import ValidationError, UserError
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class PointeurHrImportLine(models.Model):
     _name = 'pointeur_hr.import.line'
@@ -45,29 +48,53 @@ class PointeurHrImportLine(models.Model):
                 line.total_hours = 0.0
 
     def write(self, vals):
-        # Si on met à jour l'employee_id, on met à jour l'état et on crée/met à jour la correspondance
-        if 'employee_id' in vals and vals['employee_id']:
-            vals['state'] = 'mapped'
-            for record in self:
-                if record.employee_name:  # On vérifie qu'il y a un nom à mapper
-                    mapping = self.env['pointeur_hr.employee.mapping'].search(
-                        [('name', '=', record.employee_name)], limit=1)
-                    if mapping:
-                        mapping.write({
-                            'employee_id': vals['employee_id'],
-                            'last_used': fields.Datetime.now(),
-                            'import_count': mapping.import_count + 1
-                        })
-                    else:
-                        self.env['pointeur_hr.employee.mapping'].create({
-                            'name': record.employee_name,
-                            'employee_id': vals['employee_id'],
-                            'import_id': record.import_id.id,
-                        })
-
-        # Si on met à jour l'attendance_id, on met à jour l'état
-        if 'attendance_id' in vals and vals['attendance_id']:
-            vals['state'] = 'done'
+        _logger.info("=== DÉBUT WRITE IMPORT LINE ===")
+        _logger.info("Valeurs reçues : %s", vals)
+        
+        # Si on met à jour l'employee_id, on met à jour l'état
+        if 'employee_id' in vals:
+            if vals['employee_id']:
+                vals['state'] = 'mapped'
+                _logger.info("Mise à jour état : mapped")
+                
+                # Créer/mettre à jour la correspondance
+                for record in self:
+                    if record.employee_name:  # Vérifier que le nom n'est pas vide
+                        employee = self.env['hr.employee'].browse(vals['employee_id'])
+                        _logger.info("Recherche correspondance pour %s -> %s", 
+                                   record.employee_name, employee.name)
+                        
+                        # Rechercher une correspondance existante
+                        mapping = self.env['pointeur_hr.employee.mapping'].search([
+                            ('name', '=', record.employee_name),
+                            ('employee_id', '=', vals['employee_id'])
+                        ], limit=1)
+                        
+                        if not mapping:
+                            try:
+                                # Créer une nouvelle correspondance
+                                mapping_vals = {
+                                    'name': record.employee_name,
+                                    'employee_id': vals['employee_id'],
+                                    'import_id': record.import_id.id,
+                                }
+                                _logger.info("Création correspondance : %s", mapping_vals)
+                                self.env['pointeur_hr.employee.mapping'].sudo().create(mapping_vals)
+                                _logger.info("Correspondance créée avec succès")
+                            except Exception as e:
+                                _logger.error("Erreur création correspondance : %s", str(e))
+                        else:
+                            # Mettre à jour le compteur d'utilisation
+                            _logger.info("Mise à jour correspondance existante (ID: %s)", mapping.id)
+                            mapping.write({
+                                'import_count': mapping.import_count + 1,
+                                'last_used': fields.Datetime.now()
+                            })
+            else:
+                vals['state'] = 'imported'
+                _logger.info("Mise à jour état : imported (employee_id vide)")
+        
+        _logger.info("=== FIN WRITE IMPORT LINE ===")
         return super(PointeurHrImportLine, self).write(vals)
 
     def action_view_attendance(self):

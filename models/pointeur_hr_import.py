@@ -316,26 +316,32 @@ class PointeurHrImport(models.Model):
     def action_create_attendances(self):
         """Créer les présences à partir des lignes importées"""
         self.ensure_one()
+        _logger.info("=== DÉBUT CRÉATION PRÉSENCES ===")
+        
         if self.state not in ['imported']:
             raise UserError(_("Vous ne pouvez créer les présences que si l'import est à l'état 'Importé'."))
             
         # Recherche des correspondances pour les lignes sans employé
-        unmapped_lines = self.line_ids.filtered(lambda l: not l.employee_id)
+        unmapped_lines = self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done')
+        _logger.info("Nombre de lignes sans correspondance : %d", len(unmapped_lines))
         mapped_count = 0
         
         for line in unmapped_lines:
             # Recherche d'un employé par son nom
-            employee = self._find_employee_by_name(line.employee_name)
-            if employee:
-                line.write({
-                    'employee_id': employee.id,
-                    'state': 'mapped'
-                })
-                mapped_count += 1
+            if line.employee_name:
+                employee = self._find_employee_by_name(line.employee_name)
+                if employee:
+                    _logger.info("Employé trouvé pour %s -> %s", line.employee_name, employee.name)
+                    line.write({
+                        'employee_id': employee.id,
+                        'state': 'mapped'
+                    })
+                    mapped_count += 1
         
         # S'il reste des lignes sans correspondance, ouvrir l'assistant de sélection
-        remaining_unmapped = self.line_ids.filtered(lambda l: not l.employee_id)
+        remaining_unmapped = self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done')
         if remaining_unmapped:
+            _logger.info("Il reste %d lignes non mappées -> ouverture assistant", len(remaining_unmapped))
             return {
                 'name': _('Sélectionner les employés'),
                 'type': 'ir.actions.act_window',
@@ -350,66 +356,81 @@ class PointeurHrImport(models.Model):
             }
         
         # Sinon, créer directement les présences
+        _logger.info("Toutes les lignes sont mappées -> création des présences")
         return self._create_attendances(mapped_count)
-    
+
     def _create_attendances(self, mapped_count=0):
         """Créer les présences pour les lignes avec un employé"""
         self.ensure_one()
+        _logger.info("=== DÉBUT CRÉATION PRÉSENCES ===")
         
         # Création des présences pour les lignes avec un employé
         attendance_count = 0
         error_count = 0
         
-        for line in self.line_ids.filtered(lambda l: l.employee_id and l.state != 'done'):
+        # Récupérer toutes les lignes mappées qui n'ont pas encore de présence
+        mapped_lines = self.line_ids.filtered(lambda l: l.employee_id and l.state in ['mapped'])
+        _logger.info("Nombre de lignes à traiter : %d", len(mapped_lines))
+        
+        for line in mapped_lines:
             try:
-                attendance = self.env['hr.attendance'].create({
+                _logger.info("Création présence pour %s (ID: %s)", line.employee_name, line.id)
+                # Vérifier les données obligatoires
+                if not line.check_in:
+                    raise ValidationError(_("L'heure d'entrée est obligatoire"))
+                
+                # Créer la présence
+                attendance_vals = {
                     'employee_id': line.employee_id.id,
                     'check_in': line.check_in,
                     'check_out': line.check_out,
-                    'import_id': self.id,
-                    'import_line_id': line.id,
                     'location_id': line.location_id.id,
-                })
+                }
+                _logger.info("Valeurs de la présence : %s", attendance_vals)
+                
+                attendance = self.env['hr.attendance'].create(attendance_vals)
+                _logger.info("Présence créée avec succès (ID: %s)", attendance.id)
+                
+                # Mettre à jour la ligne
                 line.write({
                     'attendance_id': attendance.id,
                     'state': 'done'
                 })
                 attendance_count += 1
+                
             except Exception as e:
+                error_message = str(e)
+                _logger.error("Erreur création présence pour ligne %s : %s", line.id, error_message)
                 line.write({
                     'state': 'error',
-                    'notes': _("Erreur lors de la création de la présence : %s") % str(e)
+                    'notes': _("Erreur lors de la création de la présence : %s") % error_message
                 })
                 error_count += 1
                 
-        # Mise à jour de l'état de l'import
+        # Mise à jour de l'état de l'import si au moins une présence a été créée
         if attendance_count > 0:
             self.write({'state': 'done'})
+            _logger.info("Import marqué comme terminé")
             
         # Message de confirmation
-        message = _("""Création des présences terminée :
-- {} lignes ont été mappées automatiquement
-- {} présences ont été créées
-- {} erreurs ont été rencontrées
-- {} lignes restent sans correspondance""").format(
-            mapped_count, 
-            attendance_count, 
-            error_count, 
-            len(self.line_ids.filtered(lambda l: not l.employee_id))
-        )
+        unmapped_count = len(self.line_ids.filtered(lambda l: not l.employee_id))
+        message_parts = []
         
+        if mapped_count > 0:
+            message_parts.append(_("%d lignes ont été mappées automatiquement") % mapped_count)
+        if attendance_count > 0:
+            message_parts.append(_("%d présences ont été créées") % attendance_count)
+        if error_count > 0:
+            message_parts.append(_("%d erreurs ont été rencontrées") % error_count)
+        if unmapped_count > 0:
+            message_parts.append(_("%d lignes restent sans correspondance") % unmapped_count)
+            
+        message = _("Création des présences terminée :\n- %s") % "\n- ".join(message_parts)
+        _logger.info(message)
         self.message_post(body=message)
         
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Création des présences'),
-                'message': _('%s présences créées.') % attendance_count,
-                'sticky': False,
-                'type': 'success' if attendance_count > 0 else 'warning',
-            }
-        }
+        _logger.info("=== FIN CRÉATION PRÉSENCES ===")
+        return True
 
     def action_view_attendances(self):
         """Voir les présences créées"""
@@ -429,35 +450,49 @@ class PointeurHrImport(models.Model):
         
     def _find_employee_by_name(self, employee_name):
         """Recherche un employé par son nom en utilisant les correspondances existantes ou en recherchant dans les employés"""
-        self.ensure_one()
-        
         if not employee_name:
             return False
             
-        # 1. Recherche dans les correspondances existantes
+        _logger.info("=== DÉBUT RECHERCHE EMPLOYÉ ===")
+        _logger.info("Recherche pour le nom : %s", employee_name)
+        
+        # 1. Rechercher dans les correspondances existantes
         mapping = self.env['pointeur_hr.employee.mapping'].search([
             ('name', '=', employee_name)
         ], limit=1)
         
-        if mapping and mapping.employee_id:
+        if mapping:
+            _logger.info("Correspondance trouvée (ID: %s) -> Employé %s", 
+                        mapping.id, mapping.employee_id.name)
+            # Mettre à jour le compteur d'utilisation
+            mapping.write({
+                'import_count': mapping.import_count + 1,
+                'last_used': fields.Datetime.now()
+            })
             return mapping.employee_id
             
-        # 2. Recherche directe dans les employés (correspondance exacte)
+        # 2. Rechercher un employé avec le nom exact
         employee = self.env['hr.employee'].search([
-            '|', '|',
-            ('name', '=ilike', employee_name),
-            ('name', '=ilike', employee_name.strip()),
-            ('name', '=ilike', ' '.join(reversed(employee_name.split())))
+            ('name', '=', employee_name),
+            ('active', '=', True)
         ], limit=1)
         
         if employee:
-            # Création d'une correspondance pour utilisation future
-            self.env['pointeur_hr.employee.mapping'].create({
-                'name': employee_name,
-                'employee_id': employee.id,
-            })
+            _logger.info("Employé trouvé avec nom exact : %s", employee.name)
+            # Créer une correspondance
+            try:
+                self.env['pointeur_hr.employee.mapping'].create({
+                    'name': employee_name,
+                    'employee_id': employee.id,
+                    'import_id': self.id
+                })
+                _logger.info("Nouvelle correspondance créée")
+            except Exception as e:
+                _logger.error("Erreur création correspondance : %s", str(e))
             return employee
             
+        _logger.info("Aucun employé trouvé")
+        _logger.info("=== FIN RECHERCHE EMPLOYÉ ===")
         return False
 
     def action_view_mappings(self):

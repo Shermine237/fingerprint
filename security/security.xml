@@ -63,16 +63,4 @@
         <field name="perm_create" eval="True"/>
         <field name="perm_unlink" eval="True"/>
     </record>
-
-    <!-- Règle globale pour restreindre l'accès aux autres utilisateurs -->
-    <record id="pointeur_hr_global_rule" model="ir.rule">
-        <field name="name">Pointeur HR Global Restriction</field>
-        <field name="model_id" eval="False"/> <!-- S'applique à tous les modèles -->
-        <field name="domain_force">[(0, '=', 1)]</field> <!-- Toujours faux pour bloquer l'accès -->
-        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-        <field name="perm_read" eval="False"/>
-        <field name="perm_write" eval="False"/>
-        <field name="perm_create" eval="False"/>
-        <field name="perm_unlink" eval="False"/>
-    </record>
 </odoo>

@@ -1,0 +1,1740 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* fingerprt_hr
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 14.0-20231106\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-03-20 01:14+0000\n"
+"PO-Revision-Date: 2025-03-20 01:14+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid ""
+"\n"
+"\n"
+"Errors :\n"
+"%s"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid ""
+"\n"
+"<h3>Mapping Report</h3>\n"
+"<p>\n"
+"<strong>Statistics :</strong><br/>\n"
+"- Lines imported : {total}<br/>\n"
+"- Lignes avec correspondance : {mapped} ({mapped_percent:.1f}%)<br/>\n"
+"- Lignes sans correspondance : {unmapped} ({unmapped_percent:.1f}%)\n"
+"</p>\n"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid ""
+"\n"
+"Creation of attendances completed :\n"
+"- %d attendances created\n"
+"- %d duplicates detected and associated\n"
+"- %d lines without match\n"
+"- %d lines in error\n"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
+#, python-format
+msgid ""
+"\n"
+"Mapped employees : %s"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "%d errors occurred while searching for mappings."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid ""
+"%d line(s) remain(s) without match. Use the selection wizard to manually "
+"associate them."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
+#, python-format
+msgid "%d lines have been manually mapped."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "%d mappings found successfully."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "%d mappings found, %d errors."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.actions.report,print_report_name:fingerprt_hr.action_report_attendance
+msgid "'Attendance_Report_%s' % (time.strftime(\"%Y%m%d_%H%M%S\"))"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid "<h3>Information for '{}'</h3>"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid "<h4>Import lines without mapping :</h4><ul>"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid "<h4>Other names used for this employee :</h4><ul>"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "<h4>Suggestions de correspondance :</h4><ul>"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "<li><strong>{}</strong> : "
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid "<li>Import #{} - {} ({})</li>"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid "<li>{} (used {} times)</li>"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+msgid "<span class=\"o_stat_text\">Mappings</span>"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+msgid "<strong>Export date :</strong>"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+msgid "<strong>Total</strong>"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.constraint,message:fingerprt_hr.constraint_fingerprt_hr_employee_mapping_unique_name_active
+msgid "A mapping already exists for this imported name!"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_needaction
+msgid "Action Needed"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__active
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location__active
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_location_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_employee_mapping_search
+msgid "Active"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__activity_ids
+msgid "Activities"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__activity_state
+msgid "Activity State"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__activity_type_icon
+msgid "Activity Type Icon"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_form
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_form
+msgid "Additional Information"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location__address
+msgid "Address"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "All lines already have an employee associated."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "All matches have been found."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid ""
+"An active mapping already exists for name '%s' (associated with employee "
+"%s)."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid ""
+"An active mapping already exists for the name '%s' (associated with employee"
+" %s)."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_attendance.py:0
+#, python-format
+msgid "An attendance cannot have a check-out time without a check-in time."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__wizard_id
+msgid "Assistant"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_attachment_count
+msgid "Attachment Count"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#: model:ir.model,name:fingerprt_hr.model_hr_attendance
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__attendance_id
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_attendance_view_tree
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.hr_employee_view_form_inherit
+#, python-format
+msgid "Attendance"
+msgstr "Présence"
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.hr_employee_view_form_inherit
+msgid "Attendance Configuration"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model,name:fingerprt_hr.model_fingerprt_hr_location
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__location_id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__location_id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance__location_id
+msgid "Attendance Location"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_employee__attendance_rate
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.hr_employee_view_kanban_inherit
+msgid "Attendance Rate"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.actions.act_window,name:fingerprt_hr.action_attendance_report
+#: model:ir.actions.report,name:fingerprt_hr.action_report_attendance
+#: model:ir.model,name:fingerprt_hr.model_fingerprt_hr_attendance_report
+#: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_attendance_report
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_graph
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_pivot
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_tree
+msgid "Attendance Report"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model,name:fingerprt_hr.model_fingerprt_hr_attendance_report_export_wizard
+msgid "Attendance Report Export Wizard"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.hr_employee_view_form_inherit
+msgid "Attendance Statistics (Current Month)"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__attendance_type_ids
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance__attendance_type_ids
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+msgid "Attendance Types"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "Attendance already exists and associated"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+#, python-format
+msgid "Attendances"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "Automatic matching (score: %.2f)"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid ""
+"Automatic search for matches :\n"
+"- %d lines have been mapped"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__display_id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_employee__badge_id
+msgid "Badge ID"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_export_wizard_form
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
+msgid "Cancel"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_import__state__cancelled
+msgid "Cancelled"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "Cannot mark as done a line without an associated employee"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__check_in
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__check_in
+msgid "Check In"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__in_note
+msgid "Check In Note"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__check_out
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__check_out
+msgid "Check Out"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__out_note
+msgid "Check Out Note"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__check_in
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
+msgid "Check-in (example)"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__check_out
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
+msgid "Check-out (example)"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "Check-out time cannot be earlier than check-in time."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_attendance.py:0
+#, python-format
+msgid "Check-out time must be after check-in time."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_attendance_report_export_wizard__export_scope
+msgid ""
+"Choose to export only selected lines or all lines using the current search "
+"filters"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location__company_id
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_location_search
+msgid "Company"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_config
+msgid "Configuration Fingerprt"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
+msgid "Confirm"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+msgid "Create Attendances"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
+msgid "Create correspondence"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.actions.act_window,help:fingerprt_hr.action_location
+msgid ""
+"Create locations to manage the places where your employees can clock in."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__create_mapping
+msgid "Create mapping"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report_export_wizard__create_uid
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__create_uid
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__create_uid
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__create_uid
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location__create_uid
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees__create_uid
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report_export_wizard__create_date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__create_date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__create_date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__create_date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location__create_date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees__create_date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__date
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
+msgid "Date"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "Date is required."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_employee_mapping_form
+msgid "Deactivate"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_employee__default_location_id
+msgid "Default Attendance Location"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__default_location_id
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+msgid "Default Location"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__department_id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__department
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
+msgid "Department"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__dept_code
+msgid "Department Code"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+msgid "Detailed Attendance Report"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__display_name
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report_export_wizard__display_name
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__display_name
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__display_name
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__display_name
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location__display_name
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees__display_name
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__display_name
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance__display_name
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_employee__display_name
+msgid "Display Name"
+msgstr "Nom d'affichage"
+
+#. module: fingerprt_hr
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_import__state__done
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_import_line__state__done
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
+msgid "Done"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_import__state__draft
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
+msgid "Draft"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
+msgid "Early Leave"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__early_leave_hours
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance__early_leave_hours
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+msgid "Early Leave Hours"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model,name:fingerprt_hr.model_hr_employee
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__employee_id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__employee_id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__employee_id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__employee_id
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_employee_mapping_search
+msgid "Employee"
+msgstr "Employé"
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid "Employee %s already has an active mapping with name '%s'."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "Employee '%s' already has an active mapping with name '%s'"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "Employee '%s' already has an active mapping with name '%s'."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.actions.act_window,name:fingerprt_hr.action_employee_mapping
+#: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_employee_mapping
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_employee_mapping_form
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_employee_mapping_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_employee_mapping_tree
+msgid "Employee Mapping"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
+#, python-format
+msgid "Employee already assigned"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.actions.act_window,help:fingerprt_hr.action_employee_mapping
+msgid ""
+"Employee mappings are automatically created when importing attendance data.\n"
+"                They allow associating imported names with existing employees."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "Employee name is required."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_hr_employee__default_location_id
+msgid "Employee's default attendance location"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_hr_employee__badge_id
+msgid "Employee's unique badge identifier"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+msgid "Entry"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_form
+msgid "Entry note"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "Erreur lors de l'import : %s"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_import__state__error
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_import_line__state__error
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
+msgid "Error"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__error_message
+msgid "Error Message"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "Error searching for mapping: %s"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "Error while creating attendance: %s"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_attendance_report_export_wizard__export_type__excel
+msgid "Excel"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
+#, python-format
+msgid "Existing mapping"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+msgid "Exit"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_form
+msgid "Exit note"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_export_wizard_form
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_tree
+msgid "Export"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_attendance_report_export_wizard__export_scope__all
+msgid "Export All (current filters)"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.actions.act_window,name:fingerprt_hr.action_attendance_report_export_wizard
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_export_wizard_form
+msgid "Export Attendance Report"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report_export_wizard__export_scope
+msgid "Export Scope"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report_export_wizard__export_type
+msgid "Export Type"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__file
+msgid "File CSV"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__file_name
+msgid "File Name"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_employee_mapping_form
+msgid "Find Similar Names"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_import_root
+msgid "Fingerprt"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+msgid "Fingerprt Import"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:res.groups,name:fingerprt_hr.group_fingerprt_manager
+msgid "Fingerprt Manager"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_tree
+msgid "Fingerprt imports"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_follower_ids
+msgid "Followers"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_channel_ids
+msgid "Followers (Channels)"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_partner_ids
+msgid "Followers (Partners)"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_import__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
+msgid ""
+"For each mapped name, all lines with this name will be associated with the "
+"selected employee."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_location_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_employee_mapping_search
+msgid "Group by"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+msgid "Hours Worked"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_form
+msgid "Hours worked"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report_export_wizard__id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location__id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees__id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance__id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_employee__id
+msgid "ID"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__activity_exception_icon
+msgid "Icon"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_import__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_import__message_needaction
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_import__message_unread
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_import__message_has_error
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_import__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__import_id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees__import_id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_employee__import_id
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_attendance_report__source__import
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__hr_attendance__source__import
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
+msgid "Import"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "Import %s"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__import_count
+msgid "Import Count"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.actions.act_window,name:fingerprt_hr.fingerprt_hr_import_action
+msgid "Import Data"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__import_date
+msgid "Import Date"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model,name:fingerprt_hr.model_fingerprt_hr_import_line
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance__import_line_id
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_form
+msgid "Import Line"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.actions.act_window,name:fingerprt_hr.fingerprt_hr_import_line_action
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_tree
+msgid "Import Lines"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_import_line
+msgid "Import Lines from Fingerprt"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid "Import Lines without Mapping"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model,name:fingerprt_hr.model_fingerprt_hr_import
+msgid "Import Physical Time Clock Data"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.actions.act_window,help:fingerprt_hr.action_fingerprt_hr_import
+msgid "Import data from your fingerprt"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.actions.act_window,name:fingerprt_hr.action_fingerprt_hr_import
+#: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_import
+msgid "Import from Fingerprt"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.actions.act_window,help:fingerprt_hr.fingerprt_hr_import_line_action
+msgid ""
+"Import lines are automatically created when importing attendance data.\n"
+"                They allow you to view and correct the data before creating attendances."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__import_line_ids
+msgid "Import lines associated"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_employee_mapping_search
+msgid "Import source"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid ""
+"Import successful on %s :\n"
+"- %d lines imported\n"
+"- %d employees different"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.actions.act_window,help:fingerprt_hr.fingerprt_hr_import_action
+msgid ""
+"Import your attendance files to create attendances.\n"
+"                The files must be in CSV format with the following columns:\n"
+"                - Employee name\n"
+"                - Entry date and time\n"
+"                - Exit date and time"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_import__state__imported
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_import_line__state__imported
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
+msgid "Imported"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_form
+msgid "Imported Line"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.actions.act_window,name:fingerprt_hr.action_fingerprt_hr_import_line
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__line_ids
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_tree
+msgid "Imported Lines"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__name
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__employee_name
+msgid "Imported Name"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.actions.act_window,help:fingerprt_hr.action_fingerprt_hr_import_line
+msgid "Imported lines will appear here after data import"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__employee_name
+msgid "Imported name"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__import_ids
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_employee_mapping_form
+msgid "Imports"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "Impossible d'annuler un import terminé."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_search
+msgid "In Error"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_search
+msgid "In error"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_location_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_employee_mapping_search
+msgid "Inactive"
+msgstr ""
+
+#. module: fingerprt_hr
+#. openerp-web
+#: code:addons/fingerprt_hr/static/src/js/import_form_view.js:0
+#, python-format
+msgid "Information"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_is_follower
+msgid "Is Follower"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "L'heure d'entrée est obligatoire"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report____last_update
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report_export_wizard____last_update
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping____last_update
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import____last_update
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line____last_update
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location____last_update
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees____last_update
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line____last_update
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance____last_update
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_employee____last_update
+msgid "Last Modified on"
+msgstr "Dernière modification le"
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report_export_wizard__write_uid
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__write_uid
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__write_uid
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__write_uid
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location__write_uid
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees__write_uid
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report_export_wizard__write_date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__write_date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__write_date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__write_date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location__write_date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees__write_date
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__last_used
+msgid "Last Used"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
+msgid "Late"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__late_hours
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance__late_hours
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+msgid "Late Hours"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model,name:fingerprt_hr.model_fingerprt_hr_select_employees_line
+msgid "Line of the selection assistant"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees__line_ids
+msgid "Lines"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees__unmapped_count
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
+msgid "Lines to process"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "Lines with Errors"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__location_id
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_location_form
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.hr_employee_view_search_inherit
+msgid "Location"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.actions.act_window,name:fingerprt_hr.action_location
+#: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_location
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_location_tree
+msgid "Locations"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_main_attachment_id
+msgid "Main Attachment"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_attendance_report__source__manual
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__hr_attendance__source__manual
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
+msgid "Manual"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_import_line__state__mapped
+msgid "Mapped"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees__mapped_count
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
+msgid "Mapped Lines"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid "Mapping '{}' has been deactivated"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid "Mapping Analysis"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "Mapping Created"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid "Mapping Deactivated"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "Mapping Search"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model,name:fingerprt_hr.model_fingerprt_hr_employee_mapping
+msgid "Mapping between imported names and employees"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
+#, python-format
+msgid "Mapping completed"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "Mapping reactivated: %s -> %s"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "Mapping updated: %s -> %s"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "Mappings"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_has_error
+msgid "Message Delivery error"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_ids
+msgid "Messages"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_search
+msgid "Month"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_search
+msgid "My imports"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__name
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__name
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location__name
+msgid "Name"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "New mapping created: %s -> %s"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__activity_summary
+msgid "Next Activity Summary"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__activity_type_id
+msgid "Next Activity Type"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.actions.act_window,help:fingerprt_hr.action_employee_mapping
+msgid "No employee mapping found"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.actions.act_window,help:fingerprt_hr.fingerprt_hr_import_line_action
+msgid "No import lines found"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.actions.act_window,help:fingerprt_hr.action_fingerprt_hr_import_line
+msgid "No imported lines found"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.actions.act_window,help:fingerprt_hr.action_fingerprt_hr_import
+#: model_terms:ir.actions.act_window,help:fingerprt_hr.fingerprt_hr_import_action
+msgid "No imports found"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.actions.act_window,help:fingerprt_hr.action_location
+msgid "No locations defined"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "No mappings found."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "No valid line found in the file."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+msgid "Nom de l'import"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_search
+msgid "Not Done"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_search
+msgid "Not done"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__notes
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__notes
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location__notes
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_form
+msgid "Notes"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_form
+msgid "Notes and Errors"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+msgid "Notes sur l'import..."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_needaction_counter
+msgid "Number of Actions"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__attendance_count
+msgid "Number of Attendances"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_employee__total_early_leave_count
+msgid "Number of Early Departures"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_employee__total_late_count
+msgid "Number of Late Arrivals"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__line_count
+msgid "Number of Lines"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_has_error_counter
+msgid "Number of errors"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__line_count
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
+msgid "Number of lines"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_import__message_needaction_counter
+msgid "Number of messages which requires an action"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_import__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_import__message_unread_counter
+msgid "Number of unread messages"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "Only CSV files are accepted."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_attendance_view_filter
+msgid "Overtime"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__ot1_hours
+msgid "Overtime 1 Hours"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__ot2_hours
+msgid "Overtime 2 Hours"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__overtime_hours
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance__overtime_hours
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+msgid "Overtime Hours"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_attendance_report_export_wizard__export_type__pdf
+msgid "PDF"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__payroll_id
+msgid "Payroll ID"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_location_form
+msgid "Place name"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "Please select a file to import."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
+#, python-format
+msgid "Please select at least one employee."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_tree
+msgid "Rechercher"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__reference_line_id
+msgid "Reference line"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__regular_hours
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__reg_hours
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance__regular_hours
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+msgid "Regular Hours"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid "Related Imports"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_reporting
+msgid "Reporting"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_form
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_tree
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+msgid "Reset"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__activity_user_id
+msgid "Responsible User"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_attendance_view_filter
+msgid "Search Attendance"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_search
+msgid "Search imports"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
+msgid "Search in attendance records"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_search
+msgid "Search in import lines"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
+msgid "Search in imported lines"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_location_search
+msgid "Search locations"
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#: model:ir.actions.act_window,name:fingerprt_hr.action_select_employees
+#: model:ir.model,name:fingerprt_hr.model_fingerprt_hr_select_employees
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
+#, python-format
+msgid "Select Employees"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
+msgid ""
+"Select the employees corresponding to the imported names. The lines are "
+"grouped by name."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_attendance_report_export_wizard__export_scope__selected
+msgid "Selected Lines"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__source
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance__source
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
+msgid "Source"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__import_id
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance__import_id
+msgid "Source Import"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__state
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__state
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_search
+msgid "State"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_import__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
+#, python-format
+msgid ""
+"The employee %s has already a mapping with the name '%s'. An employee can "
+"only have one name mapping."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
+#, python-format
+msgid ""
+"The employee '%s' has already a mapping with the name '%s'. If you continue,"
+" you will not be able to create a mapping for this employee."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
+#, python-format
+msgid ""
+"The employee '%s' is already assigned to the name '%s'. An employee can only"
+" have one name mapping."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
+#, python-format
+msgid ""
+"The employee '%s' is assigned to multiple different names ('%s' and '%s'). "
+"An employee can only have one name mapping."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
+msgid "This Month"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.constraint,message:fingerprt_hr.constraint_fingerprt_hr_employee_mapping_unique_employee_active
+msgid "This employee already has an active name mapping!"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_attendance_view_filter
+msgid "This month"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_attendance_view_filter
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
+msgid "Today"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_attendance_view_tree
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_tree
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_tree
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_tree
+msgid "Total"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__total_hours
+msgid "Total Hours"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_employee__total_overtime_hours
+msgid "Total Overtime Hours"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_import__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
+#, python-format
+msgid "Unable to create mapping for %s : the name is invalid or empty."
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_unread
+msgid "Unread Messages"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_unread_counter
+msgid "Unread Messages Counter"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__user_id
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_search
+msgid "User"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_form
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_tree
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
+msgid "View Attendance"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.hr_employee_view_form_inherit
+msgid "View Attendances"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.hr_employee_view_form_inherit
+msgid "View Overtime"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__website_message_ids
+msgid "Website Messages"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,help:fingerprt_hr.field_fingerprt_hr_import__website_message_ids
+msgid "Website communication history"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_search
+msgid "Without Employee"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__working_hours
+#: model:ir.model.fields,field_description:fingerprt_hr.field_hr_attendance__working_hours
+msgid "Working Hours"
+msgstr ""
+
+#. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
+msgid ""
+"You can leave some lines unmapped if necessary but they will not have a "
+"correspondence so no attendance."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid ""
+"You can only create attendances if the import is in the 'Imported' state."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "You can only import if the state is 'Draft'."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
+#, python-format
+msgid "You must first select an employee."
+msgstr ""
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "{} (score: {:.2f}), "
+msgstr ""

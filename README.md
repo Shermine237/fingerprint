@@ -94,7 +94,7 @@ This module extends the standard Odoo 14 attendance module by adding advanced fe
 
 1. Copy module to your Odoo addons directory
 2. Update modules list
-3. Install "Attendance Manager HR" module
+3. Install "fingerprint HR" module
 
 ## Configuration
 

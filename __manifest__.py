@@ -1,5 +1,5 @@
 {
-    'name': 'Attendance Manager HR',
+    'name': 'Fingerprint HR',
     'version': '14.0.1.1.0',
     'category': 'Human Resources',
     'summary': 'Location-based attendance management',

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0-20231106\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-20 03:13+0000\n"
-"PO-Revision-Date: 2025-03-20 03:13+0000\n"
+"POT-Creation-Date: 2025-03-20 03:33+0000\n"
+"PO-Revision-Date: 2025-03-20 03:33+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -131,16 +131,16 @@ msgid "<h4>Import lines without mapping :</h4><ul>"
 msgstr "<h4>Lignes importées sans correspondance :</h4><ul>"
 
 #. module: fingerprt_hr
-#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
-#, python-format
-msgid "<h4>Other names used for this employee :</h4><ul>"
-msgstr "<h4>Autres noms utilisés pour cet employé :</h4><ul>"
-
-#. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
 #, python-format
 msgid "<h4>Matching suggestions :</h4><ul>"
 msgstr "<h4>Suggestions de correspondance :</h4><ul>"
+
+#. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
+#, python-format
+msgid "<h4>Other names used for this employee :</h4><ul>"
+msgstr "<h4>Autres noms utilisés pour cet employé :</h4><ul>"
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
@@ -414,6 +414,12 @@ msgid "Check-in (example)"
 msgstr "Pointage d'entrée (exemple)"
 
 #. module: fingerprt_hr
+#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
+#, python-format
+msgid "Check-in time is required"
+msgstr "L'heure d'entrée est obligatoire"
+
+#. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__check_out
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
 msgid "Check-out (example)"
@@ -449,7 +455,7 @@ msgstr "Entreprise"
 #. module: fingerprt_hr
 #: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_config
 msgid "Configuration Fingerprint"
-msgstr "Configuration Fingerprint"
+msgstr "Configuration du Pointeur"
 
 #. module: fingerprt_hr
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
@@ -764,6 +770,11 @@ msgid "File Name"
 msgstr "Nom du fichier"
 
 #. module: fingerprt_hr
+#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_tree
+msgid "Find"
+msgstr "Rechercher"
+
+#. module: fingerprt_hr
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_employee_mapping_form
 msgid "Find Similar Names"
 msgstr "Trouver des noms similaires"
@@ -940,12 +951,8 @@ msgid "Import data from your fingerprint"
 msgstr "Importer les données de votre Pointeur"
 
 #. module: fingerprt_hr
-#: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_import
-msgid "Import from Fingerprint"
-msgstr "Importer depuis le Pointeur"
-
-#. module: fingerprt_hr
 #: model:ir.actions.act_window,name:fingerprt_hr.action_fingerprt_hr_import
+#: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_import
 msgid "Import from Fingerprint"
 msgstr "Importer depuis le Pointeur"
 
@@ -1071,12 +1078,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_is_follower
 msgid "Is Follower"
 msgstr "Est abonné"
-
-#. module: fingerprt_hr
-#: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
-#, python-format
-msgid "Check-in time is required"
-msgstr "L'heure d'entrée est obligatoire"
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report____last_update
@@ -1490,11 +1491,6 @@ msgid "Please select at least one employee."
 msgstr "Veuillez sélectionner au moins un employé."
 
 #. module: fingerprt_hr
-#: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_tree
-msgid "Find"
-msgstr "Rechercher"
-
-#. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__reference_line_id
 msgid "Reference line"
 msgstr "Ligne de référence"
@@ -1809,4 +1805,4 @@ msgstr "Vous devez d'abord sélectionner un employé."
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
 #, python-format
 msgid "{} (score: {:.2f}), "
-msgstr ""
+msgstr "{} (score : {:.2f}), "

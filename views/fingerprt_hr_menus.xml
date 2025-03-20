@@ -3,7 +3,7 @@
     <data>
         <!-- Configuration Menu -->
         <menuitem id="menu_fingerprt_hr_config"
-                  name="Configuration Fingerprt"
+                  name="Configuration Fingerprint"
                   parent="hr_attendance.menu_hr_attendance_settings"
                   sequence="100"/>
 
@@ -21,22 +21,22 @@
                   action="fingerprt_hr.action_employee_mapping"
                   sequence="20"/>
 
-        <!-- Fingerprt Menu under Attendance Menu -->
+        <!-- Fingerprint Menu under Attendance Menu -->
         <menuitem id="menu_fingerprt_hr_import_root"
-                  name="Fingerprt"
+                  name="Fingerprint"
                   parent="hr_attendance.menu_hr_attendance_root"
                   sequence="20"/>
 
-        <!-- Import Fingerprt Menu -->
+        <!-- Import Fingerprint Menu -->
         <menuitem id="menu_fingerprt_hr_import"
-                  name="Import from Fingerprt"
+                  name="Import from Fingerprint"
                   parent="menu_fingerprt_hr_import_root"
                   action="fingerprt_hr.action_fingerprt_hr_import"
                   sequence="10"/>
 
         <!-- Import Lines Menu -->
         <menuitem id="menu_fingerprt_hr_import_line"
-                  name="Import Lines from Fingerprt"
+                  name="Import Lines from Fingerprint"
                   parent="menu_fingerprt_hr_import_root"
                   action="fingerprt_hr.action_fingerprt_hr_import_line"
                   sequence="20"/>

@@ -1,119 +1,116 @@
-# Pointeur HR
+# Attendance Manager HR
 
 ## Description
-Ce module étend les fonctionnalités du module de présences standard d'Odoo 14 en ajoutant des fonctionnalités avancées pour l'importation et la gestion des pointages d'employés à partir de fichiers externes.
+This module extends the standard Odoo 14 attendance module by adding advanced features for importing and managing employee attendance data from external files.
 
-## Fonctionnalités principales
+## Main Features
 
-### 1. Import des données de pointage
-- Import de fichiers CSV contenant les données de pointage
-- Support de différents formats de date et heure
-- Gestion des heures normales et supplémentaires
-- Import en masse des pointages
-- Validation et vérification des données importées
+### 1. Attendance Data Import
+- CSV file import for attendance data
+- Support for different date and time formats
+- Normal and overtime hours management
+- Bulk attendance import
+- Data validation and verification
 
-### 2. Gestion des correspondances employés
-- Système intelligent de correspondance entre noms importés et employés Odoo
-- Assistant de sélection des employés pour les correspondances manuelles
-- Protection contre les correspondances multiples (un employé = un seul nom)
-- Gestion des correspondances actives/inactives
-- Réactivation automatique des correspondances inactives si nécessaire
+### 2. Employee Mapping System
+- Intelligent mapping system between imported names and Odoo employees
+- Employee selection wizard for manual mapping
+- Protection against multiple mappings (one employee = one name)
+- Active/inactive mapping management
+- Automatic reactivation of inactive mappings when needed
 
-### 3. Traitement des présences
-- Création automatique des présences à partir des données importées
-- Validation des heures d'entrée et de sortie
-- Association avec les lieux de pointage
-- Gestion des états des lignes (importé, mappé, terminé, erreur)
-- Possibilité de réinitialiser les lignes en erreur
+### 3. Attendance Processing
+- Automatic attendance creation from imported data
+- Check-in and check-out time validation
+- Location association
+- Line status management (imported, mapped, done, error)
+- Error line reset capability
 
-### 4. Interface utilisateur avancée
-- Vue arborescente des lignes d'import avec code couleur selon l'état
-- Filtres de recherche personnalisés
-- Actions contextuelles sur les lignes
-- Notifications temporaires et claires
-- Statistiques en temps réel sur l'import
+### 4. Advanced User Interface
+- Tree view of import lines with status color coding
+- Custom search filters
+- Contextual line actions
+- Clear temporary notifications
+- Real-time import statistics
 
-## Guide utilisateur détaillé
+## Detailed User Guide
 
-### 1. Import des données
-1. Accédez au menu "Présences > Imports"
-2. Cliquez sur "Créer" pour démarrer un nouvel import
-3. Sélectionnez votre fichier CSV
-4. Choisissez le lieu de pointage par défaut (optionnel)
-5. Cliquez sur "Importer" pour charger les données
+### 1. Data Import
+1. Access "Attendance > Imports" menu
+2. Click "Create" to start a new import
+3. Select your CSV file
+4. Choose default location (optional)
+5. Click "Import" to load data
 
-### 2. Gestion des correspondances
-#### Correspondance automatique
-1. Une fois l'import effectué, cliquez sur "Rechercher correspondances"
-2. Le système tentera de faire correspondre automatiquement les noms importés avec les employés existants
-3. Les lignes avec correspondance passeront à l'état "mapped"
+### 2. Mapping Management
+#### Automatic Mapping
+1. After import, click "Search Mappings"
+2. The system will attempt to automatically match imported names with existing employees
+3. Successfully mapped lines will change to "mapped" status
 
-#### Correspondance manuelle
-1. Sélectionnez les lignes sans correspondance
-2. Cliquez sur "Attribuer employés"
-3. Dans l'assistant :
-   - Sélectionnez l'employé correspondant pour chaque nom
-   - Cochez/décochez "Créer correspondance" selon vos besoins
-   - Le système empêche d'attribuer un employé à plusieurs noms différents
-4. Validez pour créer les correspondances
+#### Manual Mapping
+1. For unmapped lines, use the employee selection wizard
+2. Select the correct employee for each name
+3. Choose whether to create permanent mappings
+4. Confirm selections to create mappings
 
-### 3. Création des présences
-1. Une fois les correspondances établies, cliquez sur "Créer présences"
-2. Le système :
-   - Vérifie la validité des données
-   - Crée les présences pour les lignes valides
-   - Marque les lignes comme "terminées"
-   - Signale les erreurs éventuelles
+### 3. Attendance Creation
+1. Once mapping is complete, click "Create Attendances"
+2. The system will:
+   - Validate check-in/out times
+   - Create attendance records
+   - Associate locations
+   - Update line statuses
 
-### 4. Gestion des erreurs
-1. Les lignes en erreur sont marquées en rouge
-2. Pour chaque ligne en erreur :
-   - Consultez le message d'erreur détaillé
-   - Corrigez les données si nécessaire
-   - Utilisez "Réinitialiser" pour retenter le traitement
+### 4. Error Management
+1. Lines with errors will be marked in red
+2. View error details in the line form
+3. Fix issues and reset lines
+4. Retry attendance creation
 
-### 5. Suivi et statistiques
-- Consultez les statistiques de l'import en temps réel
-- Utilisez les filtres pour analyser les données
-- Accédez aux présences créées via le bouton "Voir présences"
-- Consultez les correspondances via "Voir correspondances"
+## Technical Information
 
-### 6. Gestion des correspondances employés
-1. Accédez au menu "Présences > Configuration > Correspondances employés"
-2. Consultez toutes les correspondances existantes
-3. Activez/désactivez les correspondances selon vos besoins
-4. Suivez les statistiques d'utilisation de chaque correspondance
+### Dependencies
+- base
+- hr_attendance
+- hr
 
-### 7. Configuration des lieux de pointage
-1. Accédez au menu "Présences > Configuration > Lieux de pointage"
-2. Créez et gérez vos différents lieux de pointage
-3. Associez des lieux par défaut aux employés si nécessaire
+### Module Structure
+- models/: Data models
+- views/: XML views
+- security/: Access rights
+- reports/: Report templates
+- wizards/: Import wizards
+- data/: Configuration data
+
+### Key Features
+- Location-based attendance tracking
+- Attendance data import
+- Attendance reports
+- Normal and overtime hours tracking
+- Import error management
+
+## Installation
+
+1. Copy module to your Odoo addons directory
+2. Update modules list
+3. Install "Attendance Manager HR" module
 
 ## Configuration
 
-### Prérequis
-- Module hr (Ressources Humaines)
-- Module hr_attendance (Présences)
+1. Set up employee access rights
+2. Configure default locations
+3. Set up attendance policies
+4. Configure import settings
 
-### Installation
-1. Copiez ce module dans le dossier des addons d'Odoo
-2. Mettez à jour la liste des modules
-3. Installez le module "Pointeur HR"
+## Support
 
-### Configuration initiale
-1. Créez les lieux de pointage (Présences > Configuration > Lieux de pointage)
-2. Vérifiez les droits d'accès des utilisateurs
-3. Configurez les paramètres par défaut si nécessaire
+For support and bug reports, please create an issue in the repository or contact the module maintainer.
 
-## Support technique
-Pour toute question ou problème :
-1. Consultez les messages d'erreur détaillés
-2. Vérifiez le format de vos données d'import
-3. Contactez le support technique si nécessaire
+## License
 
-## Bonnes pratiques
-- Vérifiez toujours vos données avant l'import
-- Créez les correspondances avec précaution
-- Utilisez les filtres pour un meilleur suivi
-- Consultez régulièrement les statistiques
-- Gardez vos correspondances à jour
+This module is licensed under LGPL-3.
+
+## Author
+
+Developed by Charlie Rostant YOSSA

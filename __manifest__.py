@@ -1,10 +1,10 @@
 {
-    'name': 'Pointeur HR',
+    'name': 'Attendance Manager HR',
     'version': '14.0.1.1.0',
     'category': 'Human Resources',
-    'summary': 'Gestion des présences avec localisation',
+    'summary': 'Location-based attendance management',
     'description': """
-        Module de gestion des présences avec localisation
+        Location-based attendance management module
     """,
     'author': 'Shermine237',
     'website': 'https://github.com/Shermine237',

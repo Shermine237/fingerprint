@@ -159,29 +159,108 @@ class PointeurHrImportLine(models.Model):
 
     def find_employee_mapping(self):
         """Recherche automatique des correspondances employés"""
+        mapped_count = 0
+        error_count = 0
+        
         for record in self:
             if not record.employee_id and record.employee_name:
-                # Chercher d'abord dans les correspondances existantes
-                mapping = self.env['pointeur_hr.employee.mapping'].search(
-                    [('name', '=', record.employee_name)], limit=1)
-                if mapping:
-                    record.write({'employee_id': mapping.employee_id.id})
-                    continue
+                try:
+                    # Chercher d'abord dans les correspondances existantes
+                    mapping = self.env['pointeur_hr.employee.mapping'].search([
+                        ('name', '=', record.employee_name),
+                        ('active', '=', True)
+                    ], limit=1)
+                    
+                    if mapping:
+                        record.write({
+                            'employee_id': mapping.employee_id.id,
+                            'state': 'mapped'
+                        })
+                        # Mettre à jour le compteur d'utilisation
+                        mapping.write({
+                            'import_count': mapping.import_count + 1,
+                            'last_used': fields.Datetime.now()
+                        })
+                        mapped_count += 1
+                        continue
 
-                # Si pas de correspondance, utiliser la recherche intelligente
-                employee = self.env['pointeur_hr.import']._find_employee_by_name(record.employee_name)
-                if employee:
-                    record.write({'employee_id': employee.id})
+                    # Si pas de correspondance, utiliser la recherche intelligente
+                    employee = self.env['pointeur_hr.import']._find_employee_by_name(record.employee_name)
+                    if employee:
+                        # Vérifier si l'employé a déjà une correspondance active
+                        existing_employee = self.env['pointeur_hr.employee.mapping'].search([
+                            ('employee_id', '=', employee.id),
+                            ('active', '=', True)
+                        ], limit=1)
+                        
+                        if existing_employee:
+                            # Ne pas créer de nouvelle correspondance si l'employé en a déjà une
+                            record.write({
+                                'state': 'error',
+                                'notes': _("L'employé '%s' a déjà une correspondance active avec le nom '%s'") % 
+                                        (employee.name, existing_employee.name)
+                            })
+                            error_count += 1
+                            continue
+                            
+                        # Vérifier si une correspondance inactive existe
+                        inactive = self.env['pointeur_hr.employee.mapping'].search([
+                            ('name', '=', record.employee_name),
+                            ('employee_id', '=', employee.id),
+                            ('active', '=', False)
+                        ], limit=1)
+                        
+                        if inactive:
+                            # Réactiver la correspondance
+                            inactive.write({
+                                'active': True,
+                                'import_count': inactive.import_count + 1,
+                                'last_used': fields.Datetime.now()
+                            })
+                        else:
+                            # Créer une nouvelle correspondance
+                            self.env['pointeur_hr.employee.mapping'].create({
+                                'name': record.employee_name,
+                                'employee_id': employee.id,
+                                'import_id': record.import_id.id,
+                            })
+                            
+                        # Mettre à jour la ligne
+                        record.write({
+                            'employee_id': employee.id,
+                            'state': 'mapped'
+                        })
+                        mapped_count += 1
+                
+                except Exception as e:
+                    record.write({
+                        'state': 'error',
+                        'notes': _("Erreur lors de la recherche de correspondance : %s") % str(e)
+                    })
+                    error_count += 1
         
         # Message de notification
+        if mapped_count > 0 and error_count == 0:
+            message = _("%d correspondances trouvées avec succès.") % mapped_count
+            msg_type = 'success'
+        elif mapped_count > 0 and error_count > 0:
+            message = _("%d correspondances trouvées, %d erreurs.") % (mapped_count, error_count)
+            msg_type = 'warning'
+        elif mapped_count == 0 and error_count > 0:
+            message = _("%d erreurs lors de la recherche de correspondances.") % error_count
+            msg_type = 'danger'
+        else:
+            message = _("Aucune correspondance trouvée.")
+            msg_type = 'info'
+            
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': _('Recherche de correspondance'),
-                'message': _('Recherche terminée.'),
+                'message': message,
                 'sticky': False,
-                'type': 'info',
+                'type': msg_type,
             }
         }
     
@@ -192,17 +271,48 @@ class PointeurHrImportLine(models.Model):
         if not self.employee_id:
             raise UserError(_("Vous devez d'abord sélectionner un employé."))
             
-        # Vérifier si une correspondance existe déjà
-        existing = self.env['pointeur_hr.employee.mapping'].search([
-            ('name', '=', self.employee_name)
+        # Vérifier si une correspondance existe déjà pour ce nom
+        existing_name = self.env['pointeur_hr.employee.mapping'].search([
+            ('name', '=', self.employee_name),
+            ('active', '=', True)
         ], limit=1)
         
-        if existing:
-            # Mettre à jour la correspondance existante
-            existing.write({
-                'employee_id': self.employee_id.id,
+        if existing_name and existing_name.employee_id.id != self.employee_id.id:
+            raise UserError(_(
+                "Une correspondance active existe déjà pour le nom '%s' (associée à l'employé %s)."
+            ) % (self.employee_name, existing_name.employee_id.name))
+        
+        # Vérifier si l'employé a déjà une correspondance
+        existing_employee = self.env['pointeur_hr.employee.mapping'].search([
+            ('employee_id', '=', self.employee_id.id),
+            ('active', '=', True)
+        ], limit=1)
+        
+        if existing_employee and existing_employee.name != self.employee_name:
+            raise UserError(_(
+                "L'employé '%s' a déjà une correspondance active avec le nom '%s'."
+            ) % (self.employee_id.name, existing_employee.name))
+            
+        # Vérifier si une correspondance inactive existe pour cette combinaison
+        inactive = self.env['pointeur_hr.employee.mapping'].search([
+            ('name', '=', self.employee_name),
+            ('employee_id', '=', self.employee_id.id),
+            ('active', '=', False)
+        ], limit=1)
+        
+        if inactive:
+            # Réactiver la correspondance inactive
+            inactive.write({
+                'active': True,
                 'last_used': fields.Datetime.now(),
-                'import_count': existing.import_count + 1
+                'import_count': inactive.import_count + 1
+            })
+            message = _("Correspondance réactivée : %s -> %s") % (self.employee_name, self.employee_id.name)
+        elif existing_name and existing_name.employee_id.id == self.employee_id.id:
+            # Mettre à jour la correspondance existante
+            existing_name.write({
+                'last_used': fields.Datetime.now(),
+                'import_count': existing_name.import_count + 1
             })
             message = _("Correspondance mise à jour : %s -> %s") % (self.employee_name, self.employee_id.name)
         else:

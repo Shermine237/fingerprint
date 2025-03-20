@@ -18,42 +18,93 @@ class PointeurHrEmployeeMapping(models.Model):
     active = fields.Boolean(string='Actif', default=True)
 
     _sql_constraints = [
-        ('unique_name_employee', 'unique(name, employee_id)', 
-         'Une correspondance existe déjà pour ce nom importé et cet employé !'),
-        ('unique_employee', 'unique(employee_id)', 
-         'Cet employé a déjà une correspondance de nom !')
+        ('unique_name_active', 'unique(name, active)',
+         'Une correspondance existe déjà pour ce nom importé !'),
+        ('unique_employee_active', 'unique(employee_id, active)',
+         'Cet employé a déjà une correspondance de nom active !')
     ]
+
+    @api.constrains('name', 'employee_id', 'active')
+    def _check_unique_constraints(self):
+        """Vérification supplémentaire pour éviter les doublons"""
+        for record in self:
+            if not record.active:
+                continue  # Ignorer les enregistrements inactifs
+                
+            # Vérifier si un autre enregistrement actif existe avec le même nom
+            same_name = self.search([
+                ('id', '!=', record.id),
+                ('name', '=', record.name),
+                ('active', '=', True)
+            ], limit=1)
+            
+            if same_name:
+                raise ValidationError(_(
+                    "Une correspondance active existe déjà pour le nom '%s' (associée à l'employé %s)."
+                ) % (record.name, same_name.employee_id.name))
+            
+            # Vérifier si un autre enregistrement actif existe pour le même employé
+            same_employee = self.search([
+                ('id', '!=', record.id),
+                ('employee_id', '=', record.employee_id.id),
+                ('active', '=', True)
+            ], limit=1)
+            
+            if same_employee:
+                raise ValidationError(_(
+                    "L'employé '%s' a déjà une correspondance active avec le nom '%s'."
+                ) % (record.employee_id.name, same_employee.name))
 
     @api.model_create_multi
     def create(self, vals_list):
         """Surcharge de la création pour vérifier les doublons et logger"""
+        result = self.env['pointeur_hr.employee.mapping']
+        
         for vals in vals_list:
             _logger.info("Création correspondance : %s -> %s", 
                         vals.get('name'), vals.get('employee_id'))
             
-            # Vérifier si une correspondance similaire existe déjà
-            existing = self.search([
+            # Vérifier si une correspondance avec le même nom existe déjà
+            existing_name = self.search([
                 ('name', '=', vals.get('name')),
-                ('employee_id', '=', vals.get('employee_id')),
-                ('active', 'in', [True, False])
+                ('active', '=', True)
             ], limit=1)
             
-            if existing:
-                if not existing.active:
-                    _logger.info("Réactivation correspondance existante")
-                    existing.write({
-                        'active': True,
-                        'import_count': existing.import_count + 1,
-                        'last_used': fields.Datetime.now()
-                    })
-                    return existing
-                else:
-                    _logger.warning("Tentative de création doublon : %s", vals)
-                    raise ValidationError(_(
-                        "Une correspondance existe déjà pour le nom '{}' et l'employé #{}"
-                    ).format(vals.get('name'), vals.get('employee_id')))
-                    
-        return super().create(vals_list)
+            if existing_name:
+                _logger.warning("Une correspondance active existe déjà pour le nom '%s'", vals.get('name'))
+                continue
+                
+            # Vérifier si l'employé a déjà une correspondance active
+            existing_employee = self.search([
+                ('employee_id', '=', vals.get('employee_id')),
+                ('active', '=', True)
+            ], limit=1)
+            
+            if existing_employee:
+                _logger.warning("L'employé a déjà une correspondance active avec le nom '%s'", existing_employee.name)
+                continue
+                
+            # Vérifier si une correspondance inactive existe pour cette combinaison
+            inactive = self.search([
+                ('name', '=', vals.get('name')),
+                ('employee_id', '=', vals.get('employee_id')),
+                ('active', '=', False)
+            ], limit=1)
+            
+            if inactive:
+                _logger.info("Réactivation correspondance existante")
+                inactive.write({
+                    'active': True,
+                    'import_count': inactive.import_count + 1,
+                    'last_used': fields.Datetime.now()
+                })
+                result |= inactive
+            else:
+                # Créer une nouvelle correspondance
+                record = super(PointeurHrEmployeeMapping, self).create([vals])[0]
+                result |= record
+                
+        return result
 
     def name_get(self):
         return [(rec.id, f"{rec.name} → {rec.employee_id.name}") for rec in self]

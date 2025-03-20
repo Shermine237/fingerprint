@@ -124,7 +124,8 @@
         <field name="search_view_id" ref="pointeur_hr_view_attendance_report_search"/>
         <field name="context">{
             'search_default_this_month': 1,
-            'search_default_employee': 1
+            'search_default_employee': 1,
+            'search_default_imported': 1
         }</field>
     </record>
 </odoo>

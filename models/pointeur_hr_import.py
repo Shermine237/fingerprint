@@ -16,7 +16,7 @@ class PointeurHrImport(models.Model):
     _order = 'create_date desc'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Nom', required=True, default=lambda self: _('Import du %s') % datetime.now().strftime('%d/%m/%Y à %H:%M'))
+    name = fields.Char(string='Nom', required=True, default=lambda self: self._get_default_name())
     file = fields.Binary(string='Fichier CSV', required=True)
     file_name = fields.Char(string='Nom du fichier')
     location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage')
@@ -784,3 +784,17 @@ Création des présences terminée :
                 'state': 'imported',
                 'import_date': fields.Datetime.now()
             })
+
+    def _get_default_name(self):
+        """Obtenir un nom par défaut avec la date et l'heure actuelles dans le fuseau horaire de l'utilisateur"""
+        user = self.env.user
+        if user.tz:
+            user_tz = pytz.timezone(user.tz)
+        else:
+            user_tz = pytz.UTC
+            
+        # Obtenir la date et l'heure actuelles dans le fuseau horaire de l'utilisateur
+        now_utc = datetime.now(pytz.UTC)
+        now_user_tz = now_utc.astimezone(user_tz)
+        
+        return _('Import du %s') % now_user_tz.strftime('%d/%m/%Y à %H:%M')

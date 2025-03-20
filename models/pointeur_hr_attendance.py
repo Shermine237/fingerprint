@@ -24,6 +24,14 @@ class PointeurHrAttendance(models.Model):
     early_leave_hours = fields.Float(string='Départ anticipé', compute='_compute_working_hours', store=True)
     attendance_type_ids = fields.Char(string='Types de présence', compute='_compute_working_hours', store=True)
 
+    @api.model
+    def create(self, vals):
+        """Surcharge de la méthode create pour s'assurer que la source est correctement définie"""
+        # Si l'enregistrement provient d'un import, s'assurer que la source est 'import'
+        if vals.get('import_id') or vals.get('import_line_id'):
+            vals['source'] = 'import'
+        return super(PointeurHrAttendance, self).create(vals)
+
     @api.constrains('check_in', 'check_out')
     def _check_validity(self):
         """Vérifie que l'heure de sortie est après l'heure d'entrée et qu'il y a bien une heure d'entrée"""

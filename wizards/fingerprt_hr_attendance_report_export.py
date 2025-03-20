@@ -1,7 +1,7 @@
 from odoo import api, fields, models
 
-class FingerprintHrAttendanceReportExport(models.TransientModel):
-    _name = 'fingerprint_hr.attendance.report.export.wizard'
+class FingerprtHrAttendanceReportExport(models.TransientModel):
+    _name = 'fingerprt_hr.attendance.report.export.wizard'
     _description = 'Attendance Report Export Wizard'
 
     export_type = fields.Selection([
@@ -17,7 +17,7 @@ class FingerprintHrAttendanceReportExport(models.TransientModel):
 
     def action_export(self):
         """Export attendance report in the selected format"""
-        Report = self.env['fingerprint_hr.attendance.report']
+        Report = self.env['fingerprt_hr.attendance.report']
         
         if self.export_scope == 'selected':
             # Export only selected lines

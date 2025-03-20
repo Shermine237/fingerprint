@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Vue form -->
-    <record id="view_fingerprint_hr_select_employees_form" model="ir.ui.view">
-        <field name="name">fingerprint_hr.select.employees.form</field>
-        <field name="model">fingerprint_hr.select.employees</field>
+    <record id="view_fingerprt_hr_select_employees_form" model="ir.ui.view">
+        <field name="name">fingerprt_hr.select.employees.form</field>
+        <field name="model">fingerprt_hr.select.employees</field>
         <field name="arch" type="xml">
             <form string="Select Employees">
                 <sheet>
@@ -41,7 +41,7 @@
     <!-- Action -->
     <record id="action_select_employees" model="ir.actions.act_window">
         <field name="name">Select Employees</field>
-        <field name="res_model">fingerprint_hr.select.employees</field>
+        <field name="res_model">fingerprt_hr.select.employees</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>

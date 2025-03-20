@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="fingerprint_hr_report_attendance_document">
+    <template id="fingerprt_hr_report_attendance_document">
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
                 <div class="page">
@@ -83,12 +83,12 @@
     <!-- Action of the attendance report -->
     <record id="action_report_attendance" model="ir.actions.report">
         <field name="name">Attendance Report</field>
-        <field name="model">fingerprint_hr.attendance.report</field>
+        <field name="model">fingerprt_hr.attendance.report</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">fingerprint_hr.fingerprint_hr_report_attendance_document</field>
-        <field name="report_file">fingerprint_hr.fingerprint_hr_report_attendance_document</field>
+        <field name="report_name">fingerprt_hr.fingerprt_hr_report_attendance_document</field>
+        <field name="report_file">fingerprt_hr.fingerprt_hr_report_attendance_document</field>
         <field name="print_report_name">'Attendance_Report_%s' % (time.strftime("%Y%m%d_%H%M%S"))</field>
-        <field name="binding_model_id" ref="model_fingerprint_hr_attendance_report"/>
+        <field name="binding_model_id" ref="model_fingerprt_hr_attendance_report"/>
         <field name="binding_type">report</field>
     </record>
 </odoo>

@@ -1,4 +1,4 @@
-odoo.define('fingerprint_hr.import_form_view', function (require) {
+odoo.define('fingerprt_hr.import_form_view', function (require) {
     "use strict";
 
     var FormController = require('web.FormController');

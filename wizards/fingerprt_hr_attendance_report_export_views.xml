@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Wizard export form -->
-    <record id="fingerprint_hr_view_attendance_report_export_wizard_form" model="ir.ui.view">
-        <field name="name">fingerprint_hr.attendance.report.export.wizard.form</field>
-        <field name="model">fingerprint_hr.attendance.report.export.wizard</field>
+    <record id="fingerprt_hr_view_attendance_report_export_wizard_form" model="ir.ui.view">
+        <field name="name">fingerprt_hr.attendance.report.export.wizard.form</field>
+        <field name="model">fingerprt_hr.attendance.report.export.wizard</field>
         <field name="arch" type="xml">
             <form string="Export Attendance Report">
                 <group>

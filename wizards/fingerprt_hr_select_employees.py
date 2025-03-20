@@ -5,12 +5,12 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-class FingerprintHrSelectEmployees(models.TransientModel):
-    _name = 'fingerprint_hr.select.employees'
+class FingerprtHrSelectEmployees(models.TransientModel):
+    _name = 'fingerprt_hr.select.employees'
     _description = 'Select Employees'
     
-    import_id = fields.Many2one('fingerprint_hr.import', string='Import', required=True)
-    line_ids = fields.One2many('fingerprint_hr.select.employees.line', 'wizard_id', string='Lines')
+    import_id = fields.Many2one('fingerprt_hr.import', string='Import', required=True)
+    line_ids = fields.One2many('fingerprt_hr.select.employees.line', 'wizard_id', string='Lines')
     mapped_count = fields.Integer(string='Mapped Lines', readonly=True)
     unmapped_count = fields.Integer(string='Lines to process', compute='_compute_unmapped_count')
     
@@ -21,10 +21,10 @@ class FingerprintHrSelectEmployees(models.TransientModel):
     
     @api.model
     def default_get(self, fields_list):
-        res = super(FingerprintHrSelectEmployees, self).default_get(fields_list)
-        if self.env.context.get('active_model') == 'fingerprint_hr.import' and self.env.context.get('active_id'):
+        res = super(FingerprtHrSelectEmployees, self).default_get(fields_list)
+        if self.env.context.get('active_model') == 'fingerprt_hr.import' and self.env.context.get('active_id'):
             import_id = self.env.context.get('active_id')
-            import_record = self.env['fingerprint_hr.import'].browse(import_id)
+            import_record = self.env['fingerprt_hr.import'].browse(import_id)
             
             # Check that there are lines without a match
             unmapped_lines = import_record.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done')
@@ -103,7 +103,7 @@ class FingerprintHrSelectEmployees(models.TransientModel):
             # Create a permanent mapping if requested
             if wizard_line.create_mapping and wizard_line.employee_name and wizard_line.employee_id:
                 # Check if a mapping already exists for this employee
-                existing_employee_mapping = self.env['fingerprint_hr.employee.mapping'].sudo().search([
+                existing_employee_mapping = self.env['fingerprt_hr.employee.mapping'].sudo().search([
                     ('employee_id', '=', wizard_line.employee_id.id),
                     '|',
                     ('active', '=', True),
@@ -115,7 +115,7 @@ class FingerprintHrSelectEmployees(models.TransientModel):
                                    % (wizard_line.employee_id.name, existing_employee_mapping.name))
                 
                 # Check if a mapping already exists for this name and employee
-                mapping = self.env['fingerprint_hr.employee.mapping'].sudo().search([
+                mapping = self.env['fingerprt_hr.employee.mapping'].sudo().search([
                     ('name', '=', wizard_line.employee_name),
                     ('employee_id', '=', wizard_line.employee_id.id),
                     '|',
@@ -134,7 +134,7 @@ class FingerprintHrSelectEmployees(models.TransientModel):
                 else:
                     # Create the new mapping
                     try:
-                        self.env['fingerprint_hr.employee.mapping'].sudo().create({
+                        self.env['fingerprt_hr.employee.mapping'].sudo().create({
                             'name': wizard_line.employee_name.strip(),  # Clean spaces
                             'employee_id': wizard_line.employee_id.id,
                             'import_id': self.import_id.id,
@@ -165,13 +165,13 @@ class FingerprintHrSelectEmployees(models.TransientModel):
             }
         }
 
-class FingerprintHrSelectEmployeesLine(models.TransientModel):
-    _name = 'fingerprint_hr.select.employees.line'
+class FingerprtHrSelectEmployeesLine(models.TransientModel):
+    _name = 'fingerprt_hr.select.employees.line'
     _description = 'Line of the selection assistant'
     
-    wizard_id = fields.Many2one('fingerprint_hr.select.employees', string='Assistant', required=True, ondelete='cascade')
-    reference_line_id = fields.Many2one('fingerprint_hr.import.line', string='Reference line', required=True)
-    import_line_ids = fields.Many2many('fingerprint_hr.import.line', string='Import lines associated')
+    wizard_id = fields.Many2one('fingerprt_hr.select.employees', string='Assistant', required=True, ondelete='cascade')
+    reference_line_id = fields.Many2one('fingerprt_hr.import.line', string='Reference line', required=True)
+    import_line_ids = fields.Many2many('fingerprt_hr.import.line', string='Import lines associated')
     employee_name = fields.Char(string='Imported name', readonly=True)
     employee_id = fields.Many2one('hr.employee', string='Employee')
     check_in = fields.Datetime(string='Check-in (example)', readonly=True)
@@ -204,7 +204,7 @@ class FingerprintHrSelectEmployeesLine(models.TransientModel):
             
             # Check if the employee already has a mapping in the database
             if self.employee_id and self.employee_name:
-                existing_mapping = self.env['fingerprint_hr.employee.mapping'].search([
+                existing_mapping = self.env['fingerprt_hr.employee.mapping'].search([
                     ('employee_id', '=', self.employee_id.id),
                     ('name', '!=', self.employee_name),
                     '|',
@@ -227,7 +227,7 @@ class FingerprintHrSelectEmployeesLine(models.TransientModel):
         # Update import lines
         if self.employee_id and not self.import_line_ids:
             # Get import lines from the reference line
-            lines = self.env['fingerprint_hr.import.line'].search([
+            lines = self.env['fingerprt_hr.import.line'].search([
                 ('import_id', '=', self.wizard_id.import_id.id),
                 ('employee_name', '=', self.employee_name),
                 ('state', 'not in', ['done', 'error'])

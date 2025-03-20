@@ -3,17 +3,17 @@
     <!-- Action for export wizard -->
     <record id="action_attendance_report_export_wizard" model="ir.actions.act_window">
         <field name="name">Export Attendance Report</field>
-        <field name="res_model">fingerprint_hr.attendance.report.export.wizard</field>
+        <field name="res_model">fingerprt_hr.attendance.report.export.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <field name="binding_model_id" ref="model_fingerprint_hr_attendance_report"/>
+        <field name="binding_model_id" ref="model_fingerprt_hr_attendance_report"/>
         <field name="binding_view_types">list,pivot</field>
     </record>
 
     <!-- Tree view for attendance report -->
-    <record id="fingerprint_hr_view_attendance_report_tree" model="ir.ui.view">
-        <field name="name">fingerprint_hr.attendance.report.tree</field>
-        <field name="model">fingerprint_hr.attendance.report</field>
+    <record id="fingerprt_hr_view_attendance_report_tree" model="ir.ui.view">
+        <field name="name">fingerprt_hr.attendance.report.tree</field>
+        <field name="model">fingerprt_hr.attendance.report</field>
         <field name="arch" type="xml">
             <tree string="Attendance Report" create="false" edit="false" delete="false">
                 <header>
@@ -42,9 +42,9 @@
     </record>
 
     <!-- Export wizard form view -->
-    <record id="fingerprint_hr_view_attendance_report_export_wizard_form" model="ir.ui.view">
-        <field name="name">fingerprint_hr.attendance.report.export.wizard.form</field>
-        <field name="model">fingerprint_hr.attendance.report.export.wizard</field>
+    <record id="fingerprt_hr_view_attendance_report_export_wizard_form" model="ir.ui.view">
+        <field name="name">fingerprt_hr.attendance.report.export.wizard.form</field>
+        <field name="model">fingerprt_hr.attendance.report.export.wizard</field>
         <field name="arch" type="xml">
             <form string="Export Attendance Report">
                 <group>
@@ -59,9 +59,9 @@
     </record>
 
     <!-- Pivot view for attendance report -->
-    <record id="fingerprint_hr_view_attendance_report_pivot" model="ir.ui.view">
-        <field name="name">fingerprint_hr.attendance.report.pivot</field>
-        <field name="model">fingerprint_hr.attendance.report</field>
+    <record id="fingerprt_hr_view_attendance_report_pivot" model="ir.ui.view">
+        <field name="name">fingerprt_hr.attendance.report.pivot</field>
+        <field name="model">fingerprt_hr.attendance.report</field>
         <field name="arch" type="xml">
             <pivot string="Attendance Report">
                 <field name="employee_id" type="row"/>
@@ -76,9 +76,9 @@
     </record>
 
     <!-- Graph view for attendance report -->
-    <record id="fingerprint_hr_view_attendance_report_graph" model="ir.ui.view">
-        <field name="name">fingerprint_hr.attendance.report.graph</field>
-        <field name="model">fingerprint_hr.attendance.report</field>
+    <record id="fingerprt_hr_view_attendance_report_graph" model="ir.ui.view">
+        <field name="name">fingerprt_hr.attendance.report.graph</field>
+        <field name="model">fingerprt_hr.attendance.report</field>
         <field name="arch" type="xml">
             <graph string="Attendance Report">
                 <field name="date"/>
@@ -88,9 +88,9 @@
     </record>
 
     <!-- Search view for attendance report -->
-    <record id="fingerprint_hr_view_attendance_report_search" model="ir.ui.view">
-        <field name="name">fingerprint_hr.attendance.report.search</field>
-        <field name="model">fingerprint_hr.attendance.report</field>
+    <record id="fingerprt_hr_view_attendance_report_search" model="ir.ui.view">
+        <field name="name">fingerprt_hr.attendance.report.search</field>
+        <field name="model">fingerprt_hr.attendance.report</field>
         <field name="arch" type="xml">
             <search string="Search in attendance records">
                 <field name="name"/>
@@ -119,9 +119,9 @@
     <!-- Action for attendance report -->
     <record id="action_attendance_report" model="ir.actions.act_window">
         <field name="name">Attendance Report</field>
-        <field name="res_model">fingerprint_hr.attendance.report</field>
+        <field name="res_model">fingerprt_hr.attendance.report</field>
         <field name="view_mode">tree,pivot,graph</field>
-        <field name="search_view_id" ref="fingerprint_hr_view_attendance_report_search"/>
+        <field name="search_view_id" ref="fingerprt_hr_view_attendance_report_search"/>
         <field name="context">{
             'search_default_this_month': 1,
             'search_default_employee': 1,

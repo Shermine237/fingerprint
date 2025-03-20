@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Tree view for imports -->
-    <record id="fingerprint_hr_view_import_tree" model="ir.ui.view">
-        <field name="name">fingerprint_hr.import.tree</field>
-        <field name="model">fingerprint_hr.import</field>
+    <record id="fingerprt_hr_view_import_tree" model="ir.ui.view">
+        <field name="name">fingerprt_hr.import.tree</field>
+        <field name="model">fingerprt_hr.import</field>
         <field name="arch" type="xml">
-            <tree string="Fingerprint imports" 
+            <tree string="Fingerprt imports" 
                   decoration-success="state=='done'" 
                   decoration-info="state=='imported'" 
                   decoration-muted="state=='cancelled'" 
@@ -23,9 +23,9 @@
     </record>
 
     <!-- Search view for imports -->
-    <record id="fingerprint_hr_view_import_search" model="ir.ui.view">
-        <field name="name">fingerprint_hr.import.search</field>
-        <field name="model">fingerprint_hr.import</field>
+    <record id="fingerprt_hr_view_import_search" model="ir.ui.view">
+        <field name="name">fingerprt_hr.import.search</field>
+        <field name="model">fingerprt_hr.import</field>
         <field name="arch" type="xml">
             <search string="Search imports">
                 <field name="name"/>
@@ -46,11 +46,11 @@
     </record>
 
     <!-- Form view for imports -->
-    <record id="fingerprint_hr_view_import_form" model="ir.ui.view">
-        <field name="name">fingerprint_hr.import.form</field>
-        <field name="model">fingerprint_hr.import</field>
+    <record id="fingerprt_hr_view_import_form" model="ir.ui.view">
+        <field name="name">fingerprt_hr.import.form</field>
+        <field name="model">fingerprt_hr.import</field>
         <field name="arch" type="xml">
-            <form string="Fingerprint Import">
+            <form string="Fingerprt Import">
                 <header>
                     <button name="action_import_file" string="Import" type="object" 
                             class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
@@ -133,9 +133,9 @@
     </record>
 
     <!-- Tree view for imported lines -->
-    <record id="fingerprint_hr_view_import_line_tree" model="ir.ui.view">
-        <field name="name">fingerprint_hr.import.line.tree</field>
-        <field name="model">fingerprint_hr.import.line</field>
+    <record id="fingerprt_hr_view_import_line_tree" model="ir.ui.view">
+        <field name="name">fingerprt_hr.import.line.tree</field>
+        <field name="model">fingerprt_hr.import.line</field>
         <field name="arch" type="xml">
             <tree string="Imported Lines" decoration-success="state == 'done'" decoration-danger="state == 'error'" decoration-info="state == 'imported'" decoration-warning="state == 'mapped'">
                 <field name="import_id"/>
@@ -160,9 +160,9 @@
     </record>
 
     <!-- Search view for imported lines -->
-    <record id="fingerprint_hr_view_import_line_search" model="ir.ui.view">
-        <field name="name">fingerprint_hr.import.line.search</field>
-        <field name="model">fingerprint_hr.import.line</field>
+    <record id="fingerprt_hr_view_import_line_search" model="ir.ui.view">
+        <field name="name">fingerprt_hr.import.line.search</field>
+        <field name="model">fingerprt_hr.import.line</field>
         <field name="arch" type="xml">
             <search string="Search in imported lines">
                 <field name="employee_name"/>
@@ -187,9 +187,9 @@
     </record>
 
     <!-- Form view for imported lines -->
-    <record id="fingerprint_hr_view_import_line_form" model="ir.ui.view">
-        <field name="name">fingerprint_hr.import.line.form</field>
-        <field name="model">fingerprint_hr.import.line</field>
+    <record id="fingerprt_hr_view_import_line_form" model="ir.ui.view">
+        <field name="name">fingerprt_hr.import.line.form</field>
+        <field name="model">fingerprt_hr.import.line</field>
         <field name="arch" type="xml">
             <form string="Imported Line">
                 <header>
@@ -236,12 +236,12 @@
     </record>
 
     <!-- Actions -->
-    <record id="action_fingerprint_hr_import_line" model="ir.actions.act_window">
+    <record id="action_fingerprt_hr_import_line" model="ir.actions.act_window">
         <field name="name">Imported Lines</field>
-        <field name="res_model">fingerprint_hr.import.line</field>
+        <field name="res_model">fingerprt_hr.import.line</field>
         <field name="view_mode">tree,form</field>
-        <field name="view_id" ref="fingerprint_hr_view_import_line_tree"/>
-        <field name="search_view_id" ref="fingerprint_hr_view_import_line_search"/>
+        <field name="view_id" ref="fingerprt_hr_view_import_line_tree"/>
+        <field name="search_view_id" ref="fingerprt_hr_view_import_line_search"/>
         <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -254,27 +254,27 @@
     </record>
 
     <!-- Action -->
-    <record id="action_fingerprint_hr_import" model="ir.actions.act_window">
-        <field name="name">Import from Fingerprint</field>
-        <field name="res_model">fingerprint_hr.import</field>
+    <record id="action_fingerprt_hr_import" model="ir.actions.act_window">
+        <field name="name">Import from Fingerprt</field>
+        <field name="res_model">fingerprt_hr.import</field>
         <field name="view_mode">tree,form</field>
-        <field name="view_id" ref="fingerprint_hr_view_import_tree"/>
-        <field name="search_view_id" ref="fingerprint_hr_view_import_search"/>
+        <field name="view_id" ref="fingerprt_hr_view_import_tree"/>
+        <field name="search_view_id" ref="fingerprt_hr_view_import_search"/>
         <field name="context">{'search_default_my_imports': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No imports found
             </p>
             <p>
-                Import data from your fingerprint
+                Import data from your fingerprt
             </p>
         </field>
     </record>
 
     <!-- Action -->
-    <record id="fingerprint_hr_import_action" model="ir.actions.act_window">
+    <record id="fingerprt_hr_import_action" model="ir.actions.act_window">
         <field name="name">Import Data</field>
-        <field name="res_model">fingerprint_hr.import</field>
+        <field name="res_model">fingerprt_hr.import</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_not_done': 1}</field>
         <field name="help" type="html">

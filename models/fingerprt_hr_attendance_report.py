@@ -5,8 +5,8 @@ import base64
 import xlsxwriter
 import io
 
-class FingerprintHrAttendanceReport(models.Model):
-    _name = 'fingerprint_hr.attendance.report'
+class FingerprtHrAttendanceReport(models.Model):
+    _name = 'fingerprt_hr.attendance.report'
     _description = 'Attendance Report'
     _auto = False
     _order = 'date desc, employee_id'
@@ -15,8 +15,8 @@ class FingerprintHrAttendanceReport(models.Model):
     date = fields.Date(string='Date', readonly=True)
     employee_id = fields.Many2one('hr.employee', string='Employee', readonly=True)
     department_id = fields.Many2one('hr.department', string='Department', readonly=True)
-    location_id = fields.Many2one('fingerprint_hr.location', string='Attendance Location', readonly=True)
-    default_location_id = fields.Many2one('fingerprint_hr.location', string='Default Location', readonly=True)
+    location_id = fields.Many2one('fingerprt_hr.location', string='Attendance Location', readonly=True)
+    default_location_id = fields.Many2one('fingerprt_hr.location', string='Default Location', readonly=True)
     source = fields.Selection([
         ('manual', 'Manual'),
         ('import', 'Import')
@@ -154,4 +154,4 @@ class FingerprintHrAttendanceReport(models.Model):
         """Export attendance reports to PDF file"""
         records = self._get_records_to_export()
         # Return action to generate PDF
-        return self.env.ref('fingerprint_hr.action_report_attendance').report_action(records)
+        return self.env.ref('fingerprt_hr.action_report_attendance').report_action(records)

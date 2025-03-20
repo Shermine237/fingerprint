@@ -4,14 +4,14 @@ from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 
 
-class FingerprintHrEmployee(models.Model):
+class FingerprtHrEmployee(models.Model):
     _inherit = 'hr.employee'
     
     # Fields for import
-    import_id = fields.Many2one('fingerprint_hr.import', string='Import', readonly=True)
+    import_id = fields.Many2one('fingerprt_hr.import', string='Import', readonly=True)
     
     # Additional fields for attendance
-    default_location_id = fields.Many2one('fingerprint_hr.location', string='Default Attendance Location',
+    default_location_id = fields.Many2one('fingerprt_hr.location', string='Default Attendance Location',
                                         help="Employee's default attendance location")
     badge_id = fields.Char(string='Badge ID', help="Employee's unique badge identifier")
     

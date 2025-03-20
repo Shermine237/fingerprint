@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Vue form for locations -->
-    <record id="fingerprint_hr_view_location_form" model="ir.ui.view">
-        <field name="name">fingerprint_hr.location.form</field>
-        <field name="model">fingerprint_hr.location</field>
+    <record id="fingerprt_hr_view_location_form" model="ir.ui.view">
+        <field name="name">fingerprt_hr.location.form</field>
+        <field name="model">fingerprt_hr.location</field>
         <field name="arch" type="xml">
             <form string="Location">
                 <sheet>
@@ -32,9 +32,9 @@
     </record>
 
     <!-- Vue tree for locations -->
-    <record id="fingerprint_hr_view_location_tree" model="ir.ui.view">
-        <field name="name">fingerprint_hr.location.tree</field>
-        <field name="model">fingerprint_hr.location</field>
+    <record id="fingerprt_hr_view_location_tree" model="ir.ui.view">
+        <field name="name">fingerprt_hr.location.tree</field>
+        <field name="model">fingerprt_hr.location</field>
         <field name="arch" type="xml">
             <tree string="Locations">
                 <field name="name"/>
@@ -46,9 +46,9 @@
     </record>
 
     <!-- Vue search for locations -->
-    <record id="fingerprint_hr_view_location_search" model="ir.ui.view">
-        <field name="name">fingerprint_hr.location.search</field>
-        <field name="model">fingerprint_hr.location</field>
+    <record id="fingerprt_hr_view_location_search" model="ir.ui.view">
+        <field name="name">fingerprt_hr.location.search</field>
+        <field name="model">fingerprt_hr.location</field>
         <field name="arch" type="xml">
             <search string="Search locations">
                 <field name="name"/>
@@ -67,7 +67,7 @@
     <!-- Action for locations -->
     <record id="action_location" model="ir.actions.act_window">
         <field name="name">Locations</field>
-        <field name="res_model">fingerprint_hr.location</field>
+        <field name="res_model">fingerprt_hr.location</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

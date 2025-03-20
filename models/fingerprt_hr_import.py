@@ -12,8 +12,8 @@ import unicodedata
 
 _logger = logging.getLogger(__name__)
 
-class FingerprintHrImport(models.Model):
-    _name = 'fingerprint_hr.import'
+class FingerprtHrImport(models.Model):
+    _name = 'fingerprt_hr.import'
     _description = 'Import Physical Time Clock Data'
     _order = 'create_date desc'
     _inherit = ['mail.thread', 'mail.activity.mixin']
@@ -21,7 +21,7 @@ class FingerprintHrImport(models.Model):
     name = fields.Char(string='Name', required=True, default=lambda self: self._get_default_name())
     file = fields.Binary(string='File CSV', required=True)
     file_name = fields.Char(string='File Name')
-    location_id = fields.Many2one('fingerprint_hr.location', string='Location')
+    location_id = fields.Many2one('fingerprt_hr.location', string='Location')
     import_date = fields.Datetime(string='Import Date', readonly=True)
     user_id = fields.Many2one('res.users', string='User', default=lambda self: self.env.user, readonly=True)
     line_count = fields.Integer(string='Number of Lines', compute='_compute_line_count')
@@ -36,7 +36,7 @@ class FingerprintHrImport(models.Model):
         ('error', 'Error')
     ], string='State', default='draft', required=True, tracking=True)
 
-    line_ids = fields.One2many('fingerprint_hr.import.line', 'import_id', string='Imported Lines')
+    line_ids = fields.One2many('fingerprt_hr.import.line', 'import_id', string='Imported Lines')
 
     @api.depends('line_ids')
     def _compute_line_count(self):
@@ -181,7 +181,7 @@ class FingerprintHrImport(models.Model):
             return False
             
         # 1. Search in existing mappings (exact match)
-        mapping = self.env['fingerprint_hr.employee.mapping'].search([
+        mapping = self.env['fingerprt_hr.employee.mapping'].search([
             ('name', '=', employee_name),
             ('active', '=', True)
         ], limit=1)
@@ -214,7 +214,7 @@ class FingerprintHrImport(models.Model):
         if employee:
             # Create a mapping
             try:
-                self.env['fingerprint_hr.employee.mapping'].create({
+                self.env['fingerprt_hr.employee.mapping'].create({
                     'name': employee_name,
                     'employee_id': employee.id,
                     'import_id': self.id
@@ -260,7 +260,7 @@ class FingerprintHrImport(models.Model):
         # If a match with a sufficient score is found, create a mapping
         if best_match and best_score >= threshold:
             try:
-                self.env['fingerprint_hr.employee.mapping'].create({
+                self.env['fingerprt_hr.employee.mapping'].create({
                     'name': employee_name,
                     'employee_id': best_match.id,
                     'import_id': self.id,
@@ -285,7 +285,7 @@ class FingerprintHrImport(models.Model):
         # Add local date to message subject
         kwargs['subject'] = kwargs.get('subject', '') + ' - ' + local_now.strftime('%d/%m/%Y %H:%M:%S')
         
-        return super(FingerprintHrImport, self).message_post(**kwargs)
+        return super(FingerprtHrImport, self).message_post(**kwargs)
 
     def _import_csv_file(self):
         """Import CSV data"""
@@ -376,7 +376,7 @@ class FingerprintHrImport(models.Model):
         # Create lines
         if line_vals:
             _logger.info("Creating %d lines", len(line_vals))
-            self.env['fingerprint_hr.import.line'].create(line_vals)
+            self.env['fingerprt_hr.import.line'].create(line_vals)
             
             # Confirmation message with statistics
             message = _("""Import successful on %s :
@@ -435,12 +435,12 @@ class FingerprintHrImport(models.Model):
             return {
                 'name': _('Select Employees'),
                 'type': 'ir.actions.act_window',
-                'res_model': 'fingerprint_hr.select.employees',
+                'res_model': 'fingerprt_hr.select.employees',
                 'view_mode': 'form',
                 'target': 'new',
                 'context': {
                     'active_id': self.id,
-                    'active_model': 'fingerprint_hr.import',
+                    'active_model': 'fingerprt_hr.import',
                     'default_mapped_count': mapped_count,
                 }
             }
@@ -575,7 +575,7 @@ Creation of attendances completed :
         # Search for existing mappings
         for line in unmapped_lines:
             _logger.info("Searching for matching employee: %s", line.employee_name)
-            mapping = self.env['fingerprint_hr.employee.mapping'].search([
+            mapping = self.env['fingerprt_hr.employee.mapping'].search([
                 ('name', '=', line.employee_name),
                 ('active', '=', True)
             ], limit=1)
@@ -625,14 +625,14 @@ Creation of attendances completed :
         self.ensure_one()
         
         # Retrieve all mappings associated with this import
-        mappings = self.env['fingerprint_hr.employee.mapping'].search([
+        mappings = self.env['fingerprt_hr.employee.mapping'].search([
             ('import_id', '=', self.id)
         ])
         
         action = {
             'name': _('Mappings'),
             'type': 'ir.actions.act_window',
-            'res_model': 'fingerprint_hr.employee.mapping',
+            'res_model': 'fingerprt_hr.employee.mapping',
             'view_mode': 'tree,form',
             'domain': [('id', 'in', mappings.ids)],
             'context': {'default_import_id': self.id},

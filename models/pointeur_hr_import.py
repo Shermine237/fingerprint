@@ -744,11 +744,40 @@ Création des présences terminée :
             self.message_post(body=_("Erreur lors de l'import : %s") % str(e))
             raise UserError(_("Erreur lors de l'import : %s") % str(e))
 
-    def _generate_mapping_report(self):
-        """Génère un rapport sur l'état des correspondances"""
-        if not self.line_ids:
-            return
+    def _name_similarity_score(self, name1, name2):
+        """Calcule un score de similarité entre deux noms"""
+        if not name1 or not name2:
+            return 0.0
             
+        # Normaliser les noms
+        normalized_name1 = self._normalize_name(name1)
+        normalized_name2 = self._normalize_name(name2)
+        
+        if not normalized_name1 or not normalized_name2:
+            return 0.0
+            
+        # Si le nom est trop court ou pourrait être juste un prénom/nom, retourner 0
+        if len(normalized_name1.split()) == 1 and len(normalized_name1) < 5:
+            return 0.0
+            
+        if len(normalized_name2.split()) == 1 and len(normalized_name2) < 5:
+            return 0.0
+            
+        # Calculer la similarité
+        similarity = difflib.SequenceMatcher(None, normalized_name1, normalized_name2).ratio()
+        
+        # Vérifier si un nom est contenu dans l'autre
+        contains_score = 0.0
+        if normalized_name1 in normalized_name2:
+            contains_score = len(normalized_name1) / len(normalized_name2)
+        elif normalized_name2 in normalized_name1:
+            contains_score = len(normalized_name2) / len(normalized_name1)
+            
+        # Retourner le meilleur score
+        return max(similarity, contains_score)
+
+    def _generate_mapping_report(self):
+        """Générer un rapport sur les correspondances"""
         # Statistiques sur les correspondances
         total_lines = len(self.line_ids)
         mapped_lines = len(self.line_ids.filtered(lambda l: l.employee_id))
@@ -760,9 +789,21 @@ Création des présences terminée :
         # Trouver les noms similaires pour suggérer des correspondances
         suggestions = []
         for name in unmapped_names[:10]:  # Limiter aux 10 premiers pour éviter un rapport trop long
-            employees = self.env['hr.employee'].search([], limit=3)
+            if not name:  # Ignorer les noms vides
+                continue
+                
+            # Vérifier si le nom est trop court pour les suggestions
+            normalized_name = self._normalize_name(name)
+            if not normalized_name or (len(normalized_name.split()) == 1 and len(normalized_name) < 5):
+                continue
+                
+            employees = self.env['hr.employee'].search([('active', '=', True)], limit=10)
             matches = []
+            
             for employee in employees:
+                if not employee.name:  # Ignorer les employés sans nom
+                    continue
+                    
                 score = self._name_similarity_score(name, employee.name)
                 if score >= 0.3:  # Seuil bas pour avoir des suggestions
                     matches.append((employee, score))
@@ -798,166 +839,10 @@ Création des présences terminée :
                 report = report[:-2] + "</li>"  # Enlever la dernière virgule
             report += "</ul>"
         
+        return report
+
+    def action_mapping_report(self):
+        """Action pour générer et afficher le rapport de correspondance"""
+        self.ensure_one()
+        report = self._generate_mapping_report()
         self.message_post(body=report)
-        return True
-
-    def action_search_employee_mappings(self):
-        """Rechercher les correspondances pour les lignes sans employé"""
-        self.ensure_one()
-        _logger.info("=== DÉBUT RECHERCHE CORRESPONDANCES ===")
-        
-        # Récupérer les lignes sans employé
-        unmapped_lines = self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done')
-        
-        if not unmapped_lines:
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'message': _("Toutes les lignes ont déjà un employé associé."),
-                    'type': 'info',
-                }
-            }
-            
-        # Rechercher les correspondances existantes
-        for line in unmapped_lines:
-            _logger.info("Recherche correspondance pour : %s", line.employee_name)
-            mapping = self.env['pointeur_hr.employee.mapping'].search([
-                ('name', '=', line.employee_name),
-                ('active', '=', True)
-            ], limit=1)
-            
-            if mapping:
-                try:
-                    _logger.info("Correspondance trouvée : %s -> %s", 
-                               mapping.name, mapping.employee_id.name)
-                    line.write({
-                        'employee_id': mapping.employee_id.id,
-                        'state': 'mapped'
-                    })
-                    # Mettre à jour le compteur d'utilisation
-                    mapping.write({
-                        'import_count': mapping.import_count + 1,
-                        'last_used': fields.Datetime.now()
-                    })
-                except Exception as e:
-                    _logger.error("Erreur mise à jour ligne : %s", str(e))
-                    
-        # Compter les lignes restantes sans correspondance
-        remaining = len(self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done'))
-        
-        # Préparer le message de retour
-        if remaining == 0:
-            message = _("Toutes les correspondances ont été trouvées.")
-            msg_type = 'success'
-        else:
-            message = _(
-                "%d ligne(s) reste(nt) sans correspondance. "
-                "Utilisez le wizard de sélection pour les associer manuellement."
-            ) % remaining
-            msg_type = 'warning'
-            
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'message': message,
-                'type': msg_type,
-                'sticky': True
-            }
-        }
-
-    def action_view_mappings(self):
-        """Voir les correspondances associées à cet import"""
-        self.ensure_one()
-        
-        # Récupérer toutes les correspondances liées à cet import
-        mappings = self.env['pointeur_hr.employee.mapping'].search([
-            ('import_id', '=', self.id)
-        ])
-        
-        action = {
-            'name': _('Correspondances'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'pointeur_hr.employee.mapping',
-            'view_mode': 'tree,form',
-            'domain': [('id', 'in', mappings.ids)],
-            'context': {'default_import_id': self.id},
-            'target': 'current',
-        }
-        
-        # Si une seule correspondance, ouvrir directement le formulaire
-        if len(mappings) == 1:
-            action['res_id'] = mappings.id
-            action['view_mode'] = 'form'
-            
-        return action
-
-    def action_view_attendances(self):
-        """Voir les présences créées pour cet import"""
-        self.ensure_one()
-        
-        # Récupérer toutes les présences liées à cet import
-        attendances = self.line_ids.mapped('attendance_id')
-        
-        # Créer l'action pour afficher les présences
-        action = {
-            'name': _('Présences'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'hr.attendance',
-            'view_mode': 'tree,form',
-            'domain': [('id', 'in', attendances.ids)],
-            'context': {'create': False},  # Empêcher la création manuelle
-            'target': 'current',
-        }
-        
-        # Si une seule présence, ouvrir directement le formulaire
-        if len(attendances) == 1:
-            action['res_id'] = attendances.id
-            action['view_mode'] = 'form'
-            
-        return action
-
-    def action_cancel(self):
-        """Annuler l'import"""
-        for record in self:
-            if record.state == 'done':
-                raise UserError(_("Impossible d'annuler un import terminé."))
-            record.write({'state': 'cancelled'})
-            
-    def action_reset(self):
-        """Réinitialiser l'import"""
-        for record in self:
-            # Supprimer les présences si elles existent
-            attendances = record.line_ids.mapped('attendance_id')
-            if attendances:
-                attendances.unlink()
-            
-            # Réinitialiser les lignes
-            record.line_ids.write({
-                'state': 'imported',
-                'error_message': False,
-                'notes': False,
-                'employee_id': False,
-                'attendance_id': False
-            })
-            
-            # Réinitialiser l'import
-            record.write({
-                'state': 'imported',
-                'import_date': fields.Datetime.now()
-            })
-
-    def _get_default_name(self):
-        """Obtenir un nom par défaut avec la date et l'heure actuelles dans le fuseau horaire de l'utilisateur"""
-        user = self.env.user
-        if user.tz:
-            user_tz = pytz.timezone(user.tz)
-        else:
-            user_tz = pytz.UTC
-            
-        # Obtenir la date et l'heure actuelles dans le fuseau horaire de l'utilisateur
-        now_utc = datetime.now(pytz.UTC)
-        now_user_tz = now_utc.astimezone(user_tz)
-        
-        return _('Import du %s') % now_user_tz.strftime('%d/%m/%Y à %H:%M')

@@ -14,29 +14,29 @@ _logger = logging.getLogger(__name__)
 
 class PointeurHrImport(models.Model):
     _name = 'pointeur_hr.import'
-    _description = 'Import des données du pointeur physique'
+    _description = 'Import Physical Time Clock Data'
     _order = 'create_date desc'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Nom', required=True, default=lambda self: self._get_default_name())
-    file = fields.Binary(string='Fichier CSV', required=True)
-    file_name = fields.Char(string='Nom du fichier')
-    location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage')
-    import_date = fields.Datetime(string='Date d\'import', readonly=True)
-    user_id = fields.Many2one('res.users', string='Utilisateur', default=lambda self: self.env.user, readonly=True)
-    line_count = fields.Integer(string='Nombre de lignes', compute='_compute_line_count')
-    attendance_count = fields.Integer(string='Nombre de présences', compute='_compute_attendance_count')
+    name = fields.Char(string='Name', required=True, default=lambda self: self._get_default_name())
+    file = fields.Binary(string='File CSV', required=True)
+    file_name = fields.Char(string='File Name')
+    location_id = fields.Many2one('pointeur_hr.location', string='Location')
+    import_date = fields.Datetime(string='Import Date', readonly=True)
+    user_id = fields.Many2one('res.users', string='User', default=lambda self: self.env.user, readonly=True)
+    line_count = fields.Integer(string='Number of Lines', compute='_compute_line_count')
+    attendance_count = fields.Integer(string='Number of Attendances', compute='_compute_attendance_count')
     notes = fields.Text(string='Notes', tracking=True)
     
     state = fields.Selection([
-        ('draft', 'Brouillon'),
-        ('imported', 'Données importées'),
-        ('done', 'Présences créées'),
-        ('cancelled', 'Annulé'),
-        ('error', 'Erreur')
-    ], string='État', default='draft', required=True, tracking=True)
+        ('draft', 'Draft'),
+        ('imported', 'Imported'),
+        ('done', 'Done'),
+        ('cancelled', 'Cancelled'),
+        ('error', 'Error')
+    ], string='State', default='draft', required=True, tracking=True)
 
-    line_ids = fields.One2many('pointeur_hr.import.line', 'import_id', string='Lignes importées')
+    line_ids = fields.One2many('pointeur_hr.import.line', 'import_id', string='Imported Lines')
 
     @api.depends('line_ids')
     def _compute_line_count(self):
@@ -50,20 +50,20 @@ class PointeurHrImport(models.Model):
 
     @api.constrains('file_name')
     def _check_file_extension(self):
-        """Vérifier que le fichier est un CSV"""
+        """Check that the file is a CSV"""
         for record in self:
             if record.file_name and not record.file_name.lower().endswith('.csv'):
-                raise ValidationError(_("Seuls les fichiers CSV sont acceptés."))
+                raise ValidationError(_("Only CSV files are accepted."))
 
     def _convert_to_float(self, value):
-        """Convertir une valeur en float avec gestion des cas particuliers"""
+        """Convert a value to float with special case handling"""
         if not value or not isinstance(value, str):
             return 0.0
         
-        # Supprimer les espaces et remplacer la virgule par un point
+        # Remove spaces and replace comma with dot
         value = value.strip().replace(',', '.')
         
-        # Gérer les valeurs négatives
+        # Handle negative values
         is_negative = value.startswith('-')
         if is_negative:
             value = value[1:]
@@ -72,25 +72,25 @@ class PointeurHrImport(models.Model):
             result = float(value)
             return -result if is_negative else result
         except ValueError as e:
-            # Log l'erreur pour le débogage
-            _logger.warning(f"Impossible de convertir '{value}' en float: {str(e)}")
+            # Log the error for debugging
+            _logger.warning(f"Unable to convert '{value}' to float: {str(e)}")
             return 0.0
 
     def _convert_time_to_float(self, time_str):
-        """Convertit une chaîne de temps (HH:MMa/p) en nombre d'heures"""
+        """Convert a time string (HH:MMa/p) to hours"""
         if not time_str:
             return 0.0
         try:
-            # Suppression des espaces
+            # Remove spaces
             time_str = time_str.strip()
             
-            # Extraction de am/pm
+            # Extract am/pm
             is_pm = time_str[-1].lower() == 'p'
             
-            # Conversion en heures et minutes
+            # Convert hours and minutes
             hours, minutes = map(int, time_str[:-1].split(':'))
             
-            # Ajustement pour pm
+            # Adjust for pm
             if is_pm and hours < 12:
                 hours += 12
             elif not is_pm and hours == 12:
@@ -101,77 +101,74 @@ class PointeurHrImport(models.Model):
             return 0.0
 
     def _convert_to_datetime(self, date_str, time_str):
-        """Convertit une date (mm/dd/yy) et une heure (HH:MMa/p) en datetime"""
-        _logger.info("=== DÉBUT CONVERSION DATE/HEURE ===")
-        _logger.info("Entrée : date=%s, heure=%s", date_str, time_str)
+        """Convert a date (mm/dd/yy) and time (HH:MMa/p) to datetime"""
         
         if not date_str or not time_str:
-            _logger.error("Date ou heure manquante")
+            _logger.error("Date or time missing")
             return False
             
         try:
-            # Conversion de la date
+            # Convert date
             date = datetime.strptime(date_str, '%m/%d/%y').date()
-            _logger.info("Date convertie : %s", date)
             
-            # Conversion de l'heure au format 12h en 24h
+            # Convert time from 12h to 24h
             time_str = time_str.strip()
             if not time_str or len(time_str) < 2:
-                _logger.error("Chaîne d'heure invalide")
+                _logger.error("Invalid time string")
                 return False
                 
-            # Vérification du marqueur AM/PM
+            # Check AM/PM marker
             am_pm = time_str[-1].lower()
             if am_pm not in ['a', 'p']:
-                _logger.error("Marqueur AM/PM invalide : %s", time_str[-1])
+                _logger.error("Invalid AM/PM marker: %s", time_str[-1])
                 return False
                 
-            # Extraction des heures et minutes
+            # Extract hours and minutes
             time_parts = time_str[:-1].split(':')
             if len(time_parts) != 2:
-                _logger.error("Format d'heure invalide : %s", time_str)
+                _logger.error("Invalid time format: %s", time_str)
                 return False
                 
             hours = int(time_parts[0])
             minutes = int(time_parts[1])
-            _logger.info("Heure extraite : %d:%02d %s", hours, minutes, am_pm)
+            _logger.info("Time extracted: %d:%02d %s", hours, minutes, am_pm)
             
-            # Conversion en format 24h
+            # Convert to 24h format
             if am_pm == 'p' and hours < 12:
                 hours += 12
             elif am_pm == 'a' and hours == 12:
                 hours = 0
                 
-            _logger.info("Heure 24h : %d:%02d", hours, minutes)
+            _logger.info("Time in 24h format: %d:%02d", hours, minutes)
             
-            # Création du datetime
+            # Create datetime
             result = datetime.combine(date, time(hours, minutes))
-            _logger.info("Résultat final : %s", result)
+            _logger.info("Final result: %s", result)
             return result
             
         except Exception as e:
-            _logger.error("Erreur de conversion : %s", str(e))
+            _logger.error("Conversion error: %s", str(e))
             return False
 
     def _normalize_name(self, name):
-        """Normalise un nom pour la comparaison"""
+        """Normalize a name for comparison"""
         if not name:
             return ""
             
-        # Convertir en minuscules
+        # Convert to lowercase
         name = name.lower()
         
-        # Supprimer les accents
+        # Remove accents
         name = ''.join(c for c in unicodedata.normalize('NFD', name)
                       if unicodedata.category(c) != 'Mn')
         
-        # Supprimer les caractères spéciaux et les chiffres
+        # Remove special characters and digits
         name = re.sub(r'[^a-z ]', '', name)
         
-        # Supprimer les espaces multiples
+        # Remove multiple spaces
         name = re.sub(r'\s+', ' ', name).strip()
         
-        # Supprimer les mots courts et communs (articles, prépositions)
+        # Remove common words and short words
         common_words = ['le', 'la', 'les', 'de', 'du', 'des', 'un', 'une', 'et', 'a', 'au', 'aux']
         words = name.split()
         words = [w for w in words if w not in common_words and len(w) > 1]
@@ -179,43 +176,43 @@ class PointeurHrImport(models.Model):
         return ' '.join(words)
 
     def _find_employee_by_name(self, employee_name):
-        """Recherche un employé par son nom en utilisant les correspondances existantes ou en recherchant dans les employés"""
+        """Find an employee by name using existing mappings or searching in employees"""
         if not employee_name:
             return False
             
-        # 1. Rechercher dans les correspondances existantes (correspondance exacte)
+        # 1. Search in existing mappings (exact match)
         mapping = self.env['pointeur_hr.employee.mapping'].search([
             ('name', '=', employee_name),
             ('active', '=', True)
         ], limit=1)
         
         if mapping:
-            # Mettre à jour le compteur d'utilisation
+            # Update usage counter
             mapping.write({
                 'import_count': mapping.import_count + 1,
                 'last_used': fields.Datetime.now()
             })
             return mapping.employee_id
         
-        # Normaliser le nom importé pour la comparaison
+        # Normalize the imported name for comparison
         normalized_name = self._normalize_name(employee_name)
         
-        # Vérifier si le nom est trop court ou pourrait être juste un prénom/nom
+        # Check if the name is too short or could be just a first name/last name
         words = normalized_name.split()
         
-        # Si le nom normalisé est vide ou contient un seul mot court, ne pas faire de correspondance automatique
+        # If the normalized name is empty or contains a single short word, do not perform automatic matching
         if not normalized_name or (len(words) == 1 and len(normalized_name) < 5):
-            _logger.info("Nom trop court ou incomplet pour correspondance automatique: '%s'", employee_name)
+            _logger.info("Name too short or incomplete for automatic matching: '%s'", employee_name)
             return False
         
-        # 2. Rechercher un employé avec le nom exact
+        # 2. Search for an employee with the exact name
         employee = self.env['hr.employee'].search([
             ('name', '=', employee_name),
             ('active', '=', True)
         ], limit=1)
         
         if employee:
-            # Créer une correspondance
+            # Create a mapping
             try:
                 self.env['pointeur_hr.employee.mapping'].create({
                     'name': employee_name,
@@ -223,129 +220,129 @@ class PointeurHrImport(models.Model):
                     'import_id': self.id
                 })
             except Exception as e:
-                _logger.error("Erreur création correspondance : %s", str(e))
+                _logger.error("Error creating mapping: %s", str(e))
             return employee
         
-        # 3. Recherche par similarité si aucune correspondance exacte n'est trouvée
-        # Récupérer tous les employés actifs
+        # 3. Search by similarity if no exact match is found
+        # Get all active employees
         all_employees = self.env['hr.employee'].search([('active', '=', True)])
         
-        # Préparer les noms normalisés des employés
+        # Prepare normalized employee names
         employee_names = [(emp, self._normalize_name(emp.name)) for emp in all_employees]
         
         best_match = None
         best_score = 0.0
-        threshold = 0.85  # Seuil de similarité (85%)
+        threshold = 0.85  # Similarity threshold (85%)
         
         for emp, emp_normalized_name in employee_names:
-            # Vérifier que le nom de l'employé contient au moins deux mots
+            # Check that the employee name contains at least two words
             emp_words = emp_normalized_name.split()
             if len(emp_words) < 2:
                 continue
                 
-            # Calculer la similarité entre les noms
+            # Calculate similarity between names
             similarity = difflib.SequenceMatcher(None, normalized_name, emp_normalized_name).ratio()
             
-            # Vérifier également si le nom importé est contenu dans le nom de l'employé ou vice versa
+            # Check also if the imported name is contained in the employee name or vice versa
             contains_score = 0
             if normalized_name in emp_normalized_name:
                 contains_score = len(normalized_name) / len(emp_normalized_name)
             elif emp_normalized_name in normalized_name:
                 contains_score = len(emp_normalized_name) / len(normalized_name)
             
-            # Prendre le meilleur score entre la similarité et le score de contenance
+            # Take the best score between similarity and contains score
             final_score = max(similarity, contains_score)
             
             if final_score > best_score:
                 best_score = final_score
                 best_match = emp
         
-        # Si un match avec un score suffisant est trouvé, créer une correspondance
+        # If a match with a sufficient score is found, create a mapping
         if best_match and best_score >= threshold:
             try:
                 self.env['pointeur_hr.employee.mapping'].create({
                     'name': employee_name,
                     'employee_id': best_match.id,
                     'import_id': self.id,
-                    'notes': _("Correspondance automatique (score: %.2f)") % best_score
+                    'notes': _("Automatic matching (score: %.2f)") % best_score
                 })
-                _logger.info("Correspondance trouvée pour '%s': '%s' (score: %.2f)", 
+                _logger.info("Automatic matching found for '%s': '%s' (score: %.2f)", 
                              employee_name, best_match.name, best_score)
                 return best_match
             except Exception as e:
-                _logger.error("Erreur création correspondance : %s", str(e))
+                _logger.error("Error creating matching: %s", str(e))
         
         return False
 
     def message_post(self, **kwargs):
-        """Surcharge pour formater les dates dans le fuseau horaire de l'utilisateur"""
-        # Conversion de la date dans le fuseau horaire de l'utilisateur
+        """Override to format dates in user's timezone"""
+        # Convert date to user's timezone
         user_tz = self.env.user.tz or 'UTC'
         local_tz = pytz.timezone(user_tz)
         utc_now = fields.Datetime.now()
         local_now = pytz.utc.localize(utc_now).astimezone(local_tz)
 
-        # Ajout de la date locale dans le message
+        # Add local date to message subject
         kwargs['subject'] = kwargs.get('subject', '') + ' - ' + local_now.strftime('%d/%m/%Y %H:%M:%S')
         
         return super(PointeurHrImport, self).message_post(**kwargs)
 
     def _import_csv_file(self):
-        """Importer les données du fichier CSV"""
+        """Import CSV data"""
         self.ensure_one()
-        _logger.info("=== DÉBUT IMPORT ===")
+        _logger.info("=== START IMPORT ===")
 
         if not self.file:
-            raise UserError(_("Veuillez sélectionner un fichier à importer."))
+            raise UserError(_("Please select a file to import."))
 
-        # Lecture du fichier CSV
+        # Read CSV file
         csv_data = base64.b64decode(self.file)
         csv_file = io.StringIO(csv_data.decode('utf-8'))
         reader = csv.DictReader(csv_file)
-        _logger.info("Colonnes CSV : %s", reader.fieldnames)
+        _logger.info("CSV columns: %s", reader.fieldnames)
         
         success_count = 0
         error_lines = []
 
-        # Suppression des anciennes lignes
+        # Delete old lines
         self.line_ids.unlink()
 
-        # Import des nouvelles lignes
+        # Import new lines
         line_vals = []
         for row in reader:
             try:
-                # Extraction des données
+                # Extract data
                 employee_name = row.get('Display Name', '').strip()
                 date = row.get('Date', '').strip()
                 in_time = row.get('In Time', '').strip()
                 out_time = row.get('Out Time', '').strip()
 
-                _logger.info("Traitement ligne : name=%s, date=%s, in=%s, out=%s", 
+                _logger.info("Processing line: name=%s, date=%s, in=%s, out=%s", 
                            employee_name, date, in_time, out_time)
 
-                # Construction des dates et heures
+                # Convert dates and times
                 check_in = self._convert_to_datetime(date, in_time) if date and in_time else False
                 check_out = self._convert_to_datetime(date, out_time) if date and out_time else False
 
-                _logger.info("Résultat conversion : check_in=%s, check_out=%s", check_in, check_out)
+                _logger.info("Conversion result: check_in=%s, check_out=%s", check_in, check_out)
 
-                # Si pas de check-in, on ignore la ligne
+                # If no check-in, skip the line
                 if not check_in:
-                    _logger.info("Ligne ignorée : pas de check-in")
+                    _logger.info("Line ignored: no check-in")
                     continue
 
-                # Si check_out est avant check_in, on ajoute un jour
+                # If check_out is before check_in, add a day
                 if check_in and check_out and check_out < check_in:
                     check_out += timedelta(days=1)
-                    _logger.info("Ajustement check_out : %s", check_out)
+                    _logger.info("Adjustment check_out: %s", check_out)
 
-                # Validation des données obligatoires
+                # Validate required fields
                 if not employee_name:
-                    raise ValidationError(_("Le nom de l'employé est obligatoire."))
+                    raise ValidationError(_("Employee name is required."))
                 if not date:
-                    raise ValidationError(_("La date est obligatoire."))
+                    raise ValidationError(_("Date is required."))
 
-                # Préparation des valeurs
+                # Prepare values
                 vals = {
                     'import_id': self.id,
                     'employee_name': employee_name,
@@ -366,53 +363,53 @@ class PointeurHrImport(models.Model):
                     'state': 'imported'
                 }
                 
-                _logger.info("Valeurs préparées : %s", vals)
+                _logger.info("Values prepared: %s", vals)
 
                 line_vals.append(vals)
                 success_count += 1
 
             except Exception as e:
-                error_message = f"Erreur ligne {reader.line_num} ({employee_name if 'employee_name' in locals() else 'inconnu'}): {str(e)}"
+                error_message = f"Error line {reader.line_num} ({employee_name if 'employee_name' in locals() else 'unknown'}): {str(e)}"
                 error_lines.append(error_message)
                 _logger.error(error_message)
 
-        # Création des lignes
+        # Create lines
         if line_vals:
-            _logger.info("Création de %d lignes", len(line_vals))
+            _logger.info("Creating %d lines", len(line_vals))
             self.env['pointeur_hr.import.line'].create(line_vals)
             
-            # Message de confirmation avec statistiques
-            message = _("""Import réussi le %s :
-- %d lignes importées
-- %d employés différents""") % (
+            # Confirmation message with statistics
+            message = _("""Import successful on %s :
+- %d lines imported
+- %d employees different""") % (
                 fields.Datetime.now().strftime('%d/%m/%Y à %H:%M:%S'),
                 success_count,
                 len(set(val['employee_name'] for val in line_vals))
             )
             
             if error_lines:
-                message += _("\n\nErreurs :\n%s") % '\n'.join(error_lines)
+                message += _("\n\nErrors :\n%s") % '\n'.join(error_lines)
                 
             self.message_post(body=message)
             
             return True
         else:
-            raise UserError(_("Aucune ligne valide trouvée dans le fichier."))
+            raise UserError(_("No valid line found in the file."))
 
     def action_create_attendances(self):
-        """Créer les présences à partir des lignes importées"""
+        """Create attendances from imported lines"""
         self.ensure_one()
         
         if self.state not in ['imported']:
-            raise UserError(_("Vous ne pouvez créer les présences que si l'import est à l'état 'Importé'."))
+            raise UserError(_("You can only create attendances if the import is in the 'Imported' state."))
             
-        # Recherche des correspondances pour les lignes sans employé
+        # Search for matches for lines without employee
         unmapped_lines = self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done')
-        _logger.info("Nombre de lignes sans correspondance : %d", len(unmapped_lines))
+        _logger.info("Number of lines without match: %d", len(unmapped_lines))
         mapped_count = 0
         
         for line in unmapped_lines:
-            # Recherche d'un employé par son nom
+            # Search for an employee by name
             if line.employee_name:
                 employee = self._find_employee_by_name(line.employee_name)
                 if employee:
@@ -422,21 +419,21 @@ class PointeurHrImport(models.Model):
                     })
                     mapped_count += 1
                     
-        # S'il reste des lignes sans correspondance, ouvrir l'assistant de sélection
+        # If there are still lines without match, open the selection assistant
         remaining_unmapped = self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done')
         if remaining_unmapped:
-            _logger.info("Il reste %d lignes non mappées -> ouverture assistant", len(remaining_unmapped))
+            _logger.info("There are still %d lines without match -> opening selection assistant", len(remaining_unmapped))
             
-            # Message pour les correspondances trouvées
+            # Message for found matches
             if mapped_count > 0:
                 self.message_post(
-                    body=_("Recherche automatique des correspondances :\n- %d lignes ont été mappées") % mapped_count,
+                    body=_("Automatic search for matches :\n- %d lines have been mapped") % mapped_count,
                     message_type='notification',
                     subtype_id=self.env.ref('mail.mt_note').id
                 )
             
             return {
-                'name': _('Sélectionner les employés'),
+                'name': _('Select Employees'),
                 'type': 'ir.actions.act_window',
                 'res_model': 'pointeur_hr.select.employees',
                 'view_mode': 'form',
@@ -448,35 +445,35 @@ class PointeurHrImport(models.Model):
                 }
             }
         
-        # Sinon, créer directement les présences
-        _logger.info("Toutes les lignes sont mappées -> création des présences")
+        # Otherwise, create attendances directly
+        _logger.info("All lines are mapped -> creating attendances")
         if mapped_count > 0:
             self.message_post(
-                body=_("Recherche automatique des correspondances :\n- %d lignes ont été mappées") % mapped_count,
+                body=_("Automatic search for matches :\n- %d lines have been mapped") % mapped_count,
                 message_type='notification',
                 subtype_id=self.env.ref('mail.mt_note').id
             )
         return self._create_attendances(mapped_count)
 
     def _create_attendances(self, mapped_count=0):
-        """Créer les présences pour les lignes avec un employé"""
+        """Create attendances for lines with an employee"""
         self.ensure_one()
         
-        # Création des présences pour les lignes avec un employé
+        # Create attendances for lines with an employee
         attendance_count = 0
         error_count = 0
         duplicate_count = 0
         
-        # Récupérer toutes les lignes mappées qui n'ont pas encore de présence
+        # Get all mapped lines that don't have an attendance
         mapped_lines = self.line_ids.filtered(lambda l: l.employee_id and l.state in ['mapped'])
         
         for line in mapped_lines:
             try:
-                # Vérifier les données obligatoires
+                # Verify required data
                 if not line.check_in:
                     raise ValidationError(_("L'heure d'entrée est obligatoire"))
                 
-                # Vérifier si une présence existe déjà pour cet employé à cette date/heure
+                # Check if an attendance already exists for this employee at this date/time
                 existing_attendance = self.env['hr.attendance'].search([
                     ('employee_id', '=', line.employee_id.id),
                     ('check_in', '=', line.check_in),
@@ -484,16 +481,16 @@ class PointeurHrImport(models.Model):
                 ], limit=1)
                 
                 if existing_attendance:
-                    # Marquer comme doublon et passer à la ligne suivante
+                    # Mark as duplicate and pass to next line
                     line.write({
                         'attendance_id': existing_attendance.id,
                         'state': 'done',
-                        'notes': _("Présence existante détectée et associée")
+                        'notes': _("Attendance already exists and associated")
                     })
                     duplicate_count += 1
                     continue
                 
-                # Créer la présence
+                # Create attendance
                 attendance_vals = {
                     'employee_id': line.employee_id.id,
                     'check_in': line.check_in,
@@ -506,7 +503,7 @@ class PointeurHrImport(models.Model):
                 
                 attendance = self.env['hr.attendance'].create(attendance_vals)
                 
-                # Mettre à jour la ligne
+                # Update the line
                 line.write({
                     'attendance_id': attendance.id,
                     'state': 'done'
@@ -517,24 +514,24 @@ class PointeurHrImport(models.Model):
                 error_message = str(e)
                 line.write({
                     'state': 'error',
-                    'notes': _("Erreur lors de la création de la présence : %s") % error_message
+                    'notes': _("Error while creating attendance: %s") % error_message
                 })
                 error_count += 1
                 
-        # Mise à jour de l'état de l'import si au moins une présence a été créée
+        # Update import state if at least one attendance was created
         if attendance_count > 0 or duplicate_count > 0:
             self.write({'state': 'done'})
             
-        # Message de confirmation
+        # Confirmation message
         unmapped_count = len(self.line_ids.filtered(lambda l: not l.employee_id))
         error_count = len(self.line_ids.filtered(lambda l: l.state == 'error'))
         
         message = _("""
-Création des présences terminée :
-- %d présences créées
-- %d doublons détectés et associés
-- %d lignes sans correspondance
-- %d lignes en erreur
+Creation of attendances completed :
+- %d attendances created
+- %d duplicates detected and associated
+- %d lines without match
+- %d lines in error
 """) % (attendance_count, duplicate_count, unmapped_count, error_count)
 
         self.message_post(body=message)
@@ -542,7 +539,7 @@ Création des présences terminée :
         return True
 
     def action_view_attendances(self):
-        """Voir les présences créées"""
+        """View created attendances"""
         self.ensure_one()
         
         attendances = self.env['hr.attendance'].search([
@@ -550,7 +547,7 @@ Création des présences terminée :
         ])
         
         return {
-            'name': _('Présences'),
+            'name': _('Attendances'),
             'type': 'ir.actions.act_window',
             'res_model': 'hr.attendance',
             'view_mode': 'tree,form',
@@ -558,11 +555,11 @@ Création des présences terminée :
         }
         
     def action_search_employee_mappings(self):
-        """Rechercher les correspondances pour les lignes sans employé"""
+        """Search for employee mappings for lines without employee"""
         self.ensure_one()
-        _logger.info("=== DÉBUT RECHERCHE CORRESPONDANCES ===")
+        _logger.info("=== BEGIN SEARCHING FOR MATCHING EMPLOYEES ===")
         
-        # Récupérer les lignes sans employé
+        # Get lines without employee
         unmapped_lines = self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done')
         
         if not unmapped_lines:
@@ -570,14 +567,14 @@ Création des présences terminée :
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
-                    'message': _("Toutes les lignes ont déjà un employé associé."),
+                    'message': _("All lines already have an employee associated."),
                     'type': 'info',
                 }
             }
             
-        # Rechercher les correspondances existantes
+        # Search for existing mappings
         for line in unmapped_lines:
-            _logger.info("Recherche correspondance pour : %s", line.employee_name)
+            _logger.info("Searching for matching employee: %s", line.employee_name)
             mapping = self.env['pointeur_hr.employee.mapping'].search([
                 ('name', '=', line.employee_name),
                 ('active', '=', True)
@@ -585,31 +582,31 @@ Création des présences terminée :
             
             if mapping:
                 try:
-                    _logger.info("Correspondance trouvée : %s -> %s", 
+                    _logger.info("Matching found: %s -> %s",
                                mapping.name, mapping.employee_id.name)
                     line.write({
                         'employee_id': mapping.employee_id.id,
                         'state': 'mapped'
                     })
-                    # Mettre à jour le compteur d'utilisation
+                    # Update usage counter
                     mapping.write({
                         'import_count': mapping.import_count + 1,
                         'last_used': fields.Datetime.now()
                     })
                 except Exception as e:
-                    _logger.error("Erreur mise à jour ligne : %s", str(e))
+                    _logger.error("Error updating line: %s", str(e))
                     
-        # Compter les lignes restantes sans correspondance
+        # Count remaining lines without match
         remaining = len(self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done'))
         
-        # Préparer le message de retour
+        # Prepare return message
         if remaining == 0:
-            message = _("Toutes les correspondances ont été trouvées.")
+            message = _("All matches have been found.")
             msg_type = 'success'
         else:
             message = _(
-                "%d ligne(s) reste(nt) sans correspondance. "
-                "Utilisez le wizard de sélection pour les associer manuellement."
+                "%d line(s) remain(s) without match. "
+                "Use the selection wizard to manually associate them."
             ) % remaining
             msg_type = 'warning'
             
@@ -624,16 +621,16 @@ Création des présences terminée :
         }
 
     def action_view_mappings(self):
-        """Voir les correspondances associées à cet import"""
+        """View associated mappings for this import"""
         self.ensure_one()
         
-        # Récupérer toutes les correspondances liées à cet import
+        # Retrieve all mappings associated with this import
         mappings = self.env['pointeur_hr.employee.mapping'].search([
             ('import_id', '=', self.id)
         ])
         
         action = {
-            'name': _('Correspondances'),
+            'name': _('Mappings'),
             'type': 'ir.actions.act_window',
             'res_model': 'pointeur_hr.employee.mapping',
             'view_mode': 'tree,form',
@@ -642,7 +639,7 @@ Création des présences terminée :
             'target': 'current',
         }
         
-        # Si une seule correspondance, ouvrir directement le formulaire
+        # If one mapping, open the form directly
         if len(mappings) == 1:
             action['res_id'] = mappings.id
             action['view_mode'] = 'form'
@@ -650,24 +647,24 @@ Création des présences terminée :
         return action
 
     def action_view_attendances(self):
-        """Voir les présences créées pour cet import"""
+        """View created attendances for this import"""
         self.ensure_one()
         
-        # Récupérer toutes les présences liées à cet import
+        # Retrieve all attendances associated with this import
         attendances = self.line_ids.mapped('attendance_id')
         
-        # Créer l'action pour afficher les présences
+        # Create action to display attendances
         action = {
-            'name': _('Présences'),
+            'name': _('Attendances'),
             'type': 'ir.actions.act_window',
             'res_model': 'hr.attendance',
             'view_mode': 'tree,form',
             'domain': [('id', 'in', attendances.ids)],
-            'context': {'create': False},  # Empêcher la création manuelle
+            'context': {'create': False},  # Prevent manual creation
             'target': 'current',
         }
         
-        # Si une seule présence, ouvrir directement le formulaire
+        # If one attendance, open the form directly
         if len(attendances) == 1:
             action['res_id'] = attendances.id
             action['view_mode'] = 'form'
@@ -675,21 +672,21 @@ Création des présences terminée :
         return action
 
     def action_cancel(self):
-        """Annuler l'import"""
+        """Cancel the import"""
         for record in self:
             if record.state == 'done':
                 raise UserError(_("Impossible d'annuler un import terminé."))
             record.write({'state': 'cancelled'})
             
     def action_reset(self):
-        """Réinitialiser l'import"""
+        """Reset the import"""
         for record in self:
-            # Supprimer les présences si elles existent
+            # Delete attendances if they exist
             attendances = record.line_ids.mapped('attendance_id')
             if attendances:
                 attendances.unlink()
             
-            # Réinitialiser les lignes
+            # Reset lines
             record.line_ids.write({
                 'state': 'imported',
                 'error_message': False,
@@ -698,45 +695,45 @@ Création des présences terminée :
                 'attendance_id': False
             })
             
-            # Réinitialiser l'import
+            # Reset import
             record.write({
                 'state': 'imported',
                 'import_date': fields.Datetime.now()
             })
 
     def _get_default_name(self):
-        """Obtenir un nom par défaut avec la date et l'heure actuelles dans le fuseau horaire de l'utilisateur"""
+        """Get a default name with the current date and time in the user's timezone"""
         user = self.env.user
         if user.tz:
             user_tz = pytz.timezone(user.tz)
         else:
             user_tz = pytz.UTC
             
-        # Obtenir la date et l'heure actuelles dans le fuseau horaire de l'utilisateur
+        # Get the current date and time in the user's timezone
         now_utc = datetime.now(pytz.UTC)
         now_user_tz = now_utc.astimezone(user_tz)
         
-        return _('Import du %s') % now_user_tz.strftime('%d/%m/%Y à %H:%M')
+        return _('Import %s') % now_user_tz.strftime('%d/%m/%Y à %H:%M')
 
     def action_import_file(self):
-        """Importer le fichier CSV"""
+        """Import the CSV file"""
         self.ensure_one()
         if not self.file:
-            raise UserError(_("Veuillez sélectionner un fichier à importer."))
+            raise UserError(_("Please select a file to import."))
             
         if self.state != 'draft':
-            raise UserError(_("Vous ne pouvez importer que si l'état est 'Brouillon'."))
+            raise UserError(_("You can only import if the state is 'Draft'."))
             
-        # Mise à jour de l'état
+        # Update state
         self.write({
             'state': 'imported',
             'import_date': fields.Datetime.now()
         })
             
-        # Import du fichier
+        # Import the file
         try:
             self._import_csv_file()
-            # Générer un rapport de correspondance initial
+            # Generate initial mapping report
             self._generate_mapping_report()
             return True
         except Exception as e:
@@ -745,54 +742,54 @@ Création des présences terminée :
             raise UserError(_("Erreur lors de l'import : %s") % str(e))
 
     def _name_similarity_score(self, name1, name2):
-        """Calcule un score de similarité entre deux noms"""
+        """Calculate similarity score between two names"""
         if not name1 or not name2:
             return 0.0
             
-        # Normaliser les noms
+        # Normalize the names
         normalized_name1 = self._normalize_name(name1)
         normalized_name2 = self._normalize_name(name2)
         
         if not normalized_name1 or not normalized_name2:
             return 0.0
             
-        # Si le nom est trop court ou pourrait être juste un prénom/nom, retourner 0
+        # If the name is too short or could be just a first name/last name, return 0
         if len(normalized_name1.split()) == 1 and len(normalized_name1) < 5:
             return 0.0
             
         if len(normalized_name2.split()) == 1 and len(normalized_name2) < 5:
             return 0.0
             
-        # Calculer la similarité
+        # Calculate similarity
         similarity = difflib.SequenceMatcher(None, normalized_name1, normalized_name2).ratio()
         
-        # Vérifier si un nom est contenu dans l'autre
+        # Check if one name is contained in the other
         contains_score = 0.0
         if normalized_name1 in normalized_name2:
             contains_score = len(normalized_name1) / len(normalized_name2)
         elif normalized_name2 in normalized_name1:
             contains_score = len(normalized_name2) / len(normalized_name1)
             
-        # Retourner le meilleur score
+        # Return the best score
         return max(similarity, contains_score)
 
     def _generate_mapping_report(self):
-        """Générer un rapport sur les correspondances"""
-        # Statistiques sur les correspondances
+        """Generate a report on the mappings"""
+        # Statistics on the mappings
         total_lines = len(self.line_ids)
         mapped_lines = len(self.line_ids.filtered(lambda l: l.employee_id))
         unmapped_lines = total_lines - mapped_lines
         
-        # Récupérer les noms sans correspondance
+        # Retrieve names without match
         unmapped_names = self.line_ids.filtered(lambda l: not l.employee_id).mapped('employee_name')
         
-        # Trouver les noms similaires pour suggérer des correspondances
+        # Find similar names to suggest mappings
         suggestions = []
-        for name in unmapped_names[:10]:  # Limiter aux 10 premiers pour éviter un rapport trop long
-            if not name:  # Ignorer les noms vides
+        for name in unmapped_names[:10]:  # Limit to 10 names to avoid a long report
+            if not name:  # Ignore empty names
                 continue
                 
-            # Vérifier si le nom est trop court pour les suggestions
+            # Check if the name is too short for suggestions
             normalized_name = self._normalize_name(name)
             if not normalized_name or (len(normalized_name.split()) == 1 and len(normalized_name) < 5):
                 continue
@@ -801,23 +798,23 @@ Création des présences terminée :
             matches = []
             
             for employee in employees:
-                if not employee.name:  # Ignorer les employés sans nom
+                if not employee.name:  # Ignore employees without name
                     continue
                     
                 score = self._name_similarity_score(name, employee.name)
-                if score >= 0.3:  # Seuil bas pour avoir des suggestions
+                if score >= 0.3:  # Low threshold for suggestions
                     matches.append((employee, score))
             
             matches.sort(key=lambda x: x[1], reverse=True)
             if matches:
-                suggestions.append((name, matches[:3]))  # Garder les 3 meilleures suggestions
+                suggestions.append((name, matches[:3]))  # Keep the 3 best suggestions
         
-        # Générer le rapport
+        # Generate the report
         report = _("""
-<h3>Rapport de correspondance</h3>
+<h3>Mapping Report</h3>
 <p>
-<strong>Statistiques :</strong><br/>
-- Lignes importées : {total}<br/>
+<strong>Statistics :</strong><br/>
+- Lines imported : {total}<br/>
 - Lignes avec correspondance : {mapped} ({mapped_percent:.1f}%)<br/>
 - Lignes sans correspondance : {unmapped} ({unmapped_percent:.1f}%)
 </p>
@@ -829,20 +826,20 @@ Création des présences terminée :
             unmapped_percent=(unmapped_lines/total_lines*100) if total_lines else 0
         )
         
-        # Ajouter les suggestions si disponibles
+        # Add suggestions if available
         if suggestions:
             report += _("<h4>Suggestions de correspondance :</h4><ul>")
             for name, matches in suggestions:
                 report += _("<li><strong>{}</strong> : ").format(name)
                 for employee, score in matches:
                     report += _("{} (score: {:.2f}), ").format(employee.name, score)
-                report = report[:-2] + "</li>"  # Enlever la dernière virgule
+                report = report[:-2] + "</li>"  # Remove the last comma
             report += "</ul>"
         
         return report
 
     def action_mapping_report(self):
-        """Action pour générer et afficher le rapport de correspondance"""
+        """Action to generate and display the mapping report"""
         self.ensure_one()
         report = self._generate_mapping_report()
         self.message_post(body=report)

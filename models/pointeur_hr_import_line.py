@@ -7,49 +7,49 @@ _logger = logging.getLogger(__name__)
 
 class PointeurHrImportLine(models.Model):
     _name = 'pointeur_hr.import.line'
-    _description = 'Ligne d\'import des données du pointeur'
+    _description = 'Import Line'
     _order = 'date, employee_name'
 
     import_id = fields.Many2one('pointeur_hr.import', string='Import', required=True, ondelete='cascade')
-    employee_name = fields.Char(string='Nom employé', required=True)
-    employee_id = fields.Many2one('hr.employee', string='Employé correspondant')
-    display_id = fields.Char(string='ID Badge')
-    payroll_id = fields.Char(string='ID Paie')
-    department = fields.Char(string='Département')
-    dept_code = fields.Char(string='Code département')
+    employee_name = fields.Char(string='Imported Name', required=True)
+    employee_id = fields.Many2one('hr.employee', string='Employee')
+    display_id = fields.Char(string='Badge ID')
+    payroll_id = fields.Char(string='Payroll ID')
+    department = fields.Char(string='Department')
+    dept_code = fields.Char(string='Department Code')
     date = fields.Date(string='Date', required=True)
-    check_in = fields.Datetime(string='Entrée')  # Non requis car peut être vide
-    check_out = fields.Datetime(string='Sortie')
-    in_note = fields.Char(string='Note entrée')
-    out_note = fields.Char(string='Note sortie')
-    reg_hours = fields.Float(string='Heures normales')
-    ot1_hours = fields.Float(string='Heures sup. 1')
-    ot2_hours = fields.Float(string='Heures sup. 2')
-    total_hours = fields.Float(string='Total heures', compute='_compute_hours')
-    location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage')
-    attendance_id = fields.Many2one('hr.attendance', string='Présence')
-    error_message = fields.Text(string='Message d\'erreur')
+    check_in = fields.Datetime(string='Check In')  # Non requis car peut être vide
+    check_out = fields.Datetime(string='Check Out')
+    in_note = fields.Char(string='Check In Note')
+    out_note = fields.Char(string='Check Out Note')
+    reg_hours = fields.Float(string='Regular Hours')
+    ot1_hours = fields.Float(string='Overtime 1 Hours')
+    ot2_hours = fields.Float(string='Overtime 2 Hours')
+    total_hours = fields.Float(string='Total Hours', compute='_compute_hours')
+    location_id = fields.Many2one('pointeur_hr.location', string='Attendance Location')
+    attendance_id = fields.Many2one('hr.attendance', string='Attendance')
+    error_message = fields.Text(string='Error Message')
     notes = fields.Text(string='Notes')
 
     state = fields.Selection([
-        ('imported', 'Importé'),
-        ('mapped', 'Correspondance trouvée'),
-        ('done', 'Terminé'),
-        ('error', 'Erreur')
-    ], string='État', default='imported', required=True)
+        ('imported', 'Imported'),
+        ('mapped', 'Mapped'),
+        ('done', 'Done'),
+        ('error', 'Error')
+    ], string='State', default='imported', required=True)
 
     @api.model
     def create(self, vals):
-        """Surcharge de la création pour initialiser l'état"""
-        _logger.info("=== DÉBUT CREATE IMPORT LINE ===")
-        _logger.info("Valeurs reçues : %s", vals)
+        """Override creation to initialize state"""
+        _logger.info("=== START CREATE IMPORT LINE ===")
+        _logger.info("Received values: %s", vals)
         
         if vals.get('employee_id'):
             vals['state'] = 'mapped'
         else:
             vals['state'] = 'imported'
             
-        _logger.info("=== FIN CREATE IMPORT LINE ===")
+        _logger.info("=== END CREATE IMPORT LINE ===")
         return super().create(vals)
 
     @api.depends('check_in', 'check_out')
@@ -62,38 +62,38 @@ class PointeurHrImportLine(models.Model):
                 line.total_hours = 0.0
 
     def write(self, vals):
-        """Surcharge de l'écriture pour gérer les états et les correspondances"""
+        """Override write to manage states and mappings"""
         
-        # Si on met à jour l'employee_id, on met à jour l'état
+        # If updating employee_id, update state
         if 'employee_id' in vals:
             if vals.get('employee_id'):
-                # Ne pas changer l'état si déjà terminé
+                # Do not change state if already done
                 if self.filtered(lambda l: l.state != 'done'):
                     vals['state'] = 'mapped'
             else:
-                # Ne pas changer l'état si déjà terminé
+                # Do not change state if already done
                 if self.filtered(lambda l: l.state != 'done'):
                     vals['state'] = 'imported'
                     
-        # Si on change l'état en 'done', vérifier que l'employé est défini
+        # If changing state to 'done', check that employee is defined
         if vals.get('state') == 'done':
             for record in self:
                 if not (record.employee_id or vals.get('employee_id')):
                     raise ValidationError(_(
-                        "Impossible de marquer comme terminé une ligne sans employé associé"
+                        "Cannot mark as done a line without an associated employee"
                     ))
                     
         result = super().write(vals)
         
-        # Après la mise à jour, créer/mettre à jour les correspondances si nécessaire
+        # After update, create/update mappings if necessary
         if vals.get('employee_id'):
             for record in self:
-                if record.employee_name:  # Vérifier que le nom n'est pas vide
+                if record.employee_name:  # Check that name is not empty
                     employee = self.env['hr.employee'].browse(vals['employee_id'])
-                    _logger.info("Recherche correspondance pour %s -> %s", 
+                    _logger.info("Searching for mapping for %s -> %s", 
                                record.employee_name, employee.name)
                     
-                    # Rechercher une correspondance existante (active ou inactive)
+                    # Search for an existing mapping (active or inactive)
                     mapping = self.env['pointeur_hr.employee.mapping'].search(
                         [('name', '=', record.employee_name),
                         ('employee_id', '=', vals['employee_id']),
@@ -102,7 +102,7 @@ class PointeurHrImportLine(models.Model):
                         ('active', '=', False)
                         ], limit=1)
                     
-                    # Vérifier si l'employé a déjà une correspondance avec un autre nom
+                    # Check if employee already has an active mapping with another name
                     existing_employee_mapping = self.env['pointeur_hr.employee.mapping'].search([
                         ('employee_id', '=', vals['employee_id']),
                         '|',
@@ -112,11 +112,11 @@ class PointeurHrImportLine(models.Model):
                     
                     if not mapping:
                         try:
-                            # Si l'employé a déjà une correspondance avec un autre nom, ne pas créer de nouvelle correspondance
+                            # If employee already has an active mapping with another name, do not create a new mapping
                             if existing_employee_mapping and existing_employee_mapping.name != record.employee_name:
                                 pass
                             else:
-                                # Créer une nouvelle correspondance
+                                # Create a new mapping
                                 mapping_vals = {
                                     'name': record.employee_name,
                                     'employee_id': vals['employee_id'],
@@ -124,10 +124,10 @@ class PointeurHrImportLine(models.Model):
                                 }
                                 self.env['pointeur_hr.employee.mapping'].sudo().create(mapping_vals)
                         except Exception as e:
-                            _logger.error("Erreur création correspondance : %s", str(e))
-                            # Ne pas bloquer la mise à jour de la ligne
+                            _logger.error("Error creating mapping: %s", str(e))
+                            # Do not block the update of the line
                     else:
-                        # Réactiver et mettre à jour le compteur d'utilisation
+                        # Reactivate and update the usage counter
                         mapping.write({
                             'active': True,
                             'import_count': mapping.import_count + 1,
@@ -138,34 +138,35 @@ class PointeurHrImportLine(models.Model):
         return result
 
     def action_view_attendance(self):
-        """Voir la présence associée"""
+        """View associated attendance"""
         self.ensure_one()
         if self.attendance_id:
             return {
-                'name': _('Présence'),
+                'name': _('Attendance'),
                 'type': 'ir.actions.act_window',
                 'res_model': 'hr.attendance',
                 'view_mode': 'form',
                 'res_id': self.attendance_id.id,
+                'context': {'create': False}
             }
         return True
 
     @api.constrains('check_in', 'check_out')
     def _check_validity(self):
-        """ Vérifie la validité des heures d'entrée et de sortie """
+        """Check the validity of check-in and check-out times"""
         for record in self:
             if record.check_in and record.check_out and record.check_out < record.check_in:
-                raise ValidationError(_('La date/heure de sortie ne peut pas être antérieure à la date/heure d\'entrée.'))
+                raise ValidationError(_('Check-out time cannot be earlier than check-in time.'))
 
     def find_employee_mapping(self):
-        """Recherche automatique des correspondances employés"""
+        """Automatically search for employee mappings"""
         mapped_count = 0
         error_count = 0
         
         for record in self:
             if not record.employee_id and record.employee_name:
                 try:
-                    # Chercher d'abord dans les correspondances existantes
+                    # First, search for an existing mapping
                     mapping = self.env['pointeur_hr.employee.mapping'].search([
                         ('name', '=', record.employee_name),
                         ('active', '=', True)
@@ -176,7 +177,7 @@ class PointeurHrImportLine(models.Model):
                             'employee_id': mapping.employee_id.id,
                             'state': 'mapped'
                         })
-                        # Mettre à jour le compteur d'utilisation
+                        # Update the usage counter
                         mapping.write({
                             'import_count': mapping.import_count + 1,
                             'last_used': fields.Datetime.now()
@@ -184,26 +185,26 @@ class PointeurHrImportLine(models.Model):
                         mapped_count += 1
                         continue
 
-                    # Si pas de correspondance, utiliser la recherche intelligente
+                    # If no mapping is found, use the smart search
                     employee = self.env['pointeur_hr.import']._find_employee_by_name(record.employee_name)
                     if employee:
-                        # Vérifier si l'employé a déjà une correspondance active
+                        # Check if employee already has an active mapping
                         existing_employee = self.env['pointeur_hr.employee.mapping'].search([
                             ('employee_id', '=', employee.id),
                             ('active', '=', True)
                         ], limit=1)
                         
                         if existing_employee:
-                            # Ne pas créer de nouvelle correspondance si l'employé en a déjà une
+                            # Do not create a new mapping if employee already has an active mapping
                             record.write({
                                 'state': 'error',
-                                'notes': _("L'employé '%s' a déjà une correspondance active avec le nom '%s'") % 
-                                        (employee.name, existing_employee.name)
+                                'notes': _("Employee '%s' already has an active mapping with name '%s'") % 
+                                         (employee.name, existing_employee.name)
                             })
                             error_count += 1
                             continue
-                            
-                        # Vérifier si une correspondance inactive existe
+
+                        # Check if an inactive mapping exists for this combination
                         inactive = self.env['pointeur_hr.employee.mapping'].search([
                             ('name', '=', record.employee_name),
                             ('employee_id', '=', employee.id),
@@ -211,67 +212,78 @@ class PointeurHrImportLine(models.Model):
                         ], limit=1)
                         
                         if inactive:
-                            # Réactiver la correspondance
+                            # Reactivate the inactive mapping
                             inactive.write({
                                 'active': True,
                                 'import_count': inactive.import_count + 1,
                                 'last_used': fields.Datetime.now()
                             })
                         else:
-                            # Créer une nouvelle correspondance
+                            # Create a new mapping
                             self.env['pointeur_hr.employee.mapping'].create({
                                 'name': record.employee_name,
                                 'employee_id': employee.id,
-                                'import_id': record.import_id.id,
+                                'import_id': record.import_id.id
                             })
-                            
-                        # Mettre à jour la ligne
+
+                        # Update the line
                         record.write({
                             'employee_id': employee.id,
                             'state': 'mapped'
                         })
                         mapped_count += 1
-                
+
                 except Exception as e:
                     record.write({
                         'state': 'error',
-                        'notes': _("Erreur lors de la recherche de correspondance : %s") % str(e)
+                        'notes': _("Error searching for mapping: %s") % str(e)
                     })
                     error_count += 1
-        
-        # Message de notification
+
+        # Notification message
         if mapped_count > 0 and error_count == 0:
-            message = _("%d correspondances trouvées avec succès.") % mapped_count
+            message = _("%d mappings found successfully.") % mapped_count
             msg_type = 'success'
         elif mapped_count > 0 and error_count > 0:
-            message = _("%d correspondances trouvées, %d erreurs.") % (mapped_count, error_count)
+            message = _("%d mappings found, %d errors.") % (mapped_count, error_count)
             msg_type = 'warning'
         elif mapped_count == 0 and error_count > 0:
-            message = _("%d erreurs lors de la recherche de correspondances.") % error_count
+            message = _("%d errors occurred while searching for mappings.") % error_count
             msg_type = 'danger'
         else:
-            message = _("Aucune correspondance trouvée.")
+            message = _("No mappings found.")
             msg_type = 'info'
             
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Recherche de correspondance'),
+                'title': _('Mapping Search'),
                 'message': message,
                 'sticky': False,
                 'type': msg_type,
+                'next': {
+                    'type': 'ir.actions.act_window',
+                    'name': _('Lines with Errors'),
+                    'res_model': 'pointeur_hr.import.line',
+                    'view_mode': 'tree,form',
+                    'domain': [
+                        ('import_id', '=', self.import_id.id),
+                        ('state', '=', 'error')
+                    ],
+                    'context': {'create': False}
+                } if error_count > 0 else False
             }
         }
-    
+
     def action_create_mapping(self):
-        """Créer une correspondance pour cette ligne"""
+        """Create a mapping for this line"""
         self.ensure_one()
         
         if not self.employee_id:
-            raise UserError(_("Vous devez d'abord sélectionner un employé."))
+            raise UserError(_("You must first select an employee."))
             
-        # Vérifier si une correspondance existe déjà pour ce nom
+        # Check if a mapping already exists for this name
         existing_name = self.env['pointeur_hr.employee.mapping'].search([
             ('name', '=', self.employee_name),
             ('active', '=', True)
@@ -279,10 +291,10 @@ class PointeurHrImportLine(models.Model):
         
         if existing_name and existing_name.employee_id.id != self.employee_id.id:
             raise UserError(_(
-                "Une correspondance active existe déjà pour le nom '%s' (associée à l'employé %s)."
+                "An active mapping already exists for the name '%s' (associated with employee %s)."
             ) % (self.employee_name, existing_name.employee_id.name))
         
-        # Vérifier si l'employé a déjà une correspondance
+        # Check if employee already has a mapping
         existing_employee = self.env['pointeur_hr.employee.mapping'].search([
             ('employee_id', '=', self.employee_id.id),
             ('active', '=', True)
@@ -290,10 +302,10 @@ class PointeurHrImportLine(models.Model):
         
         if existing_employee and existing_employee.name != self.employee_name:
             raise UserError(_(
-                "L'employé '%s' a déjà une correspondance active avec le nom '%s'."
+                "Employee '%s' already has an active mapping with name '%s'."
             ) % (self.employee_id.name, existing_employee.name))
             
-        # Vérifier si une correspondance inactive existe pour cette combinaison
+        # Check if an inactive mapping exists for this combination
         inactive = self.env['pointeur_hr.employee.mapping'].search([
             ('name', '=', self.employee_name),
             ('employee_id', '=', self.employee_id.id),
@@ -301,38 +313,38 @@ class PointeurHrImportLine(models.Model):
         ], limit=1)
         
         if inactive:
-            # Réactiver la correspondance inactive
+            # Reactivate the inactive mapping
             inactive.write({
                 'active': True,
                 'last_used': fields.Datetime.now(),
                 'import_count': inactive.import_count + 1
             })
-            message = _("Correspondance réactivée : %s -> %s") % (self.employee_name, self.employee_id.name)
+            message = _("Mapping reactivated: %s -> %s") % (self.employee_name, self.employee_id.name)
         elif existing_name and existing_name.employee_id.id == self.employee_id.id:
-            # Mettre à jour la correspondance existante
+            # Update the existing mapping
             existing_name.write({
                 'last_used': fields.Datetime.now(),
                 'import_count': existing_name.import_count + 1
             })
-            message = _("Correspondance mise à jour : %s -> %s") % (self.employee_name, self.employee_id.name)
+            message = _("Mapping updated: %s -> %s") % (self.employee_name, self.employee_id.name)
         else:
-            # Créer une nouvelle correspondance
+            # Create a new mapping
             self.env['pointeur_hr.employee.mapping'].create({
                 'name': self.employee_name,
                 'employee_id': self.employee_id.id,
-                'import_id': self.import_id.id,
+                'import_id': self.import_id.id
             })
-            message = _("Nouvelle correspondance créée : %s -> %s") % (self.employee_name, self.employee_id.name)
+            message = _("New mapping created: %s -> %s") % (self.employee_name, self.employee_id.name)
             
-        # Mettre à jour l'état de la ligne
+        # Update the line state
         self.write({'state': 'mapped'})
         
-        # Afficher un message de confirmation
+        # Display a confirmation message
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Correspondance créée'),
+                'title': _('Mapping Created'),
                 'message': message,
                 'sticky': False,
                 'type': 'success',
@@ -340,7 +352,7 @@ class PointeurHrImportLine(models.Model):
         }
 
     def action_reset(self):
-        """Réinitialiser une ligne en erreur"""
+        """Reset a line in error"""
         return self.write({
             'state': 'imported',
             'error_message': False,

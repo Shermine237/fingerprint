@@ -2,11 +2,11 @@ from odoo import models, fields, api, _
 
 class PointeurHrLocation(models.Model):
     _name = 'pointeur_hr.location'
-    _description = 'Lieu de pointage'
+    _description = 'Attendance Location'
     _order = 'name'
 
-    name = fields.Char(string='Nom', required=True)
-    address = fields.Text(string='Adresse')
+    name = fields.Char(string='Name', required=True)
+    address = fields.Text(string='Address')
     active = fields.Boolean(default=True)
-    company_id = fields.Many2one('res.company', string='Société', default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     notes = fields.Text(string='Notes')

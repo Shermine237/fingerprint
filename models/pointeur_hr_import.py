@@ -7,6 +7,8 @@ import logging
 import re
 from datetime import datetime, timedelta, time
 import pytz
+import difflib
+import unicodedata
 
 _logger = logging.getLogger(__name__)
 
@@ -155,42 +157,125 @@ class PointeurHrImport(models.Model):
         """Normalise un nom pour la comparaison"""
         if not name:
             return ""
-        # Conversion en minuscules
-        name = name.lower()
-        # Suppression des espaces en début et fin
-        name = name.strip()
-        # Remplacement des caractères spéciaux par des espaces
-        name = re.sub(r'[^\w\s]', ' ', name)
-        # Remplacement des espaces multiples par un seul espace
-        name = re.sub(r'\s+', ' ', name)
-        return name
-        
-    def _get_initials(self, name):
-        """Extrait les initiales d'un nom"""
-        if not name:
-            return ""
-        # Normalisation
-        name = self._normalize_name(name)
-        # Extraction des initiales
-        words = name.split()
-        initials = ''.join(word[0] for word in words if word)
-        return initials.lower()
-
-    def _name_similarity_score(self, name1, name2):
-        """Calcule un score de similarité entre deux noms.
-        Retourne 1 si les noms sont identiques, 0 sinon."""
-        if not name1 or not name2:
-            return 0
             
-        # Normalisation des noms (minuscules, suppression des espaces en début/fin)
-        name1 = name1.lower().strip()
-        name2 = name2.lower().strip()
+        # Convertir en minuscules
+        name = name.lower()
         
-        # Vérification d'égalité exacte
-        if name1 == name2:
-            return 1
-        else:
-            return 0
+        # Supprimer les accents
+        name = ''.join(c for c in unicodedata.normalize('NFD', name)
+                      if unicodedata.category(c) != 'Mn')
+        
+        # Supprimer les caractères spéciaux et les chiffres
+        name = re.sub(r'[^a-z ]', '', name)
+        
+        # Supprimer les espaces multiples
+        name = re.sub(r'\s+', ' ', name).strip()
+        
+        # Supprimer les mots courts et communs (articles, prépositions)
+        common_words = ['le', 'la', 'les', 'de', 'du', 'des', 'un', 'une', 'et', 'a', 'au', 'aux']
+        words = name.split()
+        words = [w for w in words if w not in common_words and len(w) > 1]
+        
+        return ' '.join(words)
+
+    def _find_employee_by_name(self, employee_name):
+        """Recherche un employé par son nom en utilisant les correspondances existantes ou en recherchant dans les employés"""
+        if not employee_name:
+            return False
+            
+        # 1. Rechercher dans les correspondances existantes (correspondance exacte)
+        mapping = self.env['pointeur_hr.employee.mapping'].search([
+            ('name', '=', employee_name),
+            ('active', '=', True)
+        ], limit=1)
+        
+        if mapping:
+            # Mettre à jour le compteur d'utilisation
+            mapping.write({
+                'import_count': mapping.import_count + 1,
+                'last_used': fields.Datetime.now()
+            })
+            return mapping.employee_id
+        
+        # Normaliser le nom importé pour la comparaison
+        normalized_name = self._normalize_name(employee_name)
+        
+        # Vérifier si le nom est trop court ou pourrait être juste un prénom/nom
+        words = normalized_name.split()
+        
+        # Si le nom normalisé est vide ou contient un seul mot court, ne pas faire de correspondance automatique
+        if not normalized_name or (len(words) == 1 and len(normalized_name) < 5):
+            _logger.info("Nom trop court ou incomplet pour correspondance automatique: '%s'", employee_name)
+            return False
+        
+        # 2. Rechercher un employé avec le nom exact
+        employee = self.env['hr.employee'].search([
+            ('name', '=', employee_name),
+            ('active', '=', True)
+        ], limit=1)
+        
+        if employee:
+            # Créer une correspondance
+            try:
+                self.env['pointeur_hr.employee.mapping'].create({
+                    'name': employee_name,
+                    'employee_id': employee.id,
+                    'import_id': self.id
+                })
+            except Exception as e:
+                _logger.error("Erreur création correspondance : %s", str(e))
+            return employee
+        
+        # 3. Recherche par similarité si aucune correspondance exacte n'est trouvée
+        # Récupérer tous les employés actifs
+        all_employees = self.env['hr.employee'].search([('active', '=', True)])
+        
+        # Préparer les noms normalisés des employés
+        employee_names = [(emp, self._normalize_name(emp.name)) for emp in all_employees]
+        
+        best_match = None
+        best_score = 0.0
+        threshold = 0.85  # Seuil de similarité (85%)
+        
+        for emp, emp_normalized_name in employee_names:
+            # Vérifier que le nom de l'employé contient au moins deux mots
+            emp_words = emp_normalized_name.split()
+            if len(emp_words) < 2:
+                continue
+                
+            # Calculer la similarité entre les noms
+            similarity = difflib.SequenceMatcher(None, normalized_name, emp_normalized_name).ratio()
+            
+            # Vérifier également si le nom importé est contenu dans le nom de l'employé ou vice versa
+            contains_score = 0
+            if normalized_name in emp_normalized_name:
+                contains_score = len(normalized_name) / len(emp_normalized_name)
+            elif emp_normalized_name in normalized_name:
+                contains_score = len(emp_normalized_name) / len(normalized_name)
+            
+            # Prendre le meilleur score entre la similarité et le score de contenance
+            final_score = max(similarity, contains_score)
+            
+            if final_score > best_score:
+                best_score = final_score
+                best_match = emp
+        
+        # Si un match avec un score suffisant est trouvé, créer une correspondance
+        if best_match and best_score >= threshold:
+            try:
+                self.env['pointeur_hr.employee.mapping'].create({
+                    'name': employee_name,
+                    'employee_id': best_match.id,
+                    'import_id': self.id,
+                    'notes': _("Correspondance automatique (score: %.2f)") % best_score
+                })
+                _logger.info("Correspondance trouvée pour '%s': '%s' (score: %.2f)", 
+                             employee_name, best_match.name, best_score)
+                return best_match
+            except Exception as e:
+                _logger.error("Erreur création correspondance : %s", str(e))
+        
+        return False
 
     def message_post(self, **kwargs):
         """Surcharge pour formater les dates dans le fuseau horaire de l'utilisateur"""
@@ -317,7 +402,6 @@ class PointeurHrImport(models.Model):
     def action_create_attendances(self):
         """Créer les présences à partir des lignes importées"""
         self.ensure_one()
-        _logger.info("=== DÉBUT CRÉATION PRÉSENCES ===")
         
         if self.state not in ['imported']:
             raise UserError(_("Vous ne pouvez créer les présences que si l'import est à l'état 'Importé'."))
@@ -332,7 +416,6 @@ class PointeurHrImport(models.Model):
             if line.employee_name:
                 employee = self._find_employee_by_name(line.employee_name)
                 if employee:
-                    _logger.info("Employé trouvé pour %s -> %s", line.employee_name, employee.name)
                     line.write({
                         'employee_id': employee.id,
                         'state': 'mapped'
@@ -474,86 +557,166 @@ Création des présences terminée :
             'domain': [('id', 'in', attendances.ids)],
         }
         
-    def _find_employee_by_name(self, employee_name):
-        """Recherche un employé par son nom en utilisant les correspondances existantes ou en recherchant dans les employés"""
-        if not employee_name:
-            return False
-            
-        # 1. Rechercher dans les correspondances existantes
-        mapping = self.env['pointeur_hr.employee.mapping'].search([
-            ('name', '=', employee_name)
-        ], limit=1)
+    def action_search_employee_mappings(self):
+        """Rechercher les correspondances pour les lignes sans employé"""
+        self.ensure_one()
+        _logger.info("=== DÉBUT RECHERCHE CORRESPONDANCES ===")
         
-        if mapping:
-            # Mettre à jour le compteur d'utilisation
-            mapping.write({
-                'import_count': mapping.import_count + 1,
-                'last_used': fields.Datetime.now()
-            })
-            return mapping.employee_id
-            
-        # 2. Rechercher un employé avec le nom exact
-        employee = self.env['hr.employee'].search([
-            ('name', '=', employee_name),
-            ('active', '=', True)
-        ], limit=1)
+        # Récupérer les lignes sans employé
+        unmapped_lines = self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done')
         
-        if employee:
-            # Créer une correspondance
-            try:
-                self.env['pointeur_hr.employee.mapping'].create({
-                    'name': employee_name,
-                    'employee_id': employee.id,
-                    'import_id': self.id
-                })
-            except Exception as e:
-                _logger.error("Erreur création correspondance : %s", str(e))
-            return employee
+        if not unmapped_lines:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': _("Toutes les lignes ont déjà un employé associé."),
+                    'type': 'info',
+                }
+            }
             
-        return False
-
-    def message_post(self, **kwargs):
-        """Surcharge pour formater les dates dans le fuseau horaire de l'utilisateur"""
-        # Conversion de la date dans le fuseau horaire de l'utilisateur
-        user_tz = self.env.user.tz or 'UTC'
-        local_tz = pytz.timezone(user_tz)
-        utc_now = fields.Datetime.now()
-        local_now = pytz.utc.localize(utc_now).astimezone(local_tz)
-
-        # Ajout de la date locale dans le message
-        kwargs['subject'] = kwargs.get('subject', '') + ' - ' + local_now.strftime('%d/%m/%Y %H:%M:%S')
+        # Rechercher les correspondances existantes
+        for line in unmapped_lines:
+            _logger.info("Recherche correspondance pour : %s", line.employee_name)
+            mapping = self.env['pointeur_hr.employee.mapping'].search([
+                ('name', '=', line.employee_name),
+                ('active', '=', True)
+            ], limit=1)
+            
+            if mapping:
+                try:
+                    _logger.info("Correspondance trouvée : %s -> %s", 
+                               mapping.name, mapping.employee_id.name)
+                    line.write({
+                        'employee_id': mapping.employee_id.id,
+                        'state': 'mapped'
+                    })
+                    # Mettre à jour le compteur d'utilisation
+                    mapping.write({
+                        'import_count': mapping.import_count + 1,
+                        'last_used': fields.Datetime.now()
+                    })
+                except Exception as e:
+                    _logger.error("Erreur mise à jour ligne : %s", str(e))
+                    
+        # Compter les lignes restantes sans correspondance
+        remaining = len(self.line_ids.filtered(lambda l: not l.employee_id and l.state != 'done'))
         
-        return super(PointeurHrImport, self).message_post(**kwargs)
+        # Préparer le message de retour
+        if remaining == 0:
+            message = _("Toutes les correspondances ont été trouvées.")
+            msg_type = 'success'
+        else:
+            message = _(
+                "%d ligne(s) reste(nt) sans correspondance. "
+                "Utilisez le wizard de sélection pour les associer manuellement."
+            ) % remaining
+            msg_type = 'warning'
+            
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': message,
+                'type': msg_type,
+                'sticky': True
+            }
+        }
 
     def action_view_mappings(self):
-        """Voir les correspondances d'employés utilisées dans cet import"""
+        """Voir les correspondances associées à cet import"""
         self.ensure_one()
-        # Récupérer les noms d'employés importés
-        imported_names = self.line_ids.mapped('employee_name')
-        # Rechercher les correspondances pour ces noms
+        
+        # Récupérer toutes les correspondances liées à cet import
         mappings = self.env['pointeur_hr.employee.mapping'].search([
-            ('name', 'in', imported_names)
+            ('import_id', '=', self.id)
         ])
         
         action = {
-            'name': _('Correspondances employés'),
+            'name': _('Correspondances'),
             'type': 'ir.actions.act_window',
             'res_model': 'pointeur_hr.employee.mapping',
             'view_mode': 'tree,form',
             'domain': [('id', 'in', mappings.ids)],
+            'context': {'default_import_id': self.id},
+            'target': 'current',
         }
+        
+        # Si une seule correspondance, ouvrir directement le formulaire
+        if len(mappings) == 1:
+            action['res_id'] = mappings.id
+            action['view_mode'] = 'form'
+            
+        return action
+
+    def action_view_attendances(self):
+        """Voir les présences créées pour cet import"""
+        self.ensure_one()
+        
+        # Récupérer toutes les présences liées à cet import
+        attendances = self.line_ids.mapped('attendance_id')
+        
+        # Créer l'action pour afficher les présences
+        action = {
+            'name': _('Présences'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'hr.attendance',
+            'view_mode': 'tree,form',
+            'domain': [('id', 'in', attendances.ids)],
+            'context': {'create': False},  # Empêcher la création manuelle
+            'target': 'current',
+        }
+        
+        # Si une seule présence, ouvrir directement le formulaire
+        if len(attendances) == 1:
+            action['res_id'] = attendances.id
+            action['view_mode'] = 'form'
+            
         return action
 
     def action_cancel(self):
         """Annuler l'import"""
-        self.ensure_one()
-        self.state = 'cancelled'
-
+        for record in self:
+            if record.state == 'done':
+                raise UserError(_("Impossible d'annuler un import terminé."))
+            record.write({'state': 'cancelled'})
+            
     def action_reset(self):
         """Réinitialiser l'import"""
-        self.ensure_one()
-        self.state = 'draft'
-        self.line_ids.unlink()
+        for record in self:
+            # Supprimer les présences si elles existent
+            attendances = record.line_ids.mapped('attendance_id')
+            if attendances:
+                attendances.unlink()
+            
+            # Réinitialiser les lignes
+            record.line_ids.write({
+                'state': 'imported',
+                'error_message': False,
+                'notes': False,
+                'employee_id': False,
+                'attendance_id': False
+            })
+            
+            # Réinitialiser l'import
+            record.write({
+                'state': 'imported',
+                'import_date': fields.Datetime.now()
+            })
+
+    def _get_default_name(self):
+        """Obtenir un nom par défaut avec la date et l'heure actuelles dans le fuseau horaire de l'utilisateur"""
+        user = self.env.user
+        if user.tz:
+            user_tz = pytz.timezone(user.tz)
+        else:
+            user_tz = pytz.UTC
+            
+        # Obtenir la date et l'heure actuelles dans le fuseau horaire de l'utilisateur
+        now_utc = datetime.now(pytz.UTC)
+        now_user_tz = now_utc.astimezone(user_tz)
+        
+        return _('Import du %s') % now_user_tz.strftime('%d/%m/%Y à %H:%M')
 
     def action_import_file(self):
         """Importer le fichier CSV"""

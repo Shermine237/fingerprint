@@ -815,8 +815,8 @@ Creation of attendances completed :
 <p>
 <strong>Statistics :</strong><br/>
 - Lines imported : {total}<br/>
-- Lignes avec correspondance : {mapped} ({mapped_percent:.1f}%)<br/>
-- Lignes sans correspondance : {unmapped} ({unmapped_percent:.1f}%)
+- Lines with match : {mapped} ({mapped_percent:.1f}%)<br/>
+- Lines without match : {unmapped} ({unmapped_percent:.1f}%)
 </p>
 """).format(
             total=total_lines,

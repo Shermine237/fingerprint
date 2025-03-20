@@ -24,6 +24,10 @@ msgid ""
 "Errors :\n"
 "%s"
 msgstr ""
+"\n"
+"\n"
+"Erreurs :\n"
+"%s"
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
@@ -34,10 +38,18 @@ msgid ""
 "<p>\n"
 "<strong>Statistics :</strong><br/>\n"
 "- Lines imported : {total}<br/>\n"
-"- Lignes avec correspondance : {mapped} ({mapped_percent:.1f}%)<br/>\n"
-"- Lignes sans correspondance : {unmapped} ({unmapped_percent:.1f}%)\n"
+"- Lines with match : {mapped} ({mapped_percent:.1f}%)<br/>\n"
+"- Lines without match : {unmapped} ({unmapped_percent:.1f}%)\n"
 "</p>\n"
 msgstr ""
+"\n"
+"<h3>Mapping Report</h3>\n"
+"<p>\n"
+"<strong>Statistics :</strong><br/>\n"
+"- Lines imported : {total}<br/>\n"
+"- Lines with match : {mapped} ({mapped_percent:.1f}%)<br/>\n"
+"- Lines without match : {unmapped} ({unmapped_percent:.1f}%)\n"
+"</p>\n"
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0

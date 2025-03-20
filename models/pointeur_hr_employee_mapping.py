@@ -6,32 +6,32 @@ _logger = logging.getLogger(__name__)
 
 class PointeurHrEmployeeMapping(models.Model):
     _name = 'pointeur_hr.employee.mapping'
-    _description = 'Correspondance des noms importés avec les employés'
+    _description = 'Mapping between imported names and employees'
     _order = 'last_used desc, import_count desc'
 
-    name = fields.Char(string='Nom importé', required=True, index=True)
-    employee_id = fields.Many2one('hr.employee', string='Employé', required=True)
-    last_used = fields.Datetime(string='Dernière utilisation', default=fields.Datetime.now)
-    import_count = fields.Integer(string='Nombre d\'imports', default=1)
-    import_id = fields.Many2one('pointeur_hr.import', string='Import d\'origine')
+    name = fields.Char(string='Imported Name', required=True, index=True)
+    employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
+    last_used = fields.Datetime(string='Last Used', default=fields.Datetime.now)
+    import_count = fields.Integer(string='Import Count', default=1)
+    import_id = fields.Many2one('pointeur_hr.import', string='Source Import')
     import_ids = fields.Many2many('pointeur_hr.import', string='Imports', compute='_compute_import_ids')
-    active = fields.Boolean(string='Actif', default=True)
+    active = fields.Boolean(string='Active', default=True)
 
     _sql_constraints = [
         ('unique_name_active', 'unique(name, active)',
-         'Une correspondance existe déjà pour ce nom importé !'),
+         'A mapping already exists for this imported name!'),
         ('unique_employee_active', 'unique(employee_id, active)',
-         'Cet employé a déjà une correspondance de nom active !')
+         'This employee already has an active name mapping!')
     ]
 
     @api.constrains('name', 'employee_id', 'active')
     def _check_unique_constraints(self):
-        """Vérification supplémentaire pour éviter les doublons"""
+        """Additional check to prevent duplicates"""
         for record in self:
             if not record.active:
-                continue  # Ignorer les enregistrements inactifs
+                continue  # Ignore inactive records
                 
-            # Vérifier si un autre enregistrement actif existe avec le même nom
+            # Check if another active record exists with the same name
             same_name = self.search([
                 ('id', '!=', record.id),
                 ('name', '=', record.name),
@@ -40,10 +40,10 @@ class PointeurHrEmployeeMapping(models.Model):
             
             if same_name:
                 raise ValidationError(_(
-                    "Une correspondance active existe déjà pour le nom '%s' (associée à l'employé %s)."
+                    "An active mapping already exists for name '%s' (associated with employee %s)."
                 ) % (record.name, same_name.employee_id.name))
             
-            # Vérifier si un autre enregistrement actif existe pour le même employé
+            # Check if another active record exists for the same employee
             same_employee = self.search([
                 ('id', '!=', record.id),
                 ('employee_id', '=', record.employee_id.id),
@@ -52,39 +52,39 @@ class PointeurHrEmployeeMapping(models.Model):
             
             if same_employee:
                 raise ValidationError(_(
-                    "L'employé '%s' a déjà une correspondance active avec le nom '%s'."
+                    "Employee %s already has an active mapping with name '%s'."
                 ) % (record.employee_id.name, same_employee.name))
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Surcharge de la création pour vérifier les doublons et logger"""
+        """Override creation to check for duplicates and log"""
         result = self.env['pointeur_hr.employee.mapping']
         
         for vals in vals_list:
-            _logger.info("Création correspondance : %s -> %s", 
+            _logger.info("Creating mapping: %s -> %s", 
                         vals.get('name'), vals.get('employee_id'))
             
-            # Vérifier si une correspondance avec le même nom existe déjà
+            # Check if a mapping with the same name already exists
             existing_name = self.search([
                 ('name', '=', vals.get('name')),
                 ('active', '=', True)
             ], limit=1)
             
             if existing_name:
-                _logger.warning("Une correspondance active existe déjà pour le nom '%s'", vals.get('name'))
+                _logger.warning("An active mapping already exists for name '%s'", vals.get('name'))
                 continue
                 
-            # Vérifier si l'employé a déjà une correspondance active
+            # Check if the employee already has an active mapping
             existing_employee = self.search([
                 ('employee_id', '=', vals.get('employee_id')),
                 ('active', '=', True)
             ], limit=1)
             
             if existing_employee:
-                _logger.warning("L'employé a déjà une correspondance active avec le nom '%s'", existing_employee.name)
+                _logger.warning("Employee already has an active mapping with name '%s'", existing_employee.name)
                 continue
                 
-            # Vérifier si une correspondance inactive existe pour cette combinaison
+            # Check if an inactive mapping exists for this combination
             inactive = self.search([
                 ('name', '=', vals.get('name')),
                 ('employee_id', '=', vals.get('employee_id')),
@@ -92,7 +92,7 @@ class PointeurHrEmployeeMapping(models.Model):
             ], limit=1)
             
             if inactive:
-                _logger.info("Réactivation correspondance existante")
+                _logger.info("Reactivating existing mapping")
                 inactive.write({
                     'active': True,
                     'import_count': inactive.import_count + 1,
@@ -100,7 +100,7 @@ class PointeurHrEmployeeMapping(models.Model):
                 })
                 result |= inactive
             else:
-                # Créer une nouvelle correspondance
+                # Create a new mapping
                 record = super(PointeurHrEmployeeMapping, self).create([vals])[0]
                 result |= record
                 
@@ -110,44 +110,44 @@ class PointeurHrEmployeeMapping(models.Model):
         return [(rec.id, f"{rec.name} → {rec.employee_id.name}") for rec in self]
 
     def action_find_similar_names(self):
-        """Recherche d'autres noms qui correspondent au même employé"""
+        """Find other names that map to the same employee"""
         self.ensure_one()
-        _logger.info("Recherche noms similaires pour %s", self.name)
+        _logger.info("Finding similar names for %s", self.name)
         
         if not self.employee_id:
-            raise UserError(_("Vous devez d'abord sélectionner un employé."))
+            raise UserError(_("You must first select an employee."))
             
-        # Recherche des correspondances existantes pour cet employé
+        # Find existing mappings for this employee
         other_mappings = self.search([
             ('employee_id', '=', self.employee_id.id),
             ('id', '!=', self.id),
             ('active', '=', True)
         ])
-        _logger.info("Autres correspondances trouvées : %d", len(other_mappings))
+        _logger.info("Found %d other mappings", len(other_mappings))
         
-        # Recherche des lignes d'import avec le même nom
+        # Find import lines with the same name
         import_lines = self.env['pointeur_hr.import.line'].search([
             ('employee_name', '=', self.name),
             ('employee_id', '=', False),
             ('state', '!=', 'done')
         ], limit=10)
-        _logger.info("Lignes sans correspondance trouvées : %d", len(import_lines))
+        _logger.info("Found %d import lines without mapping", len(import_lines))
         
-        # Construire le message
+        # Build the message
         message_parts = []
-        message_parts.append(_("<h3>Informations pour '{}'</h3>").format(self.name))
+        message_parts.append(_("<h3>Information for '{}'</h3>").format(self.name))
         
-        # Ajouter les correspondances existantes
+        # Add existing mappings
         if other_mappings:
-            message_parts.append(_("<h4>Autres noms utilisés pour cet employé :</h4><ul>"))
+            message_parts.append(_("<h4>Other names used for this employee :</h4><ul>"))
             for mapping in other_mappings:
-                message_parts.append(_("<li>{} (utilisé {} fois)</li>").format(
+                message_parts.append(_("<li>{} (used {} times)</li>").format(
                     mapping.name, mapping.import_count))
             message_parts.append("</ul>")
         
-        # Ajouter les lignes d'import sans correspondance
+        # Add import lines without mapping
         if import_lines:
-            message_parts.append(_("<h4>Lignes d'import sans correspondance :</h4><ul>"))
+            message_parts.append(_("<h4>Import lines without mapping :</h4><ul>"))
             for line in import_lines:
                 message_parts.append(_("<li>Import #{} - {} ({})</li>").format(
                     line.import_id.id, line.employee_name, 
@@ -155,19 +155,19 @@ class PointeurHrEmployeeMapping(models.Model):
             message_parts.append("</ul>")
             
         message = ''.join(message_parts)
-        _logger.info("Message généré : %s", message)
+        _logger.info("Generated message: %s", message)
             
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Analyse des correspondances'),
+                'title': _('Mapping Analysis'),
                 'message': message,
                 'sticky': True,
                 'type': 'info',
                 'next': {
                     'type': 'ir.actions.act_window',
-                    'name': _('Lignes sans correspondance'),
+                    'name': _('Import Lines without Mapping'),
                     'res_model': 'pointeur_hr.import.line',
                     'view_mode': 'tree,form',
                     'domain': [
@@ -180,7 +180,7 @@ class PointeurHrEmployeeMapping(models.Model):
         }
         
     def _compute_import_ids(self):
-        """Calcule les imports qui ont utilisé cette correspondance"""
+        """Compute all imports where this mapping was used"""
         for rec in self:
             import_lines = self.env['pointeur_hr.import.line'].search([
                 ('employee_name', '=', rec.name),
@@ -189,12 +189,12 @@ class PointeurHrEmployeeMapping(models.Model):
             rec.import_ids = import_lines.mapped('import_id')
             
     def action_view_imports(self):
-        """Voir les imports qui ont utilisé cette correspondance"""
+        """View imports where this mapping was used"""
         self.ensure_one()
-        _logger.info("Affichage imports pour correspondance %s", self.name)
+        _logger.info("Viewing imports for mapping %s", self.name)
         
         return {
-            'name': _('Imports'),
+            'name': _('Related Imports'),
             'type': 'ir.actions.act_window',
             'res_model': 'pointeur_hr.import',
             'view_mode': 'tree,form',
@@ -202,17 +202,17 @@ class PointeurHrEmployeeMapping(models.Model):
         }
         
     def action_deactivate(self):
-        """Désactiver une correspondance"""
+        """Deactivate a mapping"""
         self.ensure_one()
-        _logger.info("Désactivation correspondance %s", self.name)
+        _logger.info("Deactivating mapping %s", self.name)
         
         self.write({'active': False})
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Correspondance désactivée'),
-                'message': _("La correspondance '{}' a été désactivée").format(self.name),
+                'title': _('Mapping Deactivated'),
+                'message': _("Mapping '{}' has been deactivated").format(self.name),
                 'sticky': False,
                 'type': 'success'
             }

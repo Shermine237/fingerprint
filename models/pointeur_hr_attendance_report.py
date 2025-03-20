@@ -1,4 +1,4 @@
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, tools, _
 from datetime import datetime, timedelta
 import pytz
 import base64
@@ -7,32 +7,32 @@ import io
 
 class PointeurHrAttendanceReport(models.Model):
     _name = 'pointeur_hr.attendance.report'
-    _description = 'Rapport de présence'
+    _description = 'Attendance Report'
     _auto = False
     _order = 'date desc, employee_id'
 
-    name = fields.Char(string='Nom', readonly=True)
+    name = fields.Char(string='Name', readonly=True)
     date = fields.Date(string='Date', readonly=True)
-    employee_id = fields.Many2one('hr.employee', string='Employé', readonly=True)
-    department_id = fields.Many2one('hr.department', string='Département', readonly=True)
-    location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage', readonly=True)
-    default_location_id = fields.Many2one('pointeur_hr.location', string='Lieu par défaut', readonly=True)
+    employee_id = fields.Many2one('hr.employee', string='Employee', readonly=True)
+    department_id = fields.Many2one('hr.department', string='Department', readonly=True)
+    location_id = fields.Many2one('pointeur_hr.location', string='Attendance Location', readonly=True)
+    default_location_id = fields.Many2one('pointeur_hr.location', string='Default Location', readonly=True)
     source = fields.Selection([
-        ('manual', 'Manuel'),
+        ('manual', 'Manual'),
         ('import', 'Import')
     ], string='Source', readonly=True)
-    check_in = fields.Datetime(string='Entrée', readonly=True)
-    check_out = fields.Datetime(string='Sortie', readonly=True)
-    attendance_type_ids = fields.Char(string='Types de présence', readonly=True)
-    working_hours = fields.Float(string='Heures travaillées', readonly=True)
-    regular_hours = fields.Float(string='Heures normales', readonly=True)
-    overtime_hours = fields.Float(string='Heures supplémentaires', readonly=True)
-    late_hours = fields.Float(string='Heures de retard', readonly=True)
-    early_leave_hours = fields.Float(string='Heures de départ anticipé', readonly=True)
+    check_in = fields.Datetime(string='Check In', readonly=True)
+    check_out = fields.Datetime(string='Check Out', readonly=True)
+    attendance_type_ids = fields.Char(string='Attendance Types', readonly=True)
+    working_hours = fields.Float(string='Working Hours', readonly=True)
+    regular_hours = fields.Float(string='Regular Hours', readonly=True)
+    overtime_hours = fields.Float(string='Overtime Hours', readonly=True)
+    late_hours = fields.Float(string='Late Hours', readonly=True)
+    early_leave_hours = fields.Float(string='Early Leave Hours', readonly=True)
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
-        # Vérifier si la colonne default_location_id existe dans hr_employee
+        # Check if default_location_id column exists in hr_employee
         self.env.cr.execute("""
             SELECT column_name 
             FROM information_schema.columns 
@@ -41,7 +41,7 @@ class PointeurHrAttendanceReport(models.Model):
         """)
         has_default_location = bool(self.env.cr.fetchone())
 
-        # Construire la requête en fonction de l'existence de la colonne
+        # Build query based on column existence
         default_location_field = "e.default_location_id" if has_default_location else "NULL"
         
         self.env.cr.execute("""
@@ -69,21 +69,21 @@ class PointeurHrAttendanceReport(models.Model):
         """ % (self._table, default_location_field))
 
     def _get_records_to_export(self):
-        """Retourne les enregistrements à exporter en fonction du contexte"""
+        """Return records to export based on context"""
         active_ids = self._context.get('active_ids')
         if active_ids:
-            # Si des lignes sont sélectionnées, exporter uniquement ces lignes
+            # If lines are selected, export only these lines
             return self.browse(active_ids)
-        # Sinon, exporter toutes les lignes avec les filtres actuels
+        # Otherwise, export all lines with current filters
         return self.search(self._context.get('search_domain', []))
 
     def action_export_xlsx(self):
-        """Export des rapports de présence au format Excel"""
+        """Export attendance reports to Excel file"""
         records = self._get_records_to_export()
 
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output)
-        worksheet = workbook.add_worksheet('Rapport de présence')
+        worksheet = workbook.add_worksheet('Attendance Report')
 
         # Styles
         header_style = workbook.add_format({
@@ -105,17 +105,17 @@ class PointeurHrAttendanceReport(models.Model):
             'num_format': '[h]:mm'
         })
 
-        # En-têtes
+        # Headers
         headers = [
-            'Date', 'Employé', 'Département', 'Lieu par défaut', 'Lieu de pointage',
-            'Source', 'Entrée', 'Sortie', 'Types de présence', 'Heures travaillées',
-            'Heures normales', 'Heures supplémentaires', 'Retard', 'Départ anticipé'
+            'Date', 'Employee', 'Department', 'Default Location', 'Attendance Location',
+            'Source', 'Check In', 'Check Out', 'Attendance Types', 'Working Hours',
+            'Regular Hours', 'Overtime Hours', 'Late Hours', 'Early Leave Hours'
         ]
         for col, header in enumerate(headers):
             worksheet.write(0, col, header, header_style)
             worksheet.set_column(col, col, 15)
 
-        # Données
+        # Data
         row = 1
         for record in records:
             worksheet.write(row, 0, record.date.strftime('%d/%m/%Y'), cell_style)
@@ -136,14 +136,14 @@ class PointeurHrAttendanceReport(models.Model):
 
         workbook.close()
 
-        # Création de la pièce jointe
+        # Create attachment
         attachment = self.env['ir.attachment'].create({
-            'name': f'Rapport_presence_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx',
+            'name': f'Attendance_Report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx',
             'datas': base64.b64encode(output.getvalue()),
             'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         })
 
-        # Retourne l'action pour télécharger le fichier
+        # Return action to download file
         return {
             'type': 'ir.actions.act_url',
             'url': f'/web/content/{attachment.id}?download=true',
@@ -151,7 +151,7 @@ class PointeurHrAttendanceReport(models.Model):
         }
 
     def action_export_pdf(self):
-        """Export des rapports de présence au format PDF"""
+        """Export attendance reports to PDF file"""
         records = self._get_records_to_export()
-        # Retourne l'action pour générer le PDF
+        # Return action to generate PDF
         return self.env.ref('pointeur_hr.action_report_attendance').report_action(records)

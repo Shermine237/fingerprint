@@ -16,7 +16,7 @@ class PointeurHrImport(models.Model):
     _order = 'create_date desc'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Nom', required=True, default=lambda self: _('Import du %s') % fields.Date.context_today(self).strftime('%d/%m/%Y à %H:%M'))
+    name = fields.Char(string='Nom', required=True, default=lambda self: _('Import du %s') % datetime.now().strftime('%d/%m/%Y à %H:%M'))
     file = fields.Binary(string='Fichier CSV', required=True)
     file_name = fields.Char(string='Nom du fichier')
     location_id = fields.Many2one('pointeur_hr.location', string='Lieu de pointage')
@@ -382,6 +382,7 @@ class PointeurHrImport(models.Model):
         # Création des présences pour les lignes avec un employé
         attendance_count = 0
         error_count = 0
+        duplicate_count = 0
         
         # Récupérer toutes les lignes mappées qui n'ont pas encore de présence
         mapped_lines = self.line_ids.filtered(lambda l: l.employee_id and l.state in ['mapped'])
@@ -392,13 +393,32 @@ class PointeurHrImport(models.Model):
                 if not line.check_in:
                     raise ValidationError(_("L'heure d'entrée est obligatoire"))
                 
+                # Vérifier si une présence existe déjà pour cet employé à cette date/heure
+                existing_attendance = self.env['hr.attendance'].search([
+                    ('employee_id', '=', line.employee_id.id),
+                    ('check_in', '=', line.check_in),
+                    ('location_id', '=', line.location_id.id if line.location_id else False)
+                ], limit=1)
+                
+                if existing_attendance:
+                    # Marquer comme doublon et passer à la ligne suivante
+                    line.write({
+                        'attendance_id': existing_attendance.id,
+                        'state': 'done',
+                        'notes': _("Présence existante détectée et associée")
+                    })
+                    duplicate_count += 1
+                    continue
+                
                 # Créer la présence
                 attendance_vals = {
                     'employee_id': line.employee_id.id,
                     'check_in': line.check_in,
                     'check_out': line.check_out,
-                    'location_id': line.location_id.id,
-                    'source': 'import',  # Ajouter la source
+                    'location_id': line.location_id.id if line.location_id else False,
+                    'source': 'import',
+                    'import_id': self.id,
+                    'import_line_id': line.id
                 }
                 
                 attendance = self.env['hr.attendance'].create(attendance_vals)
@@ -419,7 +439,7 @@ class PointeurHrImport(models.Model):
                 error_count += 1
                 
         # Mise à jour de l'état de l'import si au moins une présence a été créée
-        if attendance_count > 0:
+        if attendance_count > 0 or duplicate_count > 0:
             self.write({'state': 'done'})
             
         # Message de confirmation
@@ -429,9 +449,10 @@ class PointeurHrImport(models.Model):
         message = _("""
 Création des présences terminée :
 - %d présences créées
+- %d doublons détectés et associés
 - %d lignes sans correspondance
 - %d lignes en erreur
-""") % (attendance_count, unmapped_count, error_count)
+""") % (attendance_count, duplicate_count, unmapped_count, error_count)
 
         self.message_post(body=message)
         

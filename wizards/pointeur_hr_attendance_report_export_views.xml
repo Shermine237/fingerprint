@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Formulaire du wizard d'export -->
-    <record id="pointeur_hr_view_attendance_report_export_wizard_form" model="ir.ui.view">
-        <field name="name">pointeur_hr.attendance.report.export.wizard.form</field>
-        <field name="model">pointeur_hr.attendance.report.export.wizard</field>
+    <!-- Wizard export form -->
+    <record id="fingerprint_hr_view_attendance_report_export_wizard_form" model="ir.ui.view">
+        <field name="name">fingerprint_hr.attendance.report.export.wizard.form</field>
+        <field name="model">fingerprint_hr.attendance.report.export.wizard</field>
         <field name="arch" type="xml">
-            <form string="Export du rapport de présence">
+            <form string="Export Attendance Report">
                 <group>
                     <field name="export_type" widget="radio"/>
                     <field name="export_scope" widget="radio"/>
                 </group>
                 <footer>
-                    <button name="action_export" string="Exporter" type="object" class="btn-primary"/>
-                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                    <button name="action_export" string="Export" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>

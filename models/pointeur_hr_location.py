@@ -1,7 +1,7 @@
 from odoo import models, fields, api, _
 
-class PointeurHrLocation(models.Model):
-    _name = 'pointeur_hr.location'
+class FingerprintHrLocation(models.Model):
+    _name = 'fingerprint_hr.location'
     _description = 'Attendance Location'
     _order = 'name'
 

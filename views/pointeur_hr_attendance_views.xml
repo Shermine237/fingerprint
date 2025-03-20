@@ -22,8 +22,8 @@
     </record>
     
     <!-- Tree view for attendance -->
-    <record id="pointeur_hr_attendance_view_tree" model="ir.ui.view">
-        <field name="name">pointeur_hr.attendance.tree</field>
+    <record id="fingerprint_hr_attendance_view_tree" model="ir.ui.view">
+        <field name="name">fingerprint_hr.attendance.tree</field>
         <field name="model">hr.attendance</field>
         <field name="arch" type="xml">
             <tree string="Attendance" default_order="check_in desc">
@@ -45,8 +45,8 @@
     </record>
     
     <!-- Search view for attendance -->
-    <record id="pointeur_hr_attendance_view_filter" model="ir.ui.view">
-        <field name="name">pointeur_hr.attendance.filter</field>
+    <record id="fingerprint_hr_attendance_view_filter" model="ir.ui.view">
+        <field name="name">fingerprint_hr.attendance.filter</field>
         <field name="model">hr.attendance</field>
         <field name="arch" type="xml">
             <search string="Search Attendance">
@@ -76,8 +76,8 @@
     <!-- Action to replace the standard search view -->
     <record id="hr_attendance.hr_attendance_action" model="ir.actions.act_window">
         <field name="view_mode">tree,kanban,form</field>
-        <field name="view_id" ref="pointeur_hr_attendance_view_tree"/>
-        <field name="search_view_id" ref="pointeur_hr_attendance_view_filter"/>
+        <field name="view_id" ref="fingerprint_hr_attendance_view_tree"/>
+        <field name="search_view_id" ref="fingerprint_hr_attendance_view_filter"/>
         <field name="name">Attendance</field>
         <field name="context">{
             'search_default_this_month': 1,

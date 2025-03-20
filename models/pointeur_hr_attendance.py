@@ -4,13 +4,13 @@ from pytz import timezone, UTC
 from odoo.exceptions import ValidationError
 
 
-class PointeurHrAttendance(models.Model):
+class FingerprintHrAttendance(models.Model):
     _inherit = 'hr.attendance'
 
     # Base fields
-    location_id = fields.Many2one('pointeur_hr.location', string='Attendance Location')
-    import_id = fields.Many2one('pointeur_hr.import', string='Source Import')
-    import_line_id = fields.Many2one('pointeur_hr.import.line', string='Import Line')
+    location_id = fields.Many2one('fingerprint_hr.location', string='Attendance Location')
+    import_id = fields.Many2one('fingerprint_hr.import', string='Source Import')
+    import_line_id = fields.Many2one('fingerprint_hr.import.line', string='Import Line')
     source = fields.Selection([
         ('manual', 'Manual'),
         ('import', 'Import')
@@ -30,7 +30,7 @@ class PointeurHrAttendance(models.Model):
         # If the record comes from an import, ensure the source is 'import'
         if vals.get('import_id') or vals.get('import_line_id'):
             vals['source'] = 'import'
-        return super(PointeurHrAttendance, self).create(vals)
+        return super(FingerprintHrAttendance, self).create(vals)
 
     @api.constrains('check_in', 'check_out')
     def _check_validity(self):

@@ -5,12 +5,12 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-class PointeurHrImportLine(models.Model):
-    _name = 'pointeur_hr.import.line'
+class FingerprintHrImportLine(models.Model):
+    _name = 'fingerprint_hr.import.line'
     _description = 'Import Line'
     _order = 'date, employee_name'
 
-    import_id = fields.Many2one('pointeur_hr.import', string='Import', required=True, ondelete='cascade')
+    import_id = fields.Many2one('fingerprint_hr.import', string='Import', required=True, ondelete='cascade')
     employee_name = fields.Char(string='Imported Name', required=True)
     employee_id = fields.Many2one('hr.employee', string='Employee')
     display_id = fields.Char(string='Badge ID')
@@ -26,7 +26,7 @@ class PointeurHrImportLine(models.Model):
     ot1_hours = fields.Float(string='Overtime 1 Hours')
     ot2_hours = fields.Float(string='Overtime 2 Hours')
     total_hours = fields.Float(string='Total Hours', compute='_compute_hours')
-    location_id = fields.Many2one('pointeur_hr.location', string='Attendance Location')
+    location_id = fields.Many2one('fingerprint_hr.location', string='Attendance Location')
     attendance_id = fields.Many2one('hr.attendance', string='Attendance')
     error_message = fields.Text(string='Error Message')
     notes = fields.Text(string='Notes')
@@ -94,7 +94,7 @@ class PointeurHrImportLine(models.Model):
                                record.employee_name, employee.name)
                     
                     # Search for an existing mapping (active or inactive)
-                    mapping = self.env['pointeur_hr.employee.mapping'].search(
+                    mapping = self.env['fingerprint_hr.employee.mapping'].search(
                         [('name', '=', record.employee_name),
                         ('employee_id', '=', vals['employee_id']),
                         '|',
@@ -103,7 +103,7 @@ class PointeurHrImportLine(models.Model):
                         ], limit=1)
                     
                     # Check if employee already has an active mapping with another name
-                    existing_employee_mapping = self.env['pointeur_hr.employee.mapping'].search([
+                    existing_employee_mapping = self.env['fingerprint_hr.employee.mapping'].search([
                         ('employee_id', '=', vals['employee_id']),
                         '|',
                         ('active', '=', True),
@@ -122,7 +122,7 @@ class PointeurHrImportLine(models.Model):
                                     'employee_id': vals['employee_id'],
                                     'import_id': record.import_id.id,
                                 }
-                                self.env['pointeur_hr.employee.mapping'].sudo().create(mapping_vals)
+                                self.env['fingerprint_hr.employee.mapping'].sudo().create(mapping_vals)
                         except Exception as e:
                             _logger.error("Error creating mapping: %s", str(e))
                             # Do not block the update of the line
@@ -167,7 +167,7 @@ class PointeurHrImportLine(models.Model):
             if not record.employee_id and record.employee_name:
                 try:
                     # First, search for an existing mapping
-                    mapping = self.env['pointeur_hr.employee.mapping'].search([
+                    mapping = self.env['fingerprint_hr.employee.mapping'].search([
                         ('name', '=', record.employee_name),
                         ('active', '=', True)
                     ], limit=1)
@@ -186,10 +186,10 @@ class PointeurHrImportLine(models.Model):
                         continue
 
                     # If no mapping is found, use the smart search
-                    employee = self.env['pointeur_hr.import']._find_employee_by_name(record.employee_name)
+                    employee = self.env['fingerprint_hr.import']._find_employee_by_name(record.employee_name)
                     if employee:
                         # Check if employee already has an active mapping
-                        existing_employee = self.env['pointeur_hr.employee.mapping'].search([
+                        existing_employee = self.env['fingerprint_hr.employee.mapping'].search([
                             ('employee_id', '=', employee.id),
                             ('active', '=', True)
                         ], limit=1)
@@ -205,7 +205,7 @@ class PointeurHrImportLine(models.Model):
                             continue
 
                         # Check if an inactive mapping exists for this combination
-                        inactive = self.env['pointeur_hr.employee.mapping'].search([
+                        inactive = self.env['fingerprint_hr.employee.mapping'].search([
                             ('name', '=', record.employee_name),
                             ('employee_id', '=', employee.id),
                             ('active', '=', False)
@@ -220,7 +220,7 @@ class PointeurHrImportLine(models.Model):
                             })
                         else:
                             # Create a new mapping
-                            self.env['pointeur_hr.employee.mapping'].create({
+                            self.env['fingerprint_hr.employee.mapping'].create({
                                 'name': record.employee_name,
                                 'employee_id': employee.id,
                                 'import_id': record.import_id.id
@@ -265,7 +265,7 @@ class PointeurHrImportLine(models.Model):
                 'next': {
                     'type': 'ir.actions.act_window',
                     'name': _('Lines with Errors'),
-                    'res_model': 'pointeur_hr.import.line',
+                    'res_model': 'fingerprint_hr.import.line',
                     'view_mode': 'tree,form',
                     'domain': [
                         ('import_id', '=', self.import_id.id),
@@ -284,7 +284,7 @@ class PointeurHrImportLine(models.Model):
             raise UserError(_("You must first select an employee."))
             
         # Check if a mapping already exists for this name
-        existing_name = self.env['pointeur_hr.employee.mapping'].search([
+        existing_name = self.env['fingerprint_hr.employee.mapping'].search([
             ('name', '=', self.employee_name),
             ('active', '=', True)
         ], limit=1)
@@ -295,7 +295,7 @@ class PointeurHrImportLine(models.Model):
             ) % (self.employee_name, existing_name.employee_id.name))
         
         # Check if employee already has a mapping
-        existing_employee = self.env['pointeur_hr.employee.mapping'].search([
+        existing_employee = self.env['fingerprint_hr.employee.mapping'].search([
             ('employee_id', '=', self.employee_id.id),
             ('active', '=', True)
         ], limit=1)
@@ -306,7 +306,7 @@ class PointeurHrImportLine(models.Model):
             ) % (self.employee_id.name, existing_employee.name))
             
         # Check if an inactive mapping exists for this combination
-        inactive = self.env['pointeur_hr.employee.mapping'].search([
+        inactive = self.env['fingerprint_hr.employee.mapping'].search([
             ('name', '=', self.employee_name),
             ('employee_id', '=', self.employee_id.id),
             ('active', '=', False)
@@ -329,7 +329,7 @@ class PointeurHrImportLine(models.Model):
             message = _("Mapping updated: %s -> %s") % (self.employee_name, self.employee_id.name)
         else:
             # Create a new mapping
-            self.env['pointeur_hr.employee.mapping'].create({
+            self.env['fingerprint_hr.employee.mapping'].create({
                 'name': self.employee_name,
                 'employee_id': self.employee_id.id,
                 'import_id': self.import_id.id

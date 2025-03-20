@@ -1,2 +1,2 @@
-from . import pointeur_hr_attendance_report_export
-from . import pointeur_hr_select_employees
+from . import fingerprint_hr_attendance_report_export
+from . import fingerprint_hr_select_employees

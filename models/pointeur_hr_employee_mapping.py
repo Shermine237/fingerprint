@@ -4,8 +4,8 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-class PointeurHrEmployeeMapping(models.Model):
-    _name = 'pointeur_hr.employee.mapping'
+class FingerprintHrEmployeeMapping(models.Model):
+    _name = 'fingerprint_hr.employee.mapping'
     _description = 'Mapping between imported names and employees'
     _order = 'last_used desc, import_count desc'
 
@@ -13,8 +13,8 @@ class PointeurHrEmployeeMapping(models.Model):
     employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
     last_used = fields.Datetime(string='Last Used', default=fields.Datetime.now)
     import_count = fields.Integer(string='Import Count', default=1)
-    import_id = fields.Many2one('pointeur_hr.import', string='Source Import')
-    import_ids = fields.Many2many('pointeur_hr.import', string='Imports', compute='_compute_import_ids')
+    import_id = fields.Many2one('fingerprint_hr.import', string='Source Import')
+    import_ids = fields.Many2many('fingerprint_hr.import', string='Imports', compute='_compute_import_ids')
     active = fields.Boolean(string='Active', default=True)
 
     _sql_constraints = [
@@ -58,7 +58,7 @@ class PointeurHrEmployeeMapping(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         """Override creation to check for duplicates and log"""
-        result = self.env['pointeur_hr.employee.mapping']
+        result = self.env['fingerprint_hr.employee.mapping']
         
         for vals in vals_list:
             _logger.info("Creating mapping: %s -> %s", 
@@ -101,7 +101,7 @@ class PointeurHrEmployeeMapping(models.Model):
                 result |= inactive
             else:
                 # Create a new mapping
-                record = super(PointeurHrEmployeeMapping, self).create([vals])[0]
+                record = super(FingerprintHrEmployeeMapping, self).create([vals])[0]
                 result |= record
                 
         return result
@@ -126,7 +126,7 @@ class PointeurHrEmployeeMapping(models.Model):
         _logger.info("Found %d other mappings", len(other_mappings))
         
         # Find import lines with the same name
-        import_lines = self.env['pointeur_hr.import.line'].search([
+        import_lines = self.env['fingerprint_hr.import.line'].search([
             ('employee_name', '=', self.name),
             ('employee_id', '=', False),
             ('state', '!=', 'done')
@@ -168,7 +168,7 @@ class PointeurHrEmployeeMapping(models.Model):
                 'next': {
                     'type': 'ir.actions.act_window',
                     'name': _('Import Lines without Mapping'),
-                    'res_model': 'pointeur_hr.import.line',
+                    'res_model': 'fingerprint_hr.import.line',
                     'view_mode': 'tree,form',
                     'domain': [
                         ('employee_name', '=', self.name),
@@ -182,7 +182,7 @@ class PointeurHrEmployeeMapping(models.Model):
     def _compute_import_ids(self):
         """Compute all imports where this mapping was used"""
         for rec in self:
-            import_lines = self.env['pointeur_hr.import.line'].search([
+            import_lines = self.env['fingerprint_hr.import.line'].search([
                 ('employee_name', '=', rec.name),
                 ('employee_id', '=', rec.employee_id.id)
             ])
@@ -196,7 +196,7 @@ class PointeurHrEmployeeMapping(models.Model):
         return {
             'name': _('Related Imports'),
             'type': 'ir.actions.act_window',
-            'res_model': 'pointeur_hr.import',
+            'res_model': 'fingerprint_hr.import',
             'view_mode': 'tree,form',
             'domain': [('id', 'in', self.import_ids.ids)],
         }

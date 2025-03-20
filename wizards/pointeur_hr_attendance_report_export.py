@@ -1,26 +1,26 @@
 from odoo import api, fields, models
 
-class PointeurHrAttendanceReportExport(models.TransientModel):
-    _name = 'pointeur_hr.attendance.report.export.wizard'
-    _description = 'Assistant d\'export du rapport de présence'
+class FingerprintHrAttendanceReportExport(models.TransientModel):
+    _name = 'fingerprint_hr.attendance.report.export.wizard'
+    _description = 'Attendance Report Export Wizard'
 
     export_type = fields.Selection([
         ('excel', 'Excel'),
         ('pdf', 'PDF')
-    ], string='Type d\'export', required=True, default='excel')
+    ], string='Export Type', required=True, default='excel')
 
     export_scope = fields.Selection([
-        ('selected', 'Lignes sélectionnées'),
-        ('all', 'Tout exporter (filtres actuels)')
-    ], string='Portée de l\'export', required=True, default='selected',
-        help='Choisissez d\'exporter uniquement les lignes sélectionnées ou toutes les lignes en utilisant les filtres de recherche actuels')
+        ('selected', 'Selected Lines'),
+        ('all', 'Export All (current filters)')
+    ], string='Export Scope', required=True, default='selected',
+        help='Choose to export only selected lines or all lines using the current search filters')
 
     def action_export(self):
-        """Export le rapport dans le format sélectionné"""
-        Report = self.env['pointeur_hr.attendance.report']
+        """Export attendance report in the selected format"""
+        Report = self.env['fingerprint_hr.attendance.report']
         
         if self.export_scope == 'selected':
-            # Option 1: Exporter uniquement les lignes sélectionnées
+            # Export only selected lines
             active_ids = self._context.get('active_ids', [])
             if not active_ids:
                 return {
@@ -28,16 +28,14 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
                     'tag': 'display_notification',
                     'params': {
                         'title': 'Attention',
-                        'message': 'Veuillez sélectionner au moins une ligne à exporter.',
+                        'message': 'Please select at least one line to export.',
                         'type': 'warning',
                         'sticky': False,
                     }
                 }
             records = Report.browse(active_ids)
         else:
-            # Option 2: Tout exporter en utilisant les filtres actuels
-            # Utiliser le contexte actuel avec les filtres de recherche
-            # Odoo gère automatiquement les filtres actifs via la méthode search
+            # Export all lines using current search filters
             records = Report.search([])
 
         if not records:
@@ -46,7 +44,7 @@ class PointeurHrAttendanceReportExport(models.TransientModel):
                 'tag': 'display_notification',
                 'params': {
                     'title': 'Attention',
-                    'message': 'Aucune ligne à exporter.',
+                    'message': 'No lines to export.',
                     'type': 'warning',
                     'sticky': False,
                 }

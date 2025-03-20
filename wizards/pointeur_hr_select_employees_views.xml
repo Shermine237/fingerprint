@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Vue form -->
-    <record id="view_pointeur_hr_select_employees_form" model="ir.ui.view">
-        <field name="name">pointeur_hr.select.employees.form</field>
-        <field name="model">pointeur_hr.select.employees</field>
+    <record id="view_fingerprint_hr_select_employees_form" model="ir.ui.view">
+        <field name="name">fingerprint_hr.select.employees.form</field>
+        <field name="model">fingerprint_hr.select.employees</field>
         <field name="arch" type="xml">
-            <form string="Sélectionner les employés">
+            <form string="Select Employees">
                 <sheet>
                     <div class="alert alert-info" role="alert">
-                        <p>Sélectionnez les employés correspondants aux noms importés. Les lignes sont regroupées par nom.</p>
-                        <p>Pour chaque nom mappé, toutes les lignes avec ce nom seront associées à l'employé sélectionné.</p>
-                        <p>Vous pouvez laisser certaines lignes non mappées si nécessaire mais elles n'auront pas de correspondance donc pas de présences.</p>
+                        <p>Select the employees corresponding to the imported names. The lines are grouped by name.</p>
+                        <p>For each mapped name, all lines with this name will be associated with the selected employee.</p>
+                        <p>You can leave some lines unmapped if necessary but they will not have a correspondence so no attendance.</p>
                     </div>
                     <group>
-                        <field name="mapped_count" string="Lignes déjà mappées"/>
-                        <field name="unmapped_count" string="Lignes à traiter"/>
+                        <field name="mapped_count" string="Mapped Lines"/>
+                        <field name="unmapped_count" string="Lines to process"/>
                     </group>
                     <field name="import_id" invisible="1"/>
                     <field name="line_ids">
@@ -22,17 +22,17 @@
                             <field name="reference_line_id" invisible="1"/>
                             <field name="import_line_ids" invisible="1"/>
                             <field name="employee_name"/>
-                            <field name="line_count" string="Nombre de lignes"/>
-                            <field name="check_in" widget="datetime" string="Entrée (exemple)"/>
-                            <field name="check_out" widget="datetime" string="Sortie (exemple)"/>
+                            <field name="line_count" string="Number of lines"/>
+                            <field name="check_in" widget="datetime" string="Check-in (example)"/>
+                            <field name="check_out" widget="datetime" string="Check-out (example)"/>
                             <field name="employee_id" options="{'no_create': True}"/>
-                            <field name="create_mapping" string="Créer correspondance"/>
+                            <field name="create_mapping" string="Create correspondence"/>
                         </tree>
                     </field>
                 </sheet>
                 <footer>
-                    <button name="action_confirm" string="Confirmer" type="object" class="btn-primary"/>
-                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>
@@ -40,8 +40,8 @@
     
     <!-- Action -->
     <record id="action_select_employees" model="ir.actions.act_window">
-        <field name="name">Sélectionner les employés</field>
-        <field name="res_model">pointeur_hr.select.employees</field>
+        <field name="name">Select Employees</field>
+        <field name="res_model">fingerprint_hr.select.employees</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>

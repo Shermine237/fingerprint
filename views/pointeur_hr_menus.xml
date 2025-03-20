@@ -1,57 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Menu Configuration -->
-        <menuitem id="menu_pointeur_hr_config"
-                  name="Configuration Pointeur"
+        <!-- Configuration Menu -->
+        <menuitem id="menu_fingerprint_hr_config"
+                  name="Configuration Fingerprint"
                   parent="hr_attendance.menu_hr_attendance_settings"
                   sequence="100"/>
 
-        <!-- Menu Lieux de pointage -->
-        <menuitem id="menu_pointeur_hr_location"
-                  name="Lieux de pointage"
-                  parent="menu_pointeur_hr_config"
-                  action="pointeur_hr.action_location"
+        <!-- Locations Menu -->
+        <menuitem id="menu_fingerprint_hr_location"
+                  name="Locations"
+                  parent="menu_fingerprint_hr_config"
+                  action="fingerprint_hr.action_location"
                   sequence="10"/>
 
-        <!-- Menu Correspondances employés -->
-        <menuitem id="menu_pointeur_hr_employee_mapping"
-                  name="Correspondances employés"
-                  parent="menu_pointeur_hr_config"
-                  action="pointeur_hr.action_employee_mapping"
+        <!-- Employee Mapping Menu -->
+        <menuitem id="menu_fingerprint_hr_employee_mapping"
+                  name="Employee Mapping"
+                  parent="menu_fingerprint_hr_config"
+                  action="fingerprint_hr.action_employee_mapping"
                   sequence="20"/>
 
-        <!-- Menu Pointeur sous le menu des présences -->
-        <menuitem id="menu_pointeur_hr_import_root"
-                  name="Pointeur"
+        <!-- Fingerprint Menu under Attendance Menu -->
+        <menuitem id="menu_fingerprint_hr_import_root"
+                  name="Fingerprint"
                   parent="hr_attendance.menu_hr_attendance_root"
                   sequence="20"/>
 
-        <!-- Ajout de l'import des données du pointeur -->
-        <menuitem id="menu_pointeur_hr_import"
-                  name="Import du pointeur"
-                  parent="menu_pointeur_hr_import_root"
-                  action="pointeur_hr.action_pointeur_hr_import"
+        <!-- Import Fingerprint Menu -->
+        <menuitem id="menu_fingerprint_hr_import"
+                  name="Import from Fingerprint"
+                  parent="menu_fingerprint_hr_import_root"
+                  action="fingerprint_hr.action_fingerprint_hr_import"
                   sequence="10"/>
 
-        <!-- Ajout des lignes d'import -->
-        <menuitem id="menu_pointeur_hr_import_line"
-                  name="Lignes d'import"
-                  parent="menu_pointeur_hr_import_root"
-                  action="pointeur_hr.action_pointeur_hr_import_line"
+        <!-- Import Lines Menu -->
+        <menuitem id="menu_fingerprint_hr_import_line"
+                  name="Import Lines from Fingerprint"
+                  parent="menu_fingerprint_hr_import_root"
+                  action="fingerprint_hr.action_fingerprint_hr_import_line"
                   sequence="20"/>
 
-        <!-- Menu Reporting des présences -->
-        <menuitem id="menu_pointeur_hr_reporting"
+        <!-- Reporting Menu -->
+        <menuitem id="menu_fingerprint_hr_reporting"
                   name="Reporting"
                   parent="hr_attendance.menu_hr_attendance_root"
                   sequence="30"/>
 
-        <!-- Ajout du rapport dans le menu Reporting -->
-        <menuitem id="menu_pointeur_hr_attendance_report"
-                  name="Rapport de présence"
-                  parent="menu_pointeur_hr_reporting"
-                  action="pointeur_hr.action_attendance_report"
+        <!-- Attendance Report Menu -->
+        <menuitem id="menu_fingerprint_hr_attendance_report"
+                  name="Attendance Report"
+                  parent="menu_fingerprint_hr_reporting"
+                  action="fingerprint_hr.action_attendance_report"
                   sequence="10"/>
     </data>
 </odoo>

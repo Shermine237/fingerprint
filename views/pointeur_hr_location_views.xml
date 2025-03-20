@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Vue form pour les lieux de pointage -->
-    <record id="pointeur_hr_view_location_form" model="ir.ui.view">
-        <field name="name">pointeur_hr.location.form</field>
-        <field name="model">pointeur_hr.location</field>
+    <!-- Vue form for locations -->
+    <record id="fingerprint_hr_view_location_form" model="ir.ui.view">
+        <field name="name">fingerprint_hr.location.form</field>
+        <field name="model">fingerprint_hr.location</field>
         <field name="arch" type="xml">
-            <form string="Lieu de pointage">
+            <form string="Location">
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
@@ -14,7 +14,7 @@
                     </div>
                     <div class="oe_title">
                         <h1>
-                            <field name="name" placeholder="Nom du lieu"/>
+                            <field name="name" placeholder="Place name"/>
                         </h1>
                     </div>
                     <group>
@@ -31,12 +31,12 @@
         </field>
     </record>
 
-    <!-- Vue tree pour les lieux de pointage -->
-    <record id="pointeur_hr_view_location_tree" model="ir.ui.view">
-        <field name="name">pointeur_hr.location.tree</field>
-        <field name="model">pointeur_hr.location</field>
+    <!-- Vue tree for locations -->
+    <record id="fingerprint_hr_view_location_tree" model="ir.ui.view">
+        <field name="name">fingerprint_hr.location.tree</field>
+        <field name="model">fingerprint_hr.location</field>
         <field name="arch" type="xml">
-            <tree string="Lieux de pointage">
+            <tree string="Locations">
                 <field name="name"/>
                 <field name="address"/>
                 <field name="company_id" groups="base.group_multi_company"/>
@@ -45,36 +45,36 @@
         </field>
     </record>
 
-    <!-- Vue search pour les lieux de pointage -->
-    <record id="pointeur_hr_view_location_search" model="ir.ui.view">
-        <field name="name">pointeur_hr.location.search</field>
-        <field name="model">pointeur_hr.location</field>
+    <!-- Vue search for locations -->
+    <record id="fingerprint_hr_view_location_search" model="ir.ui.view">
+        <field name="name">fingerprint_hr.location.search</field>
+        <field name="model">fingerprint_hr.location</field>
         <field name="arch" type="xml">
-            <search string="Rechercher un lieu de pointage">
+            <search string="Search locations">
                 <field name="name"/>
                 <field name="address"/>
                 <field name="company_id" groups="base.group_multi_company"/>
                 <separator/>
-                <filter string="Archivé" name="inactive" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Regrouper par">
-                    <filter string="Société" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
-                    <filter string="Actif" name="active" context="{'group_by': 'active'}"/>
+                <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group by">
+                    <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Active" name="active" context="{'group_by': 'active'}"/>
                 </group>
             </search>
         </field>
     </record>
 
-    <!-- Action pour les lieux de pointage -->
+    <!-- Action for locations -->
     <record id="action_location" model="ir.actions.act_window">
-        <field name="name">Lieux de pointage</field>
-        <field name="res_model">pointeur_hr.location</field>
+        <field name="name">Locations</field>
+        <field name="res_model">fingerprint_hr.location</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Aucun lieu de pointage défini
+                No locations defined
             </p>
             <p>
-                Créez des lieux de pointage pour gérer les emplacements où vos employés peuvent pointer.
+                Create locations to manage the places where your employees can clock in.
             </p>
         </field>
     </record>

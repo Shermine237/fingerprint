@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Définition du groupe de sécurité -->
+    <!-- Security group definition -->
     <record id="group_pointeur_manager" model="res.groups">
         <field name="name">Pointeur Manager</field>
         <field name="category_id" ref="base.module_category_human_resources_employees"/>
@@ -8,7 +8,7 @@
         <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
     </record>
 
-    <!-- Règles de sécurité pour les modèles -->
+    <!-- Security rules for models -->
     <record id="pointeur_hr_location_rule" model="ir.rule">
         <field name="name">Pointeur HR Location Access</field>
         <field name="model_id" ref="model_pointeur_hr_location"/>
@@ -20,6 +20,7 @@
         <field name="perm_unlink" eval="True"/>
     </record>
 
+    <!-- Security rules for models -->
     <record id="pointeur_hr_import_rule" model="ir.rule">
         <field name="name">Pointeur HR Import Access</field>
         <field name="model_id" ref="model_pointeur_hr_import"/>
@@ -31,6 +32,7 @@
         <field name="perm_unlink" eval="True"/>
     </record>
 
+    <!-- Security rules for models -->
     <record id="pointeur_hr_import_line_rule" model="ir.rule">
         <field name="name">Pointeur HR Import Line Access</field>
         <field name="model_id" ref="model_pointeur_hr_import_line"/>
@@ -42,6 +44,7 @@
         <field name="perm_unlink" eval="True"/>
     </record>
 
+    <!-- Security rules for models -->
     <record id="pointeur_hr_employee_mapping_rule" model="ir.rule">
         <field name="name">Pointeur HR Employee Mapping Access</field>
         <field name="model_id" ref="model_pointeur_hr_employee_mapping"/>
@@ -53,6 +56,7 @@
         <field name="perm_unlink" eval="True"/>
     </record>
 
+    <!-- Security rules for models -->
     <record id="pointeur_hr_attendance_report_rule" model="ir.rule">
         <field name="name">Pointeur HR Attendance Report Access</field>
         <field name="model_id" ref="model_pointeur_hr_attendance_report"/>

@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Ajout de champs dans la vue form des employés -->
+    <!-- Add fields to the employee form view -->
     <record id="hr_employee_view_form_inherit" model="ir.ui.view">
         <field name="name">hr.employee.form.inherit</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='hr_settings']" position="after">
-                <page string="Pointage" name="attendance_settings">
+                <page string="Attendance" name="attendance_settings">
                     <group>
-                        <group string="Configuration de pointage">
+                        <group string="Attendance Configuration">
                             <field name="default_location_id"/>
                             <field name="badge_id"/>
                         </group>
-                        <group string="Statistiques de présence (mois en cours)">
+                        <group string="Attendance Statistics (Current Month)">
                             <field name="attendance_rate" widget="percentage"/>
                             <field name="total_overtime_hours" widget="float_time"/>
                             <field name="total_late_count"/>
                             <field name="total_early_leave_count"/>
                             <button name="action_view_attendances" type="object" 
-                                    string="Voir les présences" class="oe_link"/>
+                                    string="View Attendances" class="oe_link"/>
                             <button name="action_view_overtime" type="object" 
-                                    string="Voir les heures supplémentaires" class="oe_link"/>
+                                    string="View Overtime" class="oe_link"/>
                         </group>
                     </group>
                 </page>
@@ -29,7 +29,7 @@
         </field>
     </record>
     
-    <!-- Ajout de champs dans la vue kanban des employés -->
+    <!-- Add fields to the employee kanban view -->
     <record id="hr_employee_view_kanban_inherit" model="ir.ui.view">
         <field name="name">hr.employee.kanban.inherit</field>
         <field name="model">hr.employee</field>
@@ -37,7 +37,7 @@
         <field name="arch" type="xml">
             <xpath expr="//div[hasclass('o_kanban_record_bottom')]" position="inside">
                 <div class="oe_kanban_bottom_left">
-                    <span title="Taux de présence">
+                    <span title="Attendance Rate">
                         <i class="fa fa-clock-o"/> <field name="attendance_rate" widget="percentage"/>
                     </span>
                 </div>
@@ -45,7 +45,7 @@
         </field>
     </record>
     
-    <!-- Ajout de champs dans la vue liste des employés -->
+    <!-- Add fields to the employee list view -->
     <record id="hr_employee_view_tree_inherit" model="ir.ui.view">
         <field name="name">hr.employee.tree.inherit</field>
         <field name="model">hr.employee</field>
@@ -59,7 +59,7 @@
         </field>
     </record>
     
-    <!-- Ajout de champs dans la vue recherche des employés -->
+    <!-- Add fields to the employee search view -->
     <record id="hr_employee_view_search_inherit" model="ir.ui.view">
         <field name="name">hr.employee.search.inherit</field>
         <field name="model">hr.employee</field>
@@ -70,7 +70,7 @@
                 <field name="badge_id"/>
             </field>
             <filter name="group_department" position="after">
-                <filter string="Lieu de pointage" name="group_location" context="{'group_by': 'default_location_id'}"/>
+                <filter string="Location" name="group_location" context="{'group_by': 'default_location_id'}"/>
             </filter>
         </field>
     </record>

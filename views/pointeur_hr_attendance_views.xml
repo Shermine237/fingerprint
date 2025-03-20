@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Ajout de champs dans la vue form des présences -->
+    <!-- Add fields to the attendance form view -->
     <record id="hr_attendance_view_form_inherit" model="ir.ui.view">
         <field name="name">hr.attendance.form.inherit</field>
         <field name="model">hr.attendance</field>
@@ -21,12 +21,12 @@
         </field>
     </record>
     
-    <!-- Vue tree complète pour les présences -->
+    <!-- Tree view for attendance -->
     <record id="pointeur_hr_attendance_view_tree" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.tree</field>
         <field name="model">hr.attendance</field>
         <field name="arch" type="xml">
-            <tree string="Présences" default_order="check_in desc">
+            <tree string="Attendance" default_order="check_in desc">
                 <field name="employee_id"/>
                 <field name="department_id" invisible="1"/>
                 <field name="check_in"/>
@@ -44,12 +44,12 @@
         </field>
     </record>
     
-    <!-- Vue de filtrage complète pour les présences -->
+    <!-- Search view for attendance -->
     <record id="pointeur_hr_attendance_view_filter" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.filter</field>
         <field name="model">hr.attendance</field>
         <field name="arch" type="xml">
-            <search string="Recherche de présences">
+            <search string="Search Attendance">
                 <field name="employee_id"/>
                 <field name="department_id"/>
                 <field name="check_in"/>
@@ -58,27 +58,27 @@
                 <field name="source"/>
                 <field name="import_id"/>
                 <field name="attendance_type_ids"/>
-                <filter name="filter_overtime" string="Heures supplémentaires" domain="[('attendance_type_ids', 'ilike', 'supplementaire')]"/>
-                <filter name="filter_late" string="Retards" domain="[('attendance_type_ids', 'ilike', 'retard')]"/>
-                <filter name="filter_early_leave" string="Départs anticipés" domain="[('attendance_type_ids', 'ilike', 'depart_anticipe')]"/>
+                <filter name="filter_overtime" string="Overtime" domain="[('attendance_type_ids', 'ilike', 'supplementaire')]"/>
+                <filter name="filter_late" string="Late" domain="[('attendance_type_ids', 'ilike', 'retard')]"/>
+                <filter name="filter_early_leave" string="Early Leave" domain="[('attendance_type_ids', 'ilike', 'depart_anticipe')]"/>
                 <separator/>
-                <filter string="Aujourd'hui" name="today" domain="[('check_in', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))), ('check_in', '&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
-                <filter string="Ce mois" name="this_month" domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-01')), ('check_in', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Today" name="today" domain="[('check_in', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))), ('check_in', '&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+                <filter string="This month" name="this_month" domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-01')), ('check_in', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
                 <separator/>
-                <filter name="group_by_employee" string="Employé" context="{'group_by': 'employee_id'}"/>
-                <filter name="group_by_department" string="Département" context="{'group_by': 'department_id'}"/>
-                <filter name="group_by_location" string="Lieu de pointage" context="{'group_by': 'location_id'}"/>
+                <filter name="group_by_employee" string="Employee" context="{'group_by': 'employee_id'}"/>
+                <filter name="group_by_department" string="Department" context="{'group_by': 'department_id'}"/>
+                <filter name="group_by_location" string="Location" context="{'group_by': 'location_id'}"/>
                 <filter string="Source" name="groupby_source" context="{'group_by': 'source'}"/>
             </search>
         </field>
     </record>
     
-    <!-- Action pour remplacer la vue search standard -->
+    <!-- Action to replace the standard search view -->
     <record id="hr_attendance.hr_attendance_action" model="ir.actions.act_window">
         <field name="view_mode">tree,kanban,form</field>
         <field name="view_id" ref="pointeur_hr_attendance_view_tree"/>
         <field name="search_view_id" ref="pointeur_hr_attendance_view_filter"/>
-        <field name="name">Présences</field>
+        <field name="name">Attendance</field>
         <field name="context">{
             'search_default_this_month': 1,
         }</field>

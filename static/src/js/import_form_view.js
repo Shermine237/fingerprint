@@ -17,7 +17,7 @@ odoo.define('pointeur_hr.import_form_view', function (require) {
         },
 
         /**
-         * Affiche le message stocké dans le contexte
+         * Display message stored in context
          * @private
          */
         _displayMessageFromContext: function () {
@@ -29,7 +29,7 @@ odoo.define('pointeur_hr.import_form_view', function (require) {
                     title: message.title || _t('Information'),
                     message: message.message,
                     type: message.type || 'info',
-                    sticky: false // Toujours mettre à false pour que le message disparaisse
+                    sticky: false // Always set to false for the message to disappear
                 });
             }
         }

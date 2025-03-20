@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Vue tree pour l'import des données du pointeur -->
+    <!-- Tree view for imports -->
     <record id="pointeur_hr_view_import_tree" model="ir.ui.view">
         <field name="name">pointeur_hr.import.tree</field>
         <field name="model">pointeur_hr.import</field>
         <field name="arch" type="xml">
-            <tree string="Imports des données du pointeur" 
+            <tree string="Pointeur imports" 
                   decoration-success="state=='done'" 
                   decoration-info="state=='imported'" 
                   decoration-muted="state=='cancelled'" 
@@ -22,43 +22,43 @@
         </field>
     </record>
 
-    <!-- Vue search pour l'import des données du pointeur -->
+    <!-- Search view for imports -->
     <record id="pointeur_hr_view_import_search" model="ir.ui.view">
         <field name="name">pointeur_hr.import.search</field>
         <field name="model">pointeur_hr.import</field>
         <field name="arch" type="xml">
-            <search string="Rechercher les imports">
+            <search string="Search imports">
                 <field name="name"/>
                 <field name="user_id"/>
                 <field name="location_id"/>
                 <separator/>
-                <filter string="Mes imports" name="my_imports" domain="[('user_id', '=', uid)]"/>
-                <filter string="Non terminé" name="not_done" domain="[('state', '!=', 'done')]"/>
-                <filter string="En erreur" name="error" domain="[('state', '=', 'error')]"/>
-                <group expand="0" string="Regrouper par">
-                    <filter string="État" name="state" context="{'group_by': 'state'}"/>
-                    <filter string="Utilisateur" name="user" context="{'group_by': 'user_id'}"/>
-                    <filter string="Lieu" name="location" context="{'group_by': 'location_id'}"/>
-                    <filter string="Mois" name="month" context="{'group_by': 'create_date:month'}"/>
+                <filter string="My imports" name="my_imports" domain="[('user_id', '=', uid)]"/>
+                <filter string="Not done" name="not_done" domain="[('state', '!=', 'done')]"/>
+                <filter string="In error" name="error" domain="[('state', '=', 'error')]"/>
+                <group expand="0" string="Group by">
+                    <filter string="State" name="state" context="{'group_by': 'state'}"/>
+                    <filter string="User" name="user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Location" name="location" context="{'group_by': 'location_id'}"/>
+                    <filter string="Month" name="month" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>
         </field>
     </record>
 
-    <!-- Vue form pour l'import des données du pointeur -->
+    <!-- Form view for imports -->
     <record id="pointeur_hr_view_import_form" model="ir.ui.view">
         <field name="name">pointeur_hr.import.form</field>
         <field name="model">pointeur_hr.import</field>
         <field name="arch" type="xml">
-            <form string="Import des données du pointeur">
+            <form string="Pointeur Import">
                 <header>
-                    <button name="action_import_file" string="Importer" type="object" 
+                    <button name="action_import_file" string="Import" type="object" 
                             class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
-                    <button name="action_create_attendances" string="Créer présences" type="object" 
+                    <button name="action_create_attendances" string="Create Attendances" type="object" 
                             class="oe_highlight" attrs="{'invisible': [('state', '!=', 'imported')]}"/>
-                    <button name="action_cancel" string="Annuler" type="object" 
+                    <button name="action_cancel" string="Cancel" type="object" 
                             attrs="{'invisible': [('state', 'in', ['cancelled', 'done'])]}"/>
-                    <button name="action_reset" string="Réinitialiser" type="object" 
+                    <button name="action_reset" string="Reset" type="object" 
                             attrs="{'invisible': [('state', '=', 'draft')]}"/>
                     <field name="state" widget="statusbar" 
                            statusbar_visible="draft,imported,done"/>
@@ -67,11 +67,11 @@
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_attendances" type="object" class="oe_stat_button" icon="fa-calendar"
                                 attrs="{'invisible': [('attendance_count', '=', 0)]}">
-                            <field name="attendance_count" widget="statinfo" string="Présences"/>
+                            <field name="attendance_count" widget="statinfo" string="Attendances"/>
                         </button>
                         <button name="action_view_mappings" type="object" class="oe_stat_button" icon="fa-link">
                             <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_text">Correspondances</span>
+                                <span class="o_stat_text">Mappings</span>
                             </div>
                         </button>
                     </div>
@@ -93,7 +93,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Lignes importées" name="imported_lines">
+                        <page string="Imported Lines" name="imported_lines">
                             <field name="line_ids" readonly="1">
                                 <tree decoration-success="state=='done'" 
                                       decoration-info="state=='mapped'"
@@ -108,10 +108,10 @@
                                     <field name="location_id"/>
                                     <field name="state"/>
                                     <button name="action_reset" type="object" 
-                                            string="Réinitialiser" icon="fa-refresh"
+                                            string="Reset" icon="fa-refresh"
                                             attrs="{'invisible': [('state', 'not in', ['error'])]}"/>
                                     <button name="action_view_attendance" type="object" 
-                                            string="Voir présence" icon="fa-calendar"
+                                            string="View Attendance" icon="fa-calendar"
                                             attrs="{'invisible': [('state', '!=', 'done')]}"/>
                                 </tree>
                             </field>
@@ -132,12 +132,12 @@
         </field>
     </record>
 
-    <!-- Vue tree pour les lignes d'import -->
+    <!-- Tree view for imported lines -->
     <record id="pointeur_hr_view_import_line_tree" model="ir.ui.view">
         <field name="name">pointeur_hr.import.line.tree</field>
         <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
-            <tree string="Lignes d'import" decoration-success="state == 'done'" decoration-danger="state == 'error'" decoration-info="state == 'imported'" decoration-warning="state == 'mapped'">
+            <tree string="Imported Lines" decoration-success="state == 'done'" decoration-danger="state == 'error'" decoration-info="state == 'imported'" decoration-warning="state == 'mapped'">
                 <field name="import_id"/>
                 <field name="employee_name"/>
                 <field name="employee_id"/>
@@ -159,39 +159,39 @@
         </field>
     </record>
 
-    <!-- Vue search pour les lignes d'import -->
+    <!-- Search view for imported lines -->
     <record id="pointeur_hr_view_import_line_search" model="ir.ui.view">
         <field name="name">pointeur_hr.import.line.search</field>
         <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
-            <search string="Rechercher les lignes d'import">
+            <search string="Search in imported lines">
                 <field name="employee_name"/>
                 <field name="display_id"/>
                 <field name="payroll_id"/>
                 <field name="department"/>
                 <field name="location_id"/>
-                <filter string="En attente" name="draft" domain="[('state', '=', 'draft')]"/>
-                <filter string="Importé" name="imported" domain="[('state', '=', 'imported')]"/>
-                <filter string="Terminé" name="done" domain="[('state', '=', 'done')]"/>
-                <filter string="Erreur" name="error" domain="[('state', '=', 'error')]"/>
-                <group expand="0" string="Regrouper par">
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Imported" name="imported" domain="[('state', '=', 'imported')]"/>
+                <filter string="Done" name="done" domain="[('state', '=', 'done')]"/>
+                <filter string="Error" name="error" domain="[('state', '=', 'error')]"/>
+                <group expand="0" string="Group by">
                     <filter string="Import" name="import" context="{'group_by': 'import_id'}"/>
-                    <filter string="Employé" name="employee" context="{'group_by': 'employee_name'}"/>
-                    <filter string="Département" name="department" context="{'group_by': 'department'}"/>
-                    <filter string="Lieu de pointage" name="location" context="{'group_by': 'location_id'}"/>
-                    <filter string="État" name="state" context="{'group_by': 'state'}"/>
+                    <filter string="Employee" name="employee" context="{'group_by': 'employee_name'}"/>
+                    <filter string="Department" name="department" context="{'group_by': 'department'}"/>
+                    <filter string="Location" name="location" context="{'group_by': 'location_id'}"/>
+                    <filter string="State" name="state" context="{'group_by': 'state'}"/>
                     <filter string="Date" name="date" context="{'group_by': 'date'}"/>
                 </group>
             </search>
         </field>
     </record>
 
-    <!-- Vue form pour les lignes d'import -->
+    <!-- Form view for imported lines -->
     <record id="pointeur_hr_view_import_line_form" model="ir.ui.view">
         <field name="name">pointeur_hr.import.line.form</field>
         <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
-            <form string="Ligne d'import">
+            <form string="Imported Line">
                 <header>
                     <field name="state" widget="statusbar" statusbar_visible="imported,mapped,done,error"/>
                 </header>
@@ -213,13 +213,13 @@
                         </group>
                     </group>
                     <group>
-                        <group string="Heures travaillées">
+                        <group string="Hours worked">
                             <field name="reg_hours" widget="float_time"/>
                             <field name="ot1_hours" widget="float_time"/>
                             <field name="ot2_hours" widget="float_time"/>
                             <field name="total_hours" widget="float_time"/>
                         </group>
-                        <group string="Informations complémentaires">
+                        <group string="Additional Information">
                             <field name="attendance_id"/>
                             <field name="location_id"/>
                             <field name="state"/>
@@ -227,8 +227,8 @@
                         </group>
                     </group>
                     <group string="Notes">
-                        <field name="in_note" placeholder="Note d'entrée"/>
-                        <field name="out_note" placeholder="Note de sortie"/>
+                        <field name="in_note" placeholder="Entry note"/>
+                        <field name="out_note" placeholder="Exit note"/>
                     </group>
                 </sheet>
             </form>
@@ -237,7 +237,7 @@
 
     <!-- Actions -->
     <record id="action_pointeur_hr_import_line" model="ir.actions.act_window">
-        <field name="name">Lignes d'import</field>
+        <field name="name">Imported Lines</field>
         <field name="res_model">pointeur_hr.import.line</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="pointeur_hr_view_import_line_tree"/>
@@ -245,17 +245,17 @@
         <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Aucune ligne d'import pour le moment
+                No imported lines found
             </p>
             <p>
-                Les lignes d'import apparaîtront ici après l'importation des données
+                Imported lines will appear here after data import
             </p>
         </field>
     </record>
 
     <!-- Action -->
     <record id="action_pointeur_hr_import" model="ir.actions.act_window">
-        <field name="name">Import du pointeur</field>
+        <field name="name">Import from Pointeur</field>
         <field name="res_model">pointeur_hr.import</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="pointeur_hr_view_import_tree"/>
@@ -263,30 +263,30 @@
         <field name="context">{'search_default_my_imports': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Aucun import pour le moment
+                No imports found
             </p>
             <p>
-                Importez les données de présence depuis votre pointeur
+                Import data from your pointeur
             </p>
         </field>
     </record>
 
     <!-- Action -->
     <record id="pointeur_hr_import_action" model="ir.actions.act_window">
-        <field name="name">Imports des données</field>
+        <field name="name">Import Data</field>
         <field name="res_model">pointeur_hr.import</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_not_done': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Aucun import trouvé
+                No imports found
             </p>
             <p>
-                Importez vos fichiers de pointage pour créer les présences.
-                Les fichiers doivent être au format CSV avec les colonnes suivantes :
-                - Nom de l'employé
-                - Date et heure d'entrée
-                - Date et heure de sortie
+                Import your attendance files to create attendances.
+                The files must be in CSV format with the following columns:
+                - Employee name
+                - Entry date and time
+                - Exit date and time
             </p>
         </field>
     </record>

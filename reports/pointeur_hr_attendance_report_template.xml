@@ -4,13 +4,13 @@
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
                 <div class="page">
-                    <h2 class="text-center mb-4">Rapport de présence détaillé</h2>
+                    <h2 class="text-center mb-4">Detailed Attendance Report</h2>
 
-                    <!-- Informations de filtrage -->
+                    <!-- Filtering information -->
                     <div class="row mb-4">
                         <div class="col-12">
                             <p>
-                                <strong>Date d'export :</strong>
+                                <strong>Export date :</strong>
                                 <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
                             </p>
                         </div>
@@ -20,19 +20,19 @@
                         <thead>
                             <tr>
                                 <th>Date</th>
-                                <th>Employé</th>
-                                <th>Département</th>
-                                <th>Lieu par défaut</th>
-                                <th>Lieu de pointage</th>
+                                <th>Employee</th>
+                                <th>Department</th>
+                                <th>Default Location</th>
+                                <th>Location</th>
                                 <th>Source</th>
-                                <th>Entrée</th>
-                                <th>Sortie</th>
-                                <th>Types de présence</th>
-                                <th>Heures travaillées</th>
-                                <th>Heures régulières</th>
-                                <th>Heures supplémentaires</th>
-                                <th>Retard</th>
-                                <th>Départ anticipé</th>
+                                <th>Entry</th>
+                                <th>Exit</th>
+                                <th>Attendance Types</th>
+                                <th>Hours Worked</th>
+                                <th>Regular Hours</th>
+                                <th>Overtime Hours</th>
+                                <th>Late Hours</th>
+                                <th>Early Leave Hours</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -44,7 +44,7 @@
                                     <td><span t-field="o.default_location_id.name"/></td>
                                     <td><span t-field="o.location_id.name"/></td>
                                     <td>
-                                        <t t-if="o.source == 'manual'">Manuel</t>
+                                        <t t-if="o.source == 'manual'">Manual</t>
                                         <t t-elif="o.source == 'import'">Import</t>
                                     </td>
                                     <td><span t-field="o.check_in" t-options='{"format": "HH:mm"}'/></td>
@@ -80,14 +80,14 @@
         </t>
     </template>
 
-    <!-- Action du rapport de présence -->
+    <!-- Action of the attendance report -->
     <record id="action_report_attendance" model="ir.actions.report">
-        <field name="name">Rapport de présence</field>
+        <field name="name">Attendance Report</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">pointeur_hr.pointeur_hr_report_attendance_document</field>
         <field name="report_file">pointeur_hr.pointeur_hr_report_attendance_document</field>
-        <field name="print_report_name">'Rapport_presence_%s' % (time.strftime("%Y%m%d_%H%M%S"))</field>
+        <field name="print_report_name">'Attendance_Report_%s' % (time.strftime("%Y%m%d_%H%M%S"))</field>
         <field name="binding_model_id" ref="model_pointeur_hr_attendance_report"/>
         <field name="binding_type">report</field>
     </record>

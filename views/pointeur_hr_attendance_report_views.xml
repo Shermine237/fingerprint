@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Action pour le wizard d'export -->
+    <!-- Action for export wizard -->
     <record id="action_attendance_report_export_wizard" model="ir.actions.act_window">
-        <field name="name">Export du rapport de présence</field>
+        <field name="name">Export Attendance Report</field>
         <field name="res_model">pointeur_hr.attendance.report.export.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
@@ -10,15 +10,15 @@
         <field name="binding_view_types">list,pivot</field>
     </record>
 
-    <!-- Vue tree pour le rapport de présence -->
+    <!-- Tree view for attendance report -->
     <record id="pointeur_hr_view_attendance_report_tree" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.report.tree</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
-            <tree string="Rapport de présence" create="false" edit="false" delete="false">
+            <tree string="Attendance Report" create="false" edit="false" delete="false">
                 <header>
                     <button name="%(action_attendance_report_export_wizard)d" 
-                            string="Exporter" 
+                            string="Export" 
                             type="action" 
                             class="btn btn-primary"/>
                 </header>
@@ -41,29 +41,29 @@
         </field>
     </record>
 
-    <!-- Vue form pour le wizard d'export -->
+    <!-- Export wizard form view -->
     <record id="pointeur_hr_view_attendance_report_export_wizard_form" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.report.export.wizard.form</field>
         <field name="model">pointeur_hr.attendance.report.export.wizard</field>
         <field name="arch" type="xml">
-            <form string="Export du rapport de présence">
+            <form string="Export Attendance Report">
                 <group>
                     <field name="export_type" widget="radio"/>
                 </group>
                 <footer>
-                    <button name="action_export" string="Exporter" type="object" class="btn-primary"/>
-                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                    <button name="action_export" string="Export" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>
     </record>
 
-    <!-- Vue pivot pour le rapport de présence -->
+    <!-- Pivot view for attendance report -->
     <record id="pointeur_hr_view_attendance_report_pivot" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.report.pivot</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
-            <pivot string="Rapport de présence">
+            <pivot string="Attendance Report">
                 <field name="employee_id" type="row"/>
                 <field name="date" type="col"/>
                 <field name="working_hours" type="measure"/>
@@ -75,24 +75,24 @@
         </field>
     </record>
 
-    <!-- Vue graph pour le rapport de présence -->
+    <!-- Graph view for attendance report -->
     <record id="pointeur_hr_view_attendance_report_graph" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.report.graph</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
-            <graph string="Rapport de présence">
+            <graph string="Attendance Report">
                 <field name="date"/>
                 <field name="working_hours" type="measure"/>
             </graph>
         </field>
     </record>
 
-    <!-- Vue search pour le rapport de présence -->
+    <!-- Search view for attendance report -->
     <record id="pointeur_hr_view_attendance_report_search" model="ir.ui.view">
         <field name="name">pointeur_hr.attendance.report.search</field>
         <field name="model">pointeur_hr.attendance.report</field>
         <field name="arch" type="xml">
-            <search string="Rechercher dans les présences">
+            <search string="Search in attendance records">
                 <field name="name"/>
                 <field name="employee_id"/>
                 <field name="department_id"/>
@@ -100,25 +100,25 @@
                 <field name="default_location_id"/>
                 <field name="source"/>
                 <separator/>
-                <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01')), ('date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter string="Ce jour" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter string="Retards" name="late" domain="[('late_hours', '>', 0)]"/>
-                <filter string="Départs anticipés" name="early_leave" domain="[('early_leave_hours', '>', 0)]"/>
+                <filter string="This Month" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01')), ('date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Today" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Late" name="late" domain="[('late_hours', '>', 0)]"/>
+                <filter string="Early Leave" name="early_leave" domain="[('early_leave_hours', '>', 0)]"/>
                 <separator/>
-                <filter string="Importées" name="imported" domain="[('source', '=', 'import')]"/>
-                <filter string="Manuelles" name="manual" domain="[('source', '=', 'manual')]"/>
+                <filter string="Imported" name="imported" domain="[('source', '=', 'import')]"/>
+                <filter string="Manual" name="manual" domain="[('source', '=', 'manual')]"/>
                 <separator/>
-                <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
-                <filter string="Département" name="department" context="{'group_by': 'department_id'}"/>
-                <filter string="Lieu de pointage" name="location" context="{'group_by': 'location_id'}"/>
+                <filter string="Employee" name="employee" context="{'group_by': 'employee_id'}"/>
+                <filter string="Department" name="department" context="{'group_by': 'department_id'}"/>
+                <filter string="Location" name="location" context="{'group_by': 'location_id'}"/>
                 <filter string="Source" name="source" context="{'group_by': 'source'}"/>
             </search>
         </field>
     </record>
 
-    <!-- Action pour le rapport de présence -->
+    <!-- Action for attendance report -->
     <record id="action_attendance_report" model="ir.actions.act_window">
-        <field name="name">Rapport de présence</field>
+        <field name="name">Attendance Report</field>
         <field name="res_model">pointeur_hr.attendance.report</field>
         <field name="view_mode">tree,pivot,graph</field>
         <field name="search_view_id" ref="pointeur_hr_view_attendance_report_search"/>

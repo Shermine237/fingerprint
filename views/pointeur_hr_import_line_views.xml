@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Vue tree -->
+    <!-- Form view -->
     <record id="pointeur_hr_import_line_view_tree" model="ir.ui.view">
         <field name="name">pointeur_hr.import.line.tree</field>
         <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
-            <tree string="Lignes d'import" decoration-danger="state=='error'" decoration-success="state=='done'" decoration-info="state=='mapped'">
+            <tree string="Import Lines" decoration-danger="state=='error'" decoration-success="state=='done'" decoration-info="state=='mapped'">
                 <field name="employee_name"/>
                 <field name="employee_id"/>
                 <field name="date"/>
@@ -15,28 +15,28 @@
                 <field name="location_id"/>
                 <field name="state"/>
                 <button name="action_reset" type="object" 
-                        string="Réinitialiser" icon="fa-refresh"
+                        string="Reset" icon="fa-refresh"
                         attrs="{'invisible': [('state', 'not in', ['error'])]}"/>
                 <button name="action_view_attendance" type="object" 
-                        string="Voir présence" icon="fa-calendar"
+                        string="View Attendance" icon="fa-calendar"
                         attrs="{'invisible': [('state', '!=', 'done')]}"/>
             </tree>
         </field>
     </record>
 
-    <!-- Vue form -->
+    <!-- Form view -->
     <record id="pointeur_hr_import_line_view_form" model="ir.ui.view">
         <field name="name">pointeur_hr.import.line.form</field>
         <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
-            <form string="Ligne d'import">
+            <form string="Import Line">
                 <header>
                     <field name="state" widget="statusbar" statusbar_visible="imported,mapped,done"/>
                     <button name="action_reset" type="object" 
-                            string="Réinitialiser" class="btn-warning"
+                            string="Reset" class="btn-warning"
                             attrs="{'invisible': [('state', 'not in', ['error'])]}"/>
                     <button name="action_view_attendance" type="object" 
-                            string="Voir présence" class="btn-primary"
+                            string="View Attendance" class="btn-primary"
                             attrs="{'invisible': [('state', '!=', 'done')]}"/>
                 </header>
                 <sheet>
@@ -61,7 +61,7 @@
                             <field name="location_id" readonly="1"/>
                         </group>
                     </group>
-                    <group string="Informations complémentaires">
+                    <group string="Additional Information">
                         <group>
                             <field name="reg_hours" readonly="1"/>
                             <field name="ot1_hours" readonly="1"/>
@@ -72,7 +72,7 @@
                             <field name="out_note" readonly="1"/>
                         </group>
                     </group>
-                    <group string="Notes et erreurs">
+                    <group string="Notes and Errors">
                         <field name="error_message" readonly="1"/>
                         <field name="notes"/>
                     </group>
@@ -81,25 +81,25 @@
         </field>
     </record>
 
-    <!-- Vue search -->
+    <!-- Search view -->
     <record id="pointeur_hr_import_line_view_search" model="ir.ui.view">
         <field name="name">pointeur_hr.import.line.search</field>
         <field name="model">pointeur_hr.import.line</field>
         <field name="arch" type="xml">
-            <search string="Rechercher dans les lignes d'import">
+            <search string="Search in import lines">
                 <field name="employee_name"/>
                 <field name="employee_id"/>
                 <field name="date"/>
                 <field name="location_id"/>
                 <separator/>
-                <filter string="Sans employé" name="no_employee" domain="[('employee_id', '=', False)]"/>
-                <filter string="En erreur" name="error" domain="[('state', '=', 'error')]"/>
-                <filter string="Non terminé" name="not_done" domain="[('state', '!=', 'done')]"/>
-                <group expand="0" string="Regrouper par">
-                    <filter string="État" name="state" context="{'group_by': 'state'}"/>
-                    <filter string="Employé" name="employee" context="{'group_by': 'employee_id'}"/>
+                <filter string="Without Employee" name="no_employee" domain="[('employee_id', '=', False)]"/>
+                <filter string="In Error" name="error" domain="[('state', '=', 'error')]"/>
+                <filter string="Not Done" name="not_done" domain="[('state', '!=', 'done')]"/>
+                <group expand="0" string="Group by">
+                    <filter string="State" name="state" context="{'group_by': 'state'}"/>
+                    <filter string="Employee" name="employee" context="{'group_by': 'employee_id'}"/>
                     <filter string="Date" name="date" context="{'group_by': 'date'}"/>
-                    <filter string="Lieu" name="location" context="{'group_by': 'location_id'}"/>
+                    <filter string="Location" name="location" context="{'group_by': 'location_id'}"/>
                 </group>
             </search>
         </field>
@@ -107,17 +107,17 @@
 
     <!-- Action -->
     <record id="pointeur_hr_import_line_action" model="ir.actions.act_window">
-        <field name="name">Lignes d'import</field>
+        <field name="name">Import Lines</field>
         <field name="res_model">pointeur_hr.import.line</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_not_done': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Aucune ligne d'import trouvée
+                No import lines found
             </p>
             <p>
-                Les lignes d'import sont créées automatiquement lors de l'import des données de pointage.
-                Elles permettent de visualiser et de corriger les données avant la création des présences.
+                Import lines are automatically created when importing attendance data.
+                They allow you to view and correct the data before creating attendances.
             </p>
         </field>
     </record>

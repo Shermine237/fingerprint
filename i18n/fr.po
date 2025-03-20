@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0-20231106\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-20 01:14+0000\n"
-"PO-Revision-Date: 2025-03-20 01:14+0000\n"
+"POT-Creation-Date: 2025-03-20 03:13+0000\n"
+"PO-Revision-Date: 2025-03-20 03:13+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -91,7 +91,9 @@ msgstr "%d erreurs sont survenues lors de la recherche de correspondances."
 msgid ""
 "%d line(s) remain(s) without match. Use the selection wizard to manually "
 "associate them."
-msgstr "%d ligne(s) restent sans correspondance. Utilisez l'assistant de sélection pour les associer manuellement."
+msgstr ""
+"%d ligne(s) restent sans correspondance. Utilisez l'assistant de sélection "
+"pour les associer manuellement."
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
@@ -137,14 +139,14 @@ msgstr "<h4>Autres noms utilisés pour cet employé :</h4><ul>"
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
 #, python-format
-msgid "<h4>Suggestions de correspondance :</h4><ul>"
+msgid "<h4>Matching suggestions :</h4><ul>"
 msgstr "<h4>Suggestions de correspondance :</h4><ul>"
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
 #, python-format
 msgid "<li><strong>{}</strong> : "
-msgstr "<li><strong>{}</strong> : "
+msgstr ""
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
@@ -171,13 +173,12 @@ msgstr "<strong>Date d'exportation :</strong>"
 #. module: fingerprt_hr
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
 msgid "<strong>Total</strong>"
-msgstr "<strong>Total</strong>"
+msgstr ""
 
 #. module: fingerprt_hr
 #: model:ir.model.constraint,message:fingerprt_hr.constraint_fingerprt_hr_employee_mapping_unique_name_active
 msgid "A mapping already exists for this imported name!"
 msgstr "Une correspondance existe déjà pour ce nom importé !"
-
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_needaction
@@ -241,7 +242,9 @@ msgstr "Toutes les correspondances ont été trouvées."
 msgid ""
 "An active mapping already exists for name '%s' (associated with employee "
 "%s)."
-msgstr "Une correspondance active existe déjà pour le nom '%s' (associée à l'employé %s)."
+msgstr ""
+"Une correspondance active existe déjà pour le nom '%s' (associée à l'employé"
+" %s)."
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import_line.py:0
@@ -249,18 +252,21 @@ msgstr "Une correspondance active existe déjà pour le nom '%s' (associée à l
 msgid ""
 "An active mapping already exists for the name '%s' (associated with employee"
 " %s)."
-msgstr "Une correspondance active existe déjà pour le nom '%s' (associée à l'employé %s)."
+msgstr ""
+"Une correspondance active existe déjà pour le nom '%s' (associée à l'employé"
+" %s)."
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_attendance.py:0
 #, python-format
 msgid "An attendance cannot have a check-out time without a check-in time."
-msgstr "Une présence ne peut pas avoir une heure de sortie sans une heure d'entrée."
+msgstr ""
+"Une présence ne peut pas avoir une heure de sortie sans une heure d'entrée."
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_select_employees_line__wizard_id
 msgid "Assistant"
-msgstr "Assistant"
+msgstr ""
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_attachment_count
@@ -316,7 +322,6 @@ msgstr "Assistant d'exportation du rapport de présence"
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.hr_employee_view_form_inherit
 msgid "Attendance Statistics (Current Month)"
 msgstr "Statistiques de présence (Mois en cours)"
-
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_attendance_report__attendance_type_ids
@@ -431,7 +436,9 @@ msgstr "L'heure de sortie doit être postérieure à l'heure d'entrée."
 msgid ""
 "Choose to export only selected lines or all lines using the current search "
 "filters"
-msgstr "Choisissez d'exporter uniquement les lignes sélectionnées ou toutes les lignes en utilisant les filtres de recherche actuels"
+msgstr ""
+"Choisissez d'exporter uniquement les lignes sélectionnées ou toutes les "
+"lignes en utilisant les filtres de recherche actuels"
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_location__company_id
@@ -441,8 +448,8 @@ msgstr "Entreprise"
 
 #. module: fingerprt_hr
 #: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_config
-msgid "Configuration Fingerprt"
-msgstr "Configuration Fingerprt"
+msgid "Configuration Fingerprint"
+msgstr "Configuration Fingerprint"
 
 #. module: fingerprt_hr
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
@@ -453,7 +460,6 @@ msgstr "Confirmer"
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
 msgid "Create Attendances"
 msgstr "Créer des présences"
-
 
 #. module: fingerprt_hr
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.view_fingerprt_hr_select_employees_form
@@ -501,7 +507,7 @@ msgstr "Créé le"
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_search
 msgid "Date"
-msgstr "Date"
+msgstr ""
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
@@ -702,7 +708,7 @@ msgstr "Erreur lors de la création de la présence : %s"
 #. module: fingerprt_hr
 #: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_attendance_report_export_wizard__export_type__excel
 msgid "Excel"
-msgstr "Excel"
+msgstr ""
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
@@ -764,23 +770,23 @@ msgstr "Trouver des noms similaires"
 
 #. module: fingerprt_hr
 #: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_import_root
-msgid "Fingerprt"
-msgstr "Fingerprt"
+msgid "Fingerprint"
+msgstr "Pointeur"
 
 #. module: fingerprt_hr
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
-msgid "Fingerprt Import"
-msgstr "Importation Fingerprt"
+msgid "Fingerprint Import"
+msgstr "Importation Pointeur"
 
 #. module: fingerprt_hr
 #: model:res.groups,name:fingerprt_hr.group_fingerprt_manager
-msgid "Fingerprt Manager"
-msgstr "Gestionnaire Fingerprt"
+msgid "Fingerprint Manager"
+msgstr "Gestionnaire Pointeur"
 
 #. module: fingerprt_hr
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_tree
-msgid "Fingerprt imports"
-msgstr "Importations Fingerprt"
+msgid "Fingerprint imports"
+msgstr "Importations Pointeur"
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_follower_ids
@@ -914,8 +920,8 @@ msgstr "Lignes d'importation"
 
 #. module: fingerprt_hr
 #: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_import_line
-msgid "Import Lines from Fingerprt"
-msgstr "Importer les lignes de Fingerprt"
+msgid "Import Lines from Fingerprint"
+msgstr "Importer les lignes du Pointeur"
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_employee_mapping.py:0
@@ -930,14 +936,18 @@ msgstr "Importer les données de l'horloge de pointage"
 
 #. module: fingerprt_hr
 #: model_terms:ir.actions.act_window,help:fingerprt_hr.action_fingerprt_hr_import
-msgid "Import data from your fingerprt"
-msgstr "Importer les données de votre Fingerprt"
+msgid "Import data from your fingerprint"
+msgstr "Importer les données de votre Pointeur"
+
+#. module: fingerprt_hr
+#: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_import
+msgid "Import from Fingerprint"
+msgstr "Importer depuis le Pointeur"
 
 #. module: fingerprt_hr
 #: model:ir.actions.act_window,name:fingerprt_hr.action_fingerprt_hr_import
-#: model:ir.ui.menu,name:fingerprt_hr.menu_fingerprt_hr_import
-msgid "Import from Fingerprt"
-msgstr "Importer depuis Fingerprt"
+msgid "Import from Fingerprint"
+msgstr "Importer depuis le Pointeur"
 
 #. module: fingerprt_hr
 #: model_terms:ir.actions.act_window,help:fingerprt_hr.fingerprt_hr_import_line_action
@@ -980,10 +990,10 @@ msgid ""
 "                - Exit date and time"
 msgstr ""
 "Importez vos fichiers de présence pour créer des présences.\n"
-"Les fichiers doivent être au format CSV avec les colonnes suivantes :\n"
-"- Nom de l'employé\n"
-"- Date et heure d'entrée\n"
-"- Date et heure de sortie"
+"                Les fichiers doivent être au format CSV avec les colonnes suivantes :\n"
+"                - Nom de l'employé\n"
+"                - Date et heure d'entrée\n"
+"                - Date et heure de sortie"
 
 #. module: fingerprt_hr
 #: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_import__state__imported
@@ -1055,7 +1065,7 @@ msgstr "Inactif"
 #: code:addons/fingerprt_hr/static/src/js/import_form_view.js:0
 #, python-format
 msgid "Information"
-msgstr "Information"
+msgstr ""
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_is_follower
@@ -1065,7 +1075,7 @@ msgstr "Est abonné"
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
 #, python-format
-msgid "L'heure d'entrée est obligatoire"
+msgid "Check-in time is required"
 msgstr "L'heure d'entrée est obligatoire"
 
 #. module: fingerprt_hr
@@ -1255,7 +1265,7 @@ msgstr "Erreur de livraison du message"
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_ids
 msgid "Messages"
-msgstr "Messages"
+msgstr ""
 
 #. module: fingerprt_hr
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_search
@@ -1360,7 +1370,7 @@ msgstr "Non fait"
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_form
 msgid "Notes"
-msgstr "Notes"
+msgstr ""
 
 #. module: fingerprt_hr
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_import_line_view_form
@@ -1370,7 +1380,7 @@ msgstr "Notes et erreurs"
 #. module: fingerprt_hr
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
 msgid "Notes sur l'import..."
-msgstr "Notes sur l'import..."
+msgstr ""
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_needaction_counter
@@ -1454,7 +1464,7 @@ msgstr "Heures supplémentaires"
 #. module: fingerprt_hr
 #: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_attendance_report_export_wizard__export_type__pdf
 msgid "PDF"
-msgstr "PDF"
+msgstr ""
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__payroll_id
@@ -1481,7 +1491,7 @@ msgstr "Veuillez sélectionner au moins un employé."
 
 #. module: fingerprt_hr
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_tree
-msgid "Rechercher"
+msgid "Find"
 msgstr "Rechercher"
 
 #. module: fingerprt_hr
@@ -1569,7 +1579,9 @@ msgstr "Sélectionner des employés"
 msgid ""
 "Select the employees corresponding to the imported names. The lines are "
 "grouped by name."
-msgstr "Sélectionnez les employés correspondant aux noms importés. Les lignes sont regroupées par nom."
+msgstr ""
+"Sélectionnez les employés correspondant aux noms importés. Les lignes sont "
+"regroupées par nom."
 
 #. module: fingerprt_hr
 #: model:ir.model.fields.selection,name:fingerprt_hr.selection__fingerprt_hr_attendance_report_export_wizard__export_scope__selected
@@ -1583,7 +1595,7 @@ msgstr "Lignes sélectionnées"
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_report_attendance_document
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
 msgid "Source"
-msgstr "Source"
+msgstr ""
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_employee_mapping__import_id
@@ -1630,8 +1642,9 @@ msgid ""
 "The employee '%s' has already a mapping with the name '%s'. If you continue,"
 " you will not be able to create a mapping for this employee."
 msgstr ""
-"L'employé '%s' a déjà une correspondance avec le nom '%s'. Si vous continuez, "
-"vous ne pourrez pas créer une autre correspondance pour cet employé."
+"L'employé '%s' a déjà une correspondance avec le nom '%s'. Si vous "
+"continuez, vous ne pourrez pas créer une autre correspondance pour cet "
+"employé."
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
@@ -1639,7 +1652,9 @@ msgstr ""
 msgid ""
 "The employee '%s' is already assigned to the name '%s'. An employee can only"
 " have one name mapping."
-msgstr "L'employé '%s' est déjà associé au nom '%s'. Un employé ne peut avoir qu'une seule correspondance de nom."
+msgstr ""
+"L'employé '%s' est déjà associé au nom '%s'. Un employé ne peut avoir qu'une"
+" seule correspondance de nom."
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
@@ -1647,7 +1662,9 @@ msgstr "L'employé '%s' est déjà associé au nom '%s'. Un employé ne peut avo
 msgid ""
 "The employee '%s' is assigned to multiple different names ('%s' and '%s'). "
 "An employee can only have one name mapping."
-msgstr "L'employé '%s' est associé à plusieurs noms différents ('%s' et '%s'). Un employé ne peut avoir qu'une seule correspondance de nom."
+msgstr ""
+"L'employé '%s' est associé à plusieurs noms différents ('%s' et '%s'). Un "
+"employé ne peut avoir qu'une seule correspondance de nom."
 
 #. module: fingerprt_hr
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_attendance_report_search
@@ -1677,7 +1694,7 @@ msgstr "Aujourd'hui"
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_form
 #: model_terms:ir.ui.view,arch_db:fingerprt_hr.fingerprt_hr_view_import_line_tree
 msgid "Total"
-msgstr "Total"
+msgstr ""
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import_line__total_hours
@@ -1698,7 +1715,9 @@ msgstr "Type de l'activité d'exception enregistrée."
 #: code:addons/fingerprt_hr/wizards/fingerprt_hr_select_employees.py:0
 #, python-format
 msgid "Unable to create mapping for %s : the name is invalid or empty."
-msgstr "Impossible de créer une correspondance pour %s : le nom est invalide ou vide."
+msgstr ""
+"Impossible de créer une correspondance pour %s : le nom est invalide ou "
+"vide."
 
 #. module: fingerprt_hr
 #: model:ir.model.fields,field_description:fingerprt_hr.field_fingerprt_hr_import__message_unread
@@ -1759,14 +1778,19 @@ msgstr "Heures de travail"
 msgid ""
 "You can leave some lines unmapped if necessary but they will not have a "
 "correspondence so no attendance."
-msgstr "Vous pouvez laisser certaines lignes sans correspondance si nécessaire, mais elles ne seront pas associées et donc pas prises en compte dans les présences."
+msgstr ""
+"Vous pouvez laisser certaines lignes sans correspondance si nécessaire, mais"
+" elles ne seront pas associées et donc pas prises en compte dans les "
+"présences."
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
 #, python-format
 msgid ""
 "You can only create attendances if the import is in the 'Imported' state."
-msgstr "Vous ne pouvez créer des présences que si l'importation est à l'état 'Importé'."
+msgstr ""
+"Vous ne pouvez créer des présences que si l'importation est à l'état "
+"'Importé'."
 
 #. module: fingerprt_hr
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
@@ -1785,4 +1809,4 @@ msgstr "Vous devez d'abord sélectionner un employé."
 #: code:addons/fingerprt_hr/models/fingerprt_hr_import.py:0
 #, python-format
 msgid "{} (score: {:.2f}), "
-msgstr "{} (score : {:.2f}), "
+msgstr ""

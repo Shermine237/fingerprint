@@ -471,7 +471,7 @@ class FingerprtHrImport(models.Model):
             try:
                 # Verify required data
                 if not line.check_in:
-                    raise ValidationError(_("L'heure d'entrée est obligatoire"))
+                    raise ValidationError(_("Check-in time is required"))
                 
                 # Check if an attendance already exists for this employee at this date/time
                 existing_attendance = self.env['hr.attendance'].search([
@@ -828,7 +828,7 @@ Creation of attendances completed :
         
         # Add suggestions if available
         if suggestions:
-            report += _("<h4>Suggestions de correspondance :</h4><ul>")
+            report += _("<h4>Matching suggestions :</h4><ul>")
             for name, matches in suggestions:
                 report += _("<li><strong>{}</strong> : ").format(name)
                 for employee, score in matches:

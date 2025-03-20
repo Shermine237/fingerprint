@@ -5,7 +5,7 @@
         <field name="name">fingerprt_hr.import.tree</field>
         <field name="model">fingerprt_hr.import</field>
         <field name="arch" type="xml">
-            <tree string="Fingerprt imports" 
+            <tree string="Fingerprint imports" 
                   decoration-success="state=='done'" 
                   decoration-info="state=='imported'" 
                   decoration-muted="state=='cancelled'" 
@@ -50,7 +50,7 @@
         <field name="name">fingerprt_hr.import.form</field>
         <field name="model">fingerprt_hr.import</field>
         <field name="arch" type="xml">
-            <form string="Fingerprt Import">
+            <form string="Fingerprint Import">
                 <header>
                     <button name="action_import_file" string="Import" type="object" 
                             class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
@@ -154,7 +154,7 @@
                 <field name="error_message"/>
                 <field name="attendance_id" invisible="1"/>
                 <button name="action_view_attendance" type="object" icon="fa-calendar" attrs="{'invisible': [('attendance_id', '=', False)]}"/>
-                <button name="find_employee_mapping" type="object" icon="fa-search" string="Rechercher" attrs="{'invisible': ['|', ('employee_id', '!=', False), ('state', '=', 'done')]}"/>
+                <button name="find_employee_mapping" type="object" icon="fa-search" string="Find" attrs="{'invisible': ['|', ('employee_id', '!=', False), ('state', '=', 'done')]}"/>
             </tree>
         </field>
     </record>
@@ -255,7 +255,7 @@
 
     <!-- Action -->
     <record id="action_fingerprt_hr_import" model="ir.actions.act_window">
-        <field name="name">Import from Fingerprt</field>
+        <field name="name">Import from Fingerprint</field>
         <field name="res_model">fingerprt_hr.import</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="fingerprt_hr_view_import_tree"/>
@@ -266,7 +266,7 @@
                 No imports found
             </p>
             <p>
-                Import data from your fingerprt
+                Import data from your fingerprint
             </p>
         </field>
     </record>
